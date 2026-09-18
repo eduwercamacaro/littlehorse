@@ -2,8 +2,10 @@ package internal
 
 import (
 	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -195,16 +197,27 @@ to save current progress on a UserTask before executing the it.
 		}
 		saveUserTaskRunProgress.UserId = userIdVarVal.GetStr()
 
-		for _, field := range userTaskDef.Fields {
-			fmt.Println("\nField: ", field.DisplayName)
-			if field.Description != nil {
-				fmt.Println(*field.Description)
+		if userTaskDef.ResultStructDefId != nil {
+			resultFile, _ := cmd.Flags().GetString("resultFile")
+			if resultFile == "" {
+				log.Fatal("--resultFile is required when saving progress for a struct-backed UserTaskRun")
 			}
-			resultVal, err := promptFor("Please enter the response for this field ("+field.Type.String()+")", field.Type)
+			saveUserTaskRunProgress.Results, err = readPartialStructResults(cmd, resultFile, userTaskDef.ResultStructDefId, &client)
 			if err != nil {
 				log.Fatal(err)
 			}
-			saveUserTaskRunProgress.Results[field.Name] = resultVal
+		} else {
+			for _, field := range userTaskDef.Fields {
+				fmt.Println("\nField: ", field.DisplayName)
+				if field.Description != nil {
+					fmt.Println(*field.Description)
+				}
+				resultVal, err := promptFor("Please enter the response for this field ("+field.Type.String()+")", field.Type)
+				if err != nil {
+					log.Fatal(err)
+				}
+				saveUserTaskRunProgress.Results[field.Name] = resultVal
+			}
 		}
 
 		fmt.Println("Select an assignment policy value:")
@@ -451,17 +464,36 @@ func executeUserTask(cmd *cobra.Command, wfRunId string, userTaskGuid string, cl
 	}
 	completeUserTask.UserId = userIdVarVal.GetStr()
 
-	// Prompt for all of the fields and build the result
-	for _, field := range userTaskDef.Fields {
-		fmt.Println("\nField: ", field.DisplayName)
-		if field.Description != nil {
-			fmt.Println(*field.Description)
+	if userTaskDef.ResultStructDefId != nil {
+		resultFile, _ := cmd.Flags().GetString("resultFile")
+		var input string
+		if resultFile == "" {
+			input, err = promptString("Please enter the response as a JSON object")
+		} else {
+			var contents []byte
+			contents, err = os.ReadFile(resultFile)
+			input = string(contents)
 		}
-		resultVal, err := promptFor("Please enter the response for this field ("+field.Type.String()+")", field.Type)
 		if err != nil {
 			log.Fatal(err)
 		}
-		completeUserTask.Results[field.Name] = resultVal
+		completeUserTask.Output, err = structInputToVarVal(cmd, input, userTaskDef.ResultStructDefId, client)
+		if err != nil {
+			log.Fatal(err)
+		}
+	} else {
+		// Prompt for all of the legacy fields and build the result.
+		for _, field := range userTaskDef.Fields {
+			fmt.Println("\nField: ", field.DisplayName)
+			if field.Description != nil {
+				fmt.Println(*field.Description)
+			}
+			resultVal, err := promptFor("Please enter the response for this field ("+field.Type.String()+")", field.Type)
+			if err != nil {
+				log.Fatal(err)
+			}
+			completeUserTask.Results[field.Name] = resultVal
+		}
 	}
 
 	fmt.Println("Saving userTaskRun progress!")
@@ -482,14 +514,87 @@ func cancelUserTask(cmd *cobra.Command, wfRunId string, userTaskGuid string, cli
 }
 
 func promptFor(prompt string, varType lhproto.VariableType) (*lhproto.VariableValue, error) {
+	input, err := promptString(prompt)
+	if err != nil {
+		return nil, err
+	}
+	return littlehorse.StrToVarVal(input, varType)
+}
+
+func promptString(prompt string) (string, error) {
 	fmt.Print(prompt + ": ")
 	// Create a new buffered reader to read from standard input
 	reader := bufio.NewReader(os.Stdin)
 
 	// Read the entire line of text entered by the user
 	// The returned line will include newline characters such as '\n', so we'll trim it.
-	userInput, _ := reader.ReadString('\n')
-	return littlehorse.StrToVarVal(strings.TrimSpace(userInput), varType)
+	userInput, err := reader.ReadString('\n')
+	if errors.Is(err, io.EOF) && userInput != "" {
+		err = nil
+	}
+	return strings.TrimSpace(userInput), err
+}
+
+func structInputToVarVal(
+	cmd *cobra.Command,
+	input string,
+	structDefId *lhproto.StructDefId,
+	client *lhproto.LittleHorseClient,
+) (*lhproto.VariableValue, error) {
+	typeDef := &lhproto.TypeDefinition{DefinedType: &lhproto.TypeDefinition_StructDefId{StructDefId: structDefId}}
+	return littlehorse.TypeDefToVarValWithResolver(input, typeDef, structDefResolver(cmd, client))
+}
+
+func readPartialStructResults(
+	cmd *cobra.Command,
+	resultFile string,
+	structDefId *lhproto.StructDefId,
+	client *lhproto.LittleHorseClient,
+) (map[string]*lhproto.VariableValue, error) {
+	contents, err := os.ReadFile(resultFile)
+	if err != nil {
+		return nil, err
+	}
+
+	resolver := structDefResolver(cmd, client)
+	structDef, err := resolver(structDefId)
+	if err != nil {
+		return nil, err
+	}
+	return partialStructResultsFromJSON(contents, structDef, resolver)
+}
+
+func partialStructResultsFromJSON(
+	contents []byte,
+	structDef *lhproto.StructDef,
+	resolver littlehorse.StructDefResolver,
+) (map[string]*lhproto.VariableValue, error) {
+	rawFields := make(map[string]json.RawMessage)
+	if err := json.Unmarshal(contents, &rawFields); err != nil {
+		return nil, fmt.Errorf("failed parsing result file as a JSON object: %w", err)
+	}
+
+	results := make(map[string]*lhproto.VariableValue)
+	for name, rawValue := range rawFields {
+		fieldDef, ok := structDef.GetStructDef().GetFields()[name]
+		if !ok {
+			return nil, fmt.Errorf("unknown field %q for StructDef %s", name, structDef.GetId().GetName())
+		}
+		value, err := littlehorse.TypeDefToVarValWithResolver(
+			string(rawValue), fieldDef.GetFieldType(), resolver,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("failed converting field %q: %w", name, err)
+		}
+		results[name] = value
+	}
+	return results, nil
+}
+
+func structDefResolver(cmd *cobra.Command, client *lhproto.LittleHorseClient) littlehorse.StructDefResolver {
+	return func(id *lhproto.StructDefId) (*lhproto.StructDef, error) {
+		return (*client).GetStructDef(requestContext(cmd), id)
+	}
 }
 
 func getUserTaskDef(
@@ -532,6 +637,8 @@ func init() {
 	saveUserTaskRunProgressCmd.MarkFlagRequired("wfRunId")
 	saveUserTaskRunProgressCmd.Flags().String("userTaskGuid", "", "GUID of the User Task you are saving progress on.")
 	saveUserTaskRunProgressCmd.MarkFlagRequired("userTaskGuid")
+	saveUserTaskRunProgressCmd.Flags().String("resultFile", "", "JSON file containing progress for a struct-backed UserTaskRun.")
+	executeUserTaskRunCmd.Flags().String("resultFile", "", "JSON file containing the output for a struct-backed UserTaskRun.")
 
 	assignUserTaskRunCmd.Flags().String("userId", "", "User Id to assign to.")
 	assignUserTaskRunCmd.Flags().String("userGroup", "", "User Group to assign to.")

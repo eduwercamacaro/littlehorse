@@ -10,12 +10,14 @@ import io.littlehorse.sdk.common.proto.CompleteUserTaskRunRequest;
 import io.littlehorse.sdk.common.proto.DeleteUserTaskRunCommentRequest;
 import io.littlehorse.sdk.common.proto.EditUserTaskRunCommentRequest;
 import io.littlehorse.sdk.common.proto.Failure;
+import io.littlehorse.sdk.common.proto.InlineStruct;
 import io.littlehorse.sdk.common.proto.ListUserTaskRunRequest;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.NodeRun.NodeTypeCase;
 import io.littlehorse.sdk.common.proto.SaveUserTaskRunProgressRequest;
 import io.littlehorse.sdk.common.proto.SaveUserTaskRunProgressRequest.SaveUserTaskRunAssignmentPolicy;
 import io.littlehorse.sdk.common.proto.SearchWfRunRequest;
+import io.littlehorse.sdk.common.proto.Struct;
 import io.littlehorse.sdk.common.proto.TaskRun;
 import io.littlehorse.sdk.common.proto.TaskRunId;
 import io.littlehorse.sdk.common.proto.TaskStatus;
@@ -26,6 +28,7 @@ import io.littlehorse.sdk.common.proto.UserTaskRunId;
 import io.littlehorse.sdk.common.proto.UserTaskRunStatus;
 import io.littlehorse.sdk.common.proto.VariableMutationType;
 import io.littlehorse.sdk.common.proto.VariableType;
+import io.littlehorse.sdk.common.proto.VariableValue;
 import io.littlehorse.sdk.common.proto.WfRunId;
 import io.littlehorse.sdk.common.proto.WfRunIdList;
 import io.littlehorse.sdk.common.util.Arg;
@@ -113,6 +116,38 @@ public class UserTaskTest {
                     Assertions.assertThat(taskResult).contains("kenobi");
                     Assertions.assertThat(taskResult).contains("137");
                 })
+                .start();
+    }
+
+    @Test
+    void shouldRejectStructOutputForLegacyUserTask() {
+        workflowVerifier
+                .prepareRun(userTaskCancel)
+                .waitForStatus(RUNNING)
+                .thenVerifyWfRun(wfRun -> {
+                    UserTaskRunId userTaskRunId = client.listUserTaskRuns(ListUserTaskRunRequest.newBuilder()
+                                    .setWfRunId(wfRun.getId())
+                                    .build())
+                            .getResults(0)
+                            .getId();
+                    VariableValue output = VariableValue.newBuilder()
+                            .setStruct(Struct.newBuilder().setStruct(InlineStruct.getDefaultInstance()))
+                            .build();
+
+                    Assertions.assertThatThrownBy(
+                                    () -> client.completeUserTaskRun(CompleteUserTaskRunRequest.newBuilder()
+                                            .setUserTaskRunId(userTaskRunId)
+                                            .setUserId("obiwan")
+                                            .setOutput(output)
+                                            .build()))
+                            .isInstanceOf(StatusRuntimeException.class)
+                            .hasMessageContaining("Use results instead of output");
+
+                    client.cancelUserTaskRun(io.littlehorse.sdk.common.proto.CancelUserTaskRunRequest.newBuilder()
+                            .setUserTaskRunId(userTaskRunId)
+                            .build());
+                })
+                .waitForStatus(COMPLETED)
                 .start();
     }
 

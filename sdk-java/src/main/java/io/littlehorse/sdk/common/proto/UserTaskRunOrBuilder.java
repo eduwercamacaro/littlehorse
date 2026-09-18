@@ -163,9 +163,9 @@ public interface UserTaskRunOrBuilder extends
 
   /**
    * <pre>
-   * The results of the UserTaskRun. Empty if the UserTaskRun has not yet been completed.
-   * Each key in this map is the `name` of a corresponding `UserTaskField` on the
-   * UserTaskDef.
+   * The results of the UserTaskRun. Each key is either the name of a legacy
+   * UserTaskField or a top-level field in the result StructDef. May contain
+   * incomplete values saved before completion.
    * </pre>
    *
    * <code>map&lt;string, .littlehorse.VariableValue&gt; results = 6;</code>
@@ -173,9 +173,9 @@ public interface UserTaskRunOrBuilder extends
   int getResultsCount();
   /**
    * <pre>
-   * The results of the UserTaskRun. Empty if the UserTaskRun has not yet been completed.
-   * Each key in this map is the `name` of a corresponding `UserTaskField` on the
-   * UserTaskDef.
+   * The results of the UserTaskRun. Each key is either the name of a legacy
+   * UserTaskField or a top-level field in the result StructDef. May contain
+   * incomplete values saved before completion.
    * </pre>
    *
    * <code>map&lt;string, .littlehorse.VariableValue&gt; results = 6;</code>
@@ -190,9 +190,9 @@ public interface UserTaskRunOrBuilder extends
   getResults();
   /**
    * <pre>
-   * The results of the UserTaskRun. Empty if the UserTaskRun has not yet been completed.
-   * Each key in this map is the `name` of a corresponding `UserTaskField` on the
-   * UserTaskDef.
+   * The results of the UserTaskRun. Each key is either the name of a legacy
+   * UserTaskField or a top-level field in the result StructDef. May contain
+   * incomplete values saved before completion.
    * </pre>
    *
    * <code>map&lt;string, .littlehorse.VariableValue&gt; results = 6;</code>
@@ -201,9 +201,9 @@ public interface UserTaskRunOrBuilder extends
   getResultsMap();
   /**
    * <pre>
-   * The results of the UserTaskRun. Empty if the UserTaskRun has not yet been completed.
-   * Each key in this map is the `name` of a corresponding `UserTaskField` on the
-   * UserTaskDef.
+   * The results of the UserTaskRun. Each key is either the name of a legacy
+   * UserTaskField or a top-level field in the result StructDef. May contain
+   * incomplete values saved before completion.
    * </pre>
    *
    * <code>map&lt;string, .littlehorse.VariableValue&gt; results = 6;</code>
@@ -215,9 +215,9 @@ io.littlehorse.sdk.common.proto.VariableValue getResultsOrDefault(
 io.littlehorse.sdk.common.proto.VariableValue defaultValue);
   /**
    * <pre>
-   * The results of the UserTaskRun. Empty if the UserTaskRun has not yet been completed.
-   * Each key in this map is the `name` of a corresponding `UserTaskField` on the
-   * UserTaskDef.
+   * The results of the UserTaskRun. Each key is either the name of a legacy
+   * UserTaskField or a top-level field in the result StructDef. May contain
+   * incomplete values saved before completion.
    * </pre>
    *
    * <code>map&lt;string, .littlehorse.VariableValue&gt; results = 6;</code>

@@ -428,6 +428,7 @@ Choose one of the following option groups:
 }
 
 func executeUserTask(cmd *cobra.Command, wfRunId string, userTaskGuid string, client *lhproto.LittleHorseClient) {
+	prompter := &userTaskPrompter{reader: bufio.NewReader(cmd.InOrStdin()), writer: cmd.OutOrStdout(), resolver: structDefResolver(cmd, client)}
 	fmt.Println("Executing UserTaskRun ", wfRunId, " ", userTaskGuid)
 
 	completeUserTask := &lhproto.CompleteUserTaskRunRequest{
@@ -455,29 +456,25 @@ func executeUserTask(cmd *cobra.Command, wfRunId string, userTaskGuid string, cl
 	}
 
 	// Next, prompt for the userId.
-	userIdVarVal, err := promptFor(
-		"Enter the userId of the person completing the task",
-		lhproto.VariableType_STR,
-	)
+	userID, err := prompter.read("Enter the userId of the person completing the task")
 	if err != nil {
 		log.Fatal(err)
 	}
-	completeUserTask.UserId = userIdVarVal.GetStr()
+	completeUserTask.UserId = userID
 
 	if userTaskDef.ResultStructDefId != nil {
 		resultFile, _ := cmd.Flags().GetString("resultFile")
-		var input string
 		if resultFile == "" {
-			input, err = promptString("Please enter the response as a JSON object")
+			completeUserTask.Output, err = prompter.value("", &lhproto.TypeDefinition{
+				DefinedType: &lhproto.TypeDefinition_StructDefId{StructDefId: userTaskDef.ResultStructDefId},
+			})
 		} else {
 			var contents []byte
 			contents, err = os.ReadFile(resultFile)
-			input = string(contents)
+			if err == nil {
+				completeUserTask.Output, err = structInputToVarVal(cmd, string(contents), userTaskDef.ResultStructDefId, client)
+			}
 		}
-		if err != nil {
-			log.Fatal(err)
-		}
-		completeUserTask.Output, err = structInputToVarVal(cmd, input, userTaskDef.ResultStructDefId, client)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -488,7 +485,11 @@ func executeUserTask(cmd *cobra.Command, wfRunId string, userTaskGuid string, cl
 			if field.Description != nil {
 				fmt.Println(*field.Description)
 			}
-			resultVal, err := promptFor("Please enter the response for this field ("+field.Type.String()+")", field.Type)
+			input, err := prompter.read("Please enter the response for this field (" + field.Type.String() + ")")
+			if err != nil {
+				log.Fatal(err)
+			}
+			resultVal, err := littlehorse.StrToVarVal(input, field.Type)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -496,7 +497,7 @@ func executeUserTask(cmd *cobra.Command, wfRunId string, userTaskGuid string, cl
 		}
 	}
 
-	fmt.Println("Saving userTaskRun progress!")
+	fmt.Println("Completing userTaskRun!")
 	// Post the result
 	littlehorse.PrintResp(
 		(*client).CompleteUserTaskRun(requestContext(cmd), completeUserTask),

@@ -202,10 +202,18 @@ to save current progress on a UserTask before executing the it.
 			if resultFile == "" {
 				log.Fatal("--resultFile is required when saving progress for a struct-backed UserTaskRun")
 			}
-			saveUserTaskRunProgress.Results, err = readPartialStructResults(cmd, resultFile, userTaskDef.ResultStructDefId, &client)
+			var results map[string]*lhproto.VariableValue
+			results, err = readPartialStructResults(cmd, resultFile, userTaskDef.ResultStructDefId, &client)
 			if err != nil {
 				log.Fatal(err)
 			}
+			fields := make(map[string]*lhproto.StructField, len(results))
+			for name, value := range results {
+				fields[name] = &lhproto.StructField{Value: value}
+			}
+			saveUserTaskRunProgress.Output = &lhproto.VariableValue{Value: &lhproto.VariableValue_Struct{
+				Struct: &lhproto.Struct{StructDefId: userTaskDef.ResultStructDefId, Struct: &lhproto.InlineStruct{Fields: fields}},
+			}}
 		} else {
 			for _, field := range userTaskDef.Fields {
 				fmt.Println("\nField: ", field.DisplayName)

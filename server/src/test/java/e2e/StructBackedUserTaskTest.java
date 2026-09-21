@@ -49,16 +49,51 @@ public class StructBackedUserTaskTest {
                 .waitForStatus(RUNNING)
                 .thenVerifyWfRun(wfRun -> {
                     UserTaskRunId userTaskRunId = getUserTaskRunId(wfRun.getId());
+                    SaveUserTaskRunProgressRequest.Builder progress = SaveUserTaskRunProgressRequest.newBuilder()
+                            .setUserTaskRunId(userTaskRunId)
+                            .setUserId("obiwan");
+                    assertThatThrownBy(() -> client.saveUserTaskRunProgress(progress.clone()
+                                    .putResults(
+                                            "approved",
+                                            VariableValue.newBuilder()
+                                                    .setBool(true)
+                                                    .build())
+                                    .build()))
+                            .isInstanceOf(StatusRuntimeException.class)
+                            .hasMessageContaining("Use output instead of results");
+                    assertThatThrownBy(() -> client.saveUserTaskRunProgress(progress.clone()
+                                    .setOutput(VariableValue.newBuilder().setBool(true))
+                                    .build()))
+                            .isInstanceOf(StatusRuntimeException.class)
+                            .hasMessageContaining("must contain a Struct output");
+                    assertThatThrownBy(() -> client.saveUserTaskRunProgress(progress.clone()
+                                    .setOutput(VariableValue.newBuilder()
+                                            .setStruct(Struct.newBuilder()
+                                                    .setStructDefId(StructDefId.newBuilder()
+                                                            .setName("wrong-schema"))
+                                                    .setStruct(InlineStruct.getDefaultInstance())))
+                                    .build()))
+                            .isInstanceOf(StatusRuntimeException.class)
+                            .hasMessageContaining("result StructDefId");
                     client.saveUserTaskRunProgress(SaveUserTaskRunProgressRequest.newBuilder()
                             .setUserTaskRunId(userTaskRunId)
                             .setUserId("obiwan")
-                            .putResults(
-                                    "approved",
-                                    VariableValue.newBuilder().setBool(true).build())
+                            .setOutput(VariableValue.newBuilder()
+                                    .setStruct(Struct.newBuilder()
+                                            .setStructDefId(task.structDef().getId())
+                                            .setStruct(InlineStruct.newBuilder()
+                                                    .putFields(
+                                                            "approved",
+                                                            StructField.newBuilder()
+                                                                    .setValue(VariableValue.newBuilder()
+                                                                            .setBool(true))
+                                                                    .build()))))
                             .build());
 
                     UserTaskRun saved = client.getUserTaskRun(userTaskRunId);
-                    assertThat(saved.getResultsMap()).containsOnlyKeys("approved");
+                    assertThat(saved.getResultsMap()).isEmpty();
+                    assertThat(saved.getOutput().getStruct().getStruct().getFieldsMap())
+                            .containsOnlyKeys("approved");
 
                     client.completeUserTaskRun(CompleteUserTaskRunRequest.newBuilder()
                             .setUserTaskRunId(userTaskRunId)
@@ -71,11 +106,33 @@ public class StructBackedUserTaskTest {
                     UserTaskRun userTaskRun =
                             client.getUserTaskRun(nodeRun.getUserTask().getUserTaskRunId());
                     assertThat(userTaskRun.getStatus()).isEqualTo(UserTaskRunStatus.DONE);
-                    assertThat(userTaskRun.getResultsMap().get("approved").getBool())
+                    assertThat(userTaskRun.getResultsMap()).isEmpty();
+                    assertThat(userTaskRun
+                                    .getOutput()
+                                    .getStruct()
+                                    .getStruct()
+                                    .getFieldsMap()
+                                    .get("approved")
+                                    .getValue()
+                                    .getBool())
                             .isTrue();
-                    assertThat(userTaskRun.getResultsMap().get("reviewer").getStr())
+                    assertThat(userTaskRun
+                                    .getOutput()
+                                    .getStruct()
+                                    .getStruct()
+                                    .getFieldsMap()
+                                    .get("reviewer")
+                                    .getValue()
+                                    .getStr())
                             .isEqualTo("obiwan");
-                    assertThat(userTaskRun.getResultsMap().get("source").getStr())
+                    assertThat(userTaskRun
+                                    .getOutput()
+                                    .getStruct()
+                                    .getStruct()
+                                    .getFieldsMap()
+                                    .get("source")
+                                    .getValue()
+                                    .getStr())
                             .isEqualTo("manual");
                 })
                 .start();

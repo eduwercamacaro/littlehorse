@@ -19,12 +19,8 @@ import io.littlehorse.common.model.getable.global.wfspec.node.subnode.usertasks.
 import io.littlehorse.common.model.getable.objectId.CheckpointIdModel;
 import io.littlehorse.common.model.getable.objectId.UserTaskRunIdModel;
 import io.littlehorse.sdk.common.LHLibUtil;
-import io.littlehorse.sdk.common.proto.InlineStruct;
-import io.littlehorse.sdk.common.proto.Struct;
-import io.littlehorse.sdk.common.proto.StructField;
 import io.littlehorse.sdk.common.proto.UserTaskNodeRun;
 import io.littlehorse.sdk.common.proto.UserTaskRunStatus;
-import io.littlehorse.sdk.common.proto.VariableValue;
 import io.littlehorse.server.streams.topology.core.CoreProcessorContext;
 import io.littlehorse.server.streams.topology.core.ExecutionContext;
 import java.util.ArrayList;
@@ -98,17 +94,10 @@ public class UserTaskNodeRunModel extends SubNodeRun<UserTaskNodeRun> {
 
         UserTaskDefModel userTaskDef = processorContext.metadataManager().get(userTask.getUserTaskDefId());
         if (userTaskDef.getResultStructDefId() != null) {
-            InlineStruct.Builder inlineStruct = InlineStruct.newBuilder();
-            userTask.getResults()
-                    .forEach((name, value) -> inlineStruct.putFields(
-                            name,
-                            StructField.newBuilder().setValue(value.toProto()).build()));
-            VariableValue output = VariableValue.newBuilder()
-                    .setStruct(Struct.newBuilder()
-                            .setStructDefId(userTaskDef.getResultStructDefId().toProto())
-                            .setStruct(inlineStruct))
-                    .build();
-            VariableValueModel outputModel = VariableValueModel.fromProto(output, executionContext);
+            VariableValueModel outputModel = userTask.getOutput();
+            if (outputModel == null) {
+                throw new IllegalStateException("Completed Struct-backed UserTaskRun has no output");
+            }
             try {
                 new TypeDefinitionModel(userTaskDef.getResultStructDefId())
                         .validateCompatibility(outputModel, processorContext.metadataManager());

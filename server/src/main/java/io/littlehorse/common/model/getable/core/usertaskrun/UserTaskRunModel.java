@@ -80,6 +80,7 @@ public class UserTaskRunModel extends CoreGetable<UserTaskRun> implements CoreOu
     private List<UserTaskEventModel> events = new ArrayList<>();
 
     private Map<String, VariableValueModel> results = new HashMap<>();
+    private VariableValueModel output;
     private String userGroup;
     private String userId;
 
@@ -143,6 +144,7 @@ public class UserTaskRunModel extends CoreGetable<UserTaskRun> implements CoreOu
         for (Map.Entry<String, VariableValueModel> result : results.entrySet()) {
             out.putResults(result.getKey(), result.getValue().toProto().build());
         }
+        if (output != null) out.setOutput(output.toProto());
         out.setEpoch(this.epoch);
 
         return out;
@@ -173,6 +175,7 @@ public class UserTaskRunModel extends CoreGetable<UserTaskRun> implements CoreOu
         for (Map.Entry<String, VariableValue> result : p.getResultsMap().entrySet()) {
             results.put(result.getKey(), VariableValueModel.fromProto(result.getValue(), context));
         }
+        if (p.hasOutput()) output = VariableValueModel.fromProto(p.getOutput(), context);
 
         lastEventForComment = new HashMap<>();
         commentIdCounter = 0;
@@ -376,20 +379,49 @@ public class UserTaskRunModel extends CoreGetable<UserTaskRun> implements CoreOu
 
         UserTaskDefModel userTaskDef = executionContext.metadataManager().get(userTaskDefId);
         if (userTaskDef.getResultStructDefId() != null) {
-            validatePartialStructResults(req.getResults(), userTaskDef);
+            if (!req.getResults().isEmpty()) {
+                throw new LHApiException(
+                        Status.INVALID_ARGUMENT, "Use output instead of results for a struct-backed UserTaskDef");
+            }
+            VariableValueModel partialProgress = req.getOutput();
+            if (partialProgress == null || partialProgress.getStruct() == null) {
+                throw new LHApiException(
+                        Status.INVALID_ARGUMENT,
+                        "Progress for a struct-backed UserTaskDef must contain a Struct output");
+            }
+            if (!userTaskDef
+                    .getResultStructDefId()
+                    .equals(partialProgress.getStruct().getStructDefId())) {
+                throw new LHApiException(
+                        Status.INVALID_ARGUMENT, "Progress output must use the UserTaskDef's result StructDefId");
+            }
+            validatePartialStructResults(
+                    partialProgress.getStruct().getInlineStruct().getFields(), userTaskDef);
+            output = partialProgress;
+            results.clear();
+            UTESavedModel saved = new UTESavedModel(
+                    req.getUserId(),
+                    partialProgress.getStruct().getInlineStruct().getFields().entrySet().stream()
+                            .collect(Collectors.toMap(
+                                    Map.Entry::getKey, entry -> entry.getValue().getValue())));
+            this.events.add(new UserTaskEventModel(saved, ctx.currentCommand().getTime()));
+            return;
+        } else if (req.getOutput() != null) {
+            throw new LHApiException(Status.INVALID_ARGUMENT, "Use results instead of output for a legacy UserTaskDef");
         }
 
         this.results = req.getResults();
+        this.output = null;
         UTESavedModel saved = new UTESavedModel(req.getUserId(), req.getResults());
         this.events.add(new UserTaskEventModel(saved, ctx.currentCommand().getTime()));
     }
 
     private void validatePartialStructResults(
-            Map<String, VariableValueModel> partialResults, UserTaskDefModel userTaskDef) {
+            Map<String, StructFieldModel> partialResults, UserTaskDefModel userTaskDef) {
         StructDefModel structDef = executionContext.metadataManager().get(userTaskDef.getResultStructDefId());
         Map<String, StructFieldDefModel> fieldDefs = structDef.getStructDef().getFields();
 
-        for (Map.Entry<String, VariableValueModel> result : partialResults.entrySet()) {
+        for (Map.Entry<String, StructFieldModel> result : partialResults.entrySet()) {
             StructFieldDefModel fieldDef = fieldDefs.get(result.getKey());
             if (fieldDef == null) {
                 throw new LHApiException(
@@ -398,10 +430,8 @@ public class UserTaskRunModel extends CoreGetable<UserTaskRun> implements CoreOu
                                 .formatted(result.getKey(), userTaskDef.getResultStructDefId()));
             }
 
-            StructFieldModel field = new StructFieldModel();
-            field.setValue(result.getValue());
             try {
-                fieldDef.validateAgainst(field, executionContext.metadataManager());
+                fieldDef.validateAgainst(result.getValue(), executionContext.metadataManager());
             } catch (StructValidationException exn) {
                 throw new LHApiException(
                         Status.INVALID_ARGUMENT,
@@ -441,6 +471,7 @@ public class UserTaskRunModel extends CoreGetable<UserTaskRun> implements CoreOu
                 throw new LHApiException(Status.INVALID_ARGUMENT, "UserTaskDef does not define an output");
             }
             results.clear();
+            output = null;
         }
 
         this.status = UserTaskRunStatus.DONE;
@@ -469,15 +500,15 @@ public class UserTaskRunModel extends CoreGetable<UserTaskRun> implements CoreOu
             throw new LHApiException(Status.INVALID_ARGUMENT, "Invalid UserTaskRun output: " + exn.getMessage());
         }
 
-        results = output.getStruct().getInlineStruct().getFields().entrySet().stream()
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey, entry -> entry.getValue().getValue()));
+        this.output = output;
+        results.clear();
     }
 
     private void processLegacyTaskCompletedEvent(CompleteUserTaskRunRequestModel event, UserTaskDefModel userTaskDef) {
         if (event.getOutput() != null) {
             throw new LHApiException(Status.INVALID_ARGUMENT, "Use results instead of output for a legacy UserTaskDef");
         }
+        output = null;
 
         Map<String, UserTaskFieldModel> userTaskFieldsGroupedByName = userTaskDef.getFields().stream()
                 .collect(Collectors.toMap(UserTaskFieldModel::getName, Function.identity()));

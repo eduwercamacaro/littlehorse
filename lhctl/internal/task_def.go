@@ -16,7 +16,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func newDeployTaskDefCmd() *cobra.Command {
+func newDeployTaskDefCmd(provider ClientProvider) *cobra.Command {
 	deployTaskDefCmd := &cobra.Command{
 		Use:   "taskDef <filename>",
 		Short: "Create a TaskDef from a JSON or Protobuf file.",
@@ -47,14 +47,14 @@ func newDeployTaskDefCmd() *cobra.Command {
 
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).PutTaskDef(requestContext(cmd), ptd))
+			littlehorse.PrintResp(provider.Client(cmd).PutTaskDef(provider.RequestContext(cmd), ptd))
 		},
 	}
 	return deployTaskDefCmd
 }
 
 // newGetTaskDefCmd creates the taskRun command
-func newGetTaskDefCmd() *cobra.Command {
+func newGetTaskDefCmd(provider ClientProvider) *cobra.Command {
 	getTaskDefCmd := &cobra.Command{
 		Use:   "taskDef <name>",
 		Short: "Get a TaskDef by Name",
@@ -63,8 +63,8 @@ func newGetTaskDefCmd() *cobra.Command {
 			name := args[0]
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).GetTaskDef(
-					requestContext(cmd),
+				provider.Client(cmd).GetTaskDef(
+					provider.RequestContext(cmd),
 					&lhproto.TaskDefId{
 						Name: name,
 					},
@@ -75,7 +75,7 @@ func newGetTaskDefCmd() *cobra.Command {
 	return getTaskDefCmd
 }
 
-func newSearchTaskDefCmd() *cobra.Command {
+func newSearchTaskDefCmd(provider ClientProvider) *cobra.Command {
 	searchTaskDefCmd := &cobra.Command{
 		Use:   "taskDef [<prefix>]",
 		Short: "Search for TaskDefs",
@@ -97,8 +97,8 @@ You can search for all TaskDefs or may optionally provide a prefix for your sear
 			}
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).SearchTaskDef(
-					requestContext(cmd),
+				provider.Client(cmd).SearchTaskDef(
+					provider.RequestContext(cmd),
 					search,
 				),
 			)
@@ -107,7 +107,7 @@ You can search for all TaskDefs or may optionally provide a prefix for your sear
 	return searchTaskDefCmd
 }
 
-func newDeleteTaskDefCmd() *cobra.Command {
+func newDeleteTaskDefCmd(provider ClientProvider) *cobra.Command {
 	deleteTaskDefCmd := &cobra.Command{
 		Use:   "taskDef <name>",
 		Short: "Delete a TaskDef.",
@@ -118,8 +118,8 @@ func newDeleteTaskDefCmd() *cobra.Command {
 			name := args[0]
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).DeleteTaskDef(
-					requestContext(cmd),
+				provider.Client(cmd).DeleteTaskDef(
+					provider.RequestContext(cmd),
 					&lhproto.DeleteTaskDefRequest{
 						Id: &lhproto.TaskDefId{
 							Name: name,

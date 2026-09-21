@@ -8,34 +8,34 @@ import (
 )
 
 // newGetCmd creates the get command
-func newGetCmd() *cobra.Command {
+func newGetCmd(provider ClientProvider) *cobra.Command {
 	getCmd := &cobra.Command{
 		Use:   "get",
 		Short: "Utility to GET LittleHorse API resources.",
 	}
 	getCmd.AddCommand(
-		newGetBulkJobCmd(),
-		newGetCorrelatedEventCmd(),
-		newGetExternalEventCmd(),
-		newGetExternalEventDefCmd(),
-		newGetNodeRunCmd(),
-		newGetPrincipalCmd(),
-		newGetQuotaCmd(),
-		newGetStructDefCmd(),
-		newGetTaskDefCmd(),
-		newGetTaskRunCmd(),
-		newGetTaskWorkerGroup(),
-		newGetTenantCmd(),
-		newGetUserTaskDefCmd(),
-		newGetUserTaskRunCmd(),
-		newGetVariableCmd(),
-		newGetMetricWindowCmd(),
-		newGetWfRunCmd(),
-		newGetScheduledWfRun(),
-		newGetWfSpecCmd(),
-		newGetWorkflowEventCmd(),
-		newGetWorkflowEventDefCmd(),
-		newGetWorkflowMigrationPlanCmd(),
+		newGetBulkJobCmd(provider),
+		newGetCorrelatedEventCmd(provider),
+		newGetExternalEventCmd(provider),
+		newGetExternalEventDefCmd(provider),
+		newGetNodeRunCmd(provider),
+		newGetPrincipalCmd(provider),
+		newGetQuotaCmd(provider),
+		newGetStructDefCmd(provider),
+		newGetTaskDefCmd(provider),
+		newGetTaskRunCmd(provider),
+		newGetTaskWorkerGroup(provider),
+		newGetTenantCmd(provider),
+		newGetUserTaskDefCmd(provider),
+		newGetUserTaskRunCmd(provider),
+		newGetVariableCmd(provider),
+		newGetMetricWindowCmd(provider),
+		newGetWfRunCmd(provider),
+		newGetScheduledWfRun(provider),
+		newGetWfSpecCmd(provider),
+		newGetWorkflowEventCmd(provider),
+		newGetWorkflowEventDefCmd(provider),
+		newGetWorkflowMigrationPlanCmd(provider),
 	)
 	return getCmd
 }

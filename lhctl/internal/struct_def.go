@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newGetStructDefCmd() *cobra.Command {
+func newGetStructDefCmd(provider ClientProvider) *cobra.Command {
 	getStructDefCmd := &cobra.Command{
 		Use:   "structDef <name> [<version>]",
 		Short: "Get a StructDef by Name",
@@ -33,8 +33,8 @@ func newGetStructDefCmd() *cobra.Command {
 			}
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).GetStructDef(
-					requestContext(cmd),
+				provider.Client(cmd).GetStructDef(
+					provider.RequestContext(cmd),
 					structDefId,
 				),
 			)
@@ -43,7 +43,7 @@ func newGetStructDefCmd() *cobra.Command {
 	return getStructDefCmd
 }
 
-func newSearchStructDefCmd() *cobra.Command {
+func newSearchStructDefCmd(provider ClientProvider) *cobra.Command {
 	searchStructDefCmd := &cobra.Command{
 		Use:   "structDef <prefix>",
 		Short: "Search for StructDefs",
@@ -64,8 +64,8 @@ Future support will be added for searching for all versions of an exact StructDe
 			}
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).SearchStructDef(
-					requestContext(cmd),
+				provider.Client(cmd).SearchStructDef(
+					provider.RequestContext(cmd),
 					&lhproto.SearchStructDefRequest{
 						Bookmark:          bookmark,
 						Limit:             &limit,
@@ -77,7 +77,7 @@ Future support will be added for searching for all versions of an exact StructDe
 	return searchStructDefCmd
 }
 
-func newDeleteStructDefCmd() *cobra.Command {
+func newDeleteStructDefCmd(provider ClientProvider) *cobra.Command {
 	deleteStructDefCmd := &cobra.Command{
 		Use:   "structDef <name> <version>",
 		Short: "Delete a StructDef.",
@@ -94,8 +94,8 @@ func newDeleteStructDefCmd() *cobra.Command {
 			}
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).DeleteStructDef(
-					requestContext(cmd),
+				provider.Client(cmd).DeleteStructDef(
+					provider.RequestContext(cmd),
 					&lhproto.DeleteStructDefRequest{
 						Id: &lhproto.StructDefId{
 							Name:    name,

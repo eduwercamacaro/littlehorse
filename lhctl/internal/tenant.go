@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newPutTenantCmd() *cobra.Command {
+func newPutTenantCmd(provider ClientProvider) *cobra.Command {
 	putTenantCmd := &cobra.Command{
 		Use:   "tenant <id>",
 		Short: "Create or update a Tenant.",
@@ -26,7 +26,7 @@ func newPutTenantCmd() *cobra.Command {
 					DefaultRecordingLevel: lhproto.OutputTopicConfig_NO_ENTITY_EVENTS,
 				}
 			}
-			littlehorse.PrintResp(getGlobalClient(cmd).PutTenant(requestContext(cmd), putTenantReq))
+			littlehorse.PrintResp(provider.Client(cmd).PutTenant(provider.RequestContext(cmd), putTenantReq))
 
 		},
 	}
@@ -36,7 +36,7 @@ func newPutTenantCmd() *cobra.Command {
 	return putTenantCmd
 }
 
-func newSearchTenantCmd() *cobra.Command {
+func newSearchTenantCmd(provider ClientProvider) *cobra.Command {
 	searchTenantCmd := &cobra.Command{
 		Use:   "tenant",
 		Short: "Search for all available TenantIds for current Principal",
@@ -44,8 +44,8 @@ func newSearchTenantCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			bookmark, _ := cmd.Flags().GetBytesBase64("bookmark")
 			limit, _ := cmd.Flags().GetInt32("limit")
-			littlehorse.PrintResp(getGlobalClient(cmd).SearchTenant(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).SearchTenant(
+				provider.RequestContext(cmd),
 				&lhproto.SearchTenantRequest{
 					Bookmark: bookmark,
 					Limit:    &limit,
@@ -56,14 +56,14 @@ func newSearchTenantCmd() *cobra.Command {
 	return searchTenantCmd
 }
 
-func newGetTenantCmd() *cobra.Command {
+func newGetTenantCmd(provider ClientProvider) *cobra.Command {
 	getTenantCmd := &cobra.Command{
 		Use:   "tenant <id>",
 		Short: "Get a Tenant",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			littlehorse.PrintResp(getGlobalClient(cmd).GetTenant(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).GetTenant(
+				provider.RequestContext(cmd),
 				&lhproto.TenantId{
 					Id: args[0],
 				},

@@ -1,11 +1,10 @@
 package internal
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
-
-	"context"
 
 	"github.com/littlehorse-enterprises/littlehorse/sdk-go/lhproto"
 	"github.com/littlehorse-enterprises/littlehorse/sdk-go/littlehorse"
@@ -13,9 +12,36 @@ import (
 	"google.golang.org/grpc/metadata"
 )
 
-// NewRootCommand builds a fresh command tree with independent command and flag state.
-// Client and configuration loading still use the package-level caches.
-func NewRootCommand(version, commit, date string) *cobra.Command {
+// ClientProvider supplies the client and request context needed by RPC commands.
+type ClientProvider interface {
+	Client(cmd *cobra.Command) lhproto.LittleHorseClient
+	RequestContext(cmd *cobra.Command) context.Context
+}
+
+type dependencies struct {
+	client lhproto.LittleHorseClient
+	config *littlehorse.LHConfig
+}
+
+// RootOption customizes the dependencies used by one command tree.
+type RootOption func(*dependencies)
+
+// WithClient supplies the client used by the command tree.
+func WithClient(client lhproto.LittleHorseClient) RootOption {
+	return func(d *dependencies) { d.client = client }
+}
+
+// WithConfig supplies the configuration used by the command tree.
+func WithConfig(config *littlehorse.LHConfig) RootOption {
+	return func(d *dependencies) { d.config = config }
+}
+
+// NewRootCommand builds a fresh command tree with its own lazy client and configuration caches.
+func NewRootCommand(version, commit, date string, options ...RootOption) *cobra.Command {
+	d := &dependencies{}
+	for _, option := range options {
+		option(d)
+	}
 	rootCmd := &cobra.Command{
 		Use:   "lhctl",
 		Short: "Interact with the LittleHorse API",
@@ -31,38 +57,35 @@ a WfRun, to searching for various objects.
 		"Configuration File Location",
 	)
 	rootCmd.AddCommand(
-		newApplyCmd(),
-		newAssignCmd(),
-		newCancelUserTaskCmd(),
-		newCountCmd(),
-		newDeleteCmd(),
-		newDeployCmd(),
-		newEditCmd(),
-		newExecuteCmd(),
-		newGetCmd(),
-		newListCmd(),
-		newLoginCmd(),
-		newPostEventCmd(),
-		newPutCmd(),
-		newRescueCmd(),
-		newResumeCmd(),
-		newRunCmd(),
-		newSaveCmd(),
-		newScheduleCmd(),
-		newSearchCmd(),
-		newStopCmd(),
-		newVersionCmd(),
-		newWhoamiCmd(),
+		newApplyCmd(d),
+		newAssignCmd(d),
+		newCancelUserTaskCmd(d),
+		newCountCmd(d),
+		newDeleteCmd(d),
+		newDeployCmd(d),
+		newEditCmd(d),
+		newExecuteCmd(d),
+		newGetCmd(d),
+		newListCmd(d),
+		newLoginCmd(d),
+		newPostEventCmd(d),
+		newPutCmd(d),
+		newRescueCmd(d),
+		newResumeCmd(d),
+		newRunCmd(d),
+		newSaveCmd(d),
+		newScheduleCmd(d),
+		newSearchCmd(d),
+		newStopCmd(d),
+		newVersionCmd(d),
+		newWhoamiCmd(d),
 	)
 	return rootCmd
 }
 
-var globalClient *lhproto.LittleHorseClient
-var globalConfig *littlehorse.LHConfig
-
-func getGlobalConfig(cmd *cobra.Command) littlehorse.LHConfig {
-	if globalConfig != nil {
-		return *globalConfig
+func (d *dependencies) Config(cmd *cobra.Command) littlehorse.LHConfig {
+	if d.config != nil {
+		return *d.config
 	}
 
 	configLoc, err := cmd.Flags().GetString("configFile")
@@ -70,7 +93,7 @@ func getGlobalConfig(cmd *cobra.Command) littlehorse.LHConfig {
 		log.Fatal(err)
 	}
 
-	globalConfig, err = littlehorse.NewConfigFromProps(configLoc)
+	d.config, err = littlehorse.NewConfigFromProps(configLoc)
 
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -80,32 +103,31 @@ func getGlobalConfig(cmd *cobra.Command) littlehorse.LHConfig {
 		} else {
 			log.Fatal(err)
 		}
-		globalConfig = littlehorse.NewConfigFromEnv()
+		d.config = littlehorse.NewConfigFromEnv()
 	}
 
-	return *globalConfig
+	return *d.config
 }
 
-func getGlobalClient(cmd *cobra.Command) lhproto.LittleHorseClient {
-	if globalClient != nil {
-		return *globalClient
+func (d *dependencies) Client(cmd *cobra.Command) lhproto.LittleHorseClient {
+	if d.client != nil {
+		return d.client
 	}
 
-	config := getGlobalConfig(cmd)
-
-	var err error
-
-	globalClient, err = config.GetGrpcClient()
+	config := d.Config(cmd)
+	client, err := config.GetGrpcClient()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return *globalClient
+	d.client = *client
+	return d.client
 }
 
-func requestContext(cmd *cobra.Command) context.Context {
-	if getGlobalConfig(cmd).TenantId != nil {
-		tenantId := *globalConfig.TenantId
+func (d *dependencies) RequestContext(cmd *cobra.Command) context.Context {
+	config := d.Config(cmd)
+	if config.TenantId != nil {
+		tenantId := *config.TenantId
 		md := metadata.Pairs("tenantId", tenantId)
 		return metadata.NewOutgoingContext(context.Background(), md)
 	}

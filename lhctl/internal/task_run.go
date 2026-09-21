@@ -12,7 +12,7 @@ import (
 )
 
 // newGetTaskRunCmd creates the nodeRun command
-func newGetTaskRunCmd() *cobra.Command {
+func newGetTaskRunCmd(provider ClientProvider) *cobra.Command {
 	getTaskRunCmd := &cobra.Command{
 		Use:   "taskRun <wfRunId> <taskRunGuid>",
 		Short: "Get a TaskRun by WfRunId and Guid",
@@ -43,8 +43,8 @@ func newGetTaskRunCmd() *cobra.Command {
 				args = strings.Split(args[0], "/")
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).GetTaskRun(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).GetTaskRun(
+				provider.RequestContext(cmd),
 				&lhproto.TaskRunId{
 					WfRunId:  littlehorse.StrToWfRunId(args[0]),
 					TaskGuid: args[1],
@@ -55,7 +55,7 @@ func newGetTaskRunCmd() *cobra.Command {
 	return getTaskRunCmd
 }
 
-func newSearchTaskRunCmd() *cobra.Command {
+func newSearchTaskRunCmd(provider ClientProvider) *cobra.Command {
 	searchTaskRunCmd := &cobra.Command{
 		Use:   "taskRun [<taskDefName>]",
 		Short: "Search for TaskRun's.",
@@ -110,7 +110,7 @@ Choose one of the following option groups:
 				Bookmark:      bookmark,
 				Limit:         &limit,
 			}
-			littlehorse.PrintResp(getGlobalClient(cmd).SearchTaskRun(requestContext(cmd), search))
+			littlehorse.PrintResp(provider.Client(cmd).SearchTaskRun(provider.RequestContext(cmd), search))
 		},
 	}
 	searchTaskRunCmd.Flags().String("status", "", "Status of TaskRun's to search for.")
@@ -120,7 +120,7 @@ Choose one of the following option groups:
 	return searchTaskRunCmd
 }
 
-func newListTaskRunCmd() *cobra.Command {
+func newListTaskRunCmd(provider ClientProvider) *cobra.Command {
 	listTaskRunCmd := &cobra.Command{
 		Use:   "taskRun <wfRunId>",
 		Short: "List all TaskRun's for a given WfRun Id.",
@@ -139,8 +139,8 @@ Lists all TaskRun's for a given WfRun Id.
 				Limit:    &limit,
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).ListTaskRuns(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).ListTaskRuns(
+				provider.RequestContext(cmd),
 				req,
 			))
 		},
@@ -148,7 +148,7 @@ Lists all TaskRun's for a given WfRun Id.
 	return listTaskRunCmd
 }
 
-func newCountTaskRunCmd() *cobra.Command {
+func newCountTaskRunCmd(provider ClientProvider) *cobra.Command {
 	countTaskRunCmd := &cobra.Command{
 		Use:   "taskRun <taskDefName>",
 		Short: "Count TaskRun's by TaskDef name and status.",
@@ -178,7 +178,7 @@ Currently only TASK_SCHEDULED status is supported.
 				Status:      lhproto.TaskStatus(statusVal),
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).CountTaskRun(requestContext(cmd), req))
+			littlehorse.PrintResp(provider.Client(cmd).CountTaskRun(provider.RequestContext(cmd), req))
 		},
 	}
 	countTaskRunCmd.Flags().String("status", "", "Status of TaskRun's to count (required). Currently only TASK_SCHEDULED is supported.")

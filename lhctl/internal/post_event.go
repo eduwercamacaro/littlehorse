@@ -15,7 +15,7 @@ import (
 )
 
 // newPostEventCmd creates the postEvent command
-func newPostEventCmd() *cobra.Command {
+func newPostEventCmd(provider ClientProvider) *cobra.Command {
 	postEventCmd := &cobra.Command{
 		Use:   "postEvent <wfRunId> <externalEventName> [(<varType> <payload>)]",
 		Short: "Post an ExternalEvent to a WfRun.",
@@ -100,8 +100,8 @@ lhctl postEvent <wfRunId> <externalEventName>
 			}
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).PutExternalEvent(
-					requestContext(cmd),
+				provider.Client(cmd).PutExternalEvent(
+					provider.RequestContext(cmd),
 					&req,
 				),
 			)

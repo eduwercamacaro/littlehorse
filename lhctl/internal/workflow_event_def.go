@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newPutWorkflowEventDefCmd() *cobra.Command {
+func newPutWorkflowEventDefCmd(provider ClientProvider) *cobra.Command {
 	putWorkflowEventDefCmd := &cobra.Command{
 		Use:   "workflowEventDef <name> <type>",
 		Short: "Create a WorkflowEventDef.",
@@ -43,14 +43,14 @@ func newPutWorkflowEventDefCmd() *cobra.Command {
 				ContentType: &returnType,
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).PutWorkflowEventDef(requestContext(cmd), &pwed))
+			littlehorse.PrintResp(provider.Client(cmd).PutWorkflowEventDef(provider.RequestContext(cmd), &pwed))
 		},
 	}
 	return putWorkflowEventDefCmd
 }
 
 // newGetWorkflowEventDefCmd creates the getWorkflowEventDef command
-func newGetWorkflowEventDefCmd() *cobra.Command {
+func newGetWorkflowEventDefCmd(provider ClientProvider) *cobra.Command {
 	getWorkflowEventDefCmd := &cobra.Command{
 		Use:   "workflowEventDef <name>",
 		Short: "Get an WorkflowEventDef by name.",
@@ -58,8 +58,8 @@ func newGetWorkflowEventDefCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).GetWorkflowEventDef(
-					requestContext(cmd),
+				provider.Client(cmd).GetWorkflowEventDef(
+					provider.RequestContext(cmd),
 					&lhproto.WorkflowEventDefId{
 						Name: args[0],
 					},
@@ -70,7 +70,7 @@ func newGetWorkflowEventDefCmd() *cobra.Command {
 	return getWorkflowEventDefCmd
 }
 
-func newSearchWorkflowEventDefCmd() *cobra.Command {
+func newSearchWorkflowEventDefCmd(provider ClientProvider) *cobra.Command {
 	searchWorkflowEventDefCmd := &cobra.Command{
 		Use:   "workflowEventDef",
 		Short: "Search for WorkflowEventDef",
@@ -86,8 +86,8 @@ searches for all WorkflowEventDefs.
 			prefix, _ := cmd.Flags().GetString("prefix")
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).SearchWorkflowEventDef(
-					requestContext(cmd),
+				provider.Client(cmd).SearchWorkflowEventDef(
+					provider.RequestContext(cmd),
 					&lhproto.SearchWorkflowEventDefRequest{
 						Bookmark: bookmark,
 						Limit:    &limit,
@@ -100,7 +100,7 @@ searches for all WorkflowEventDefs.
 	return searchWorkflowEventDefCmd
 }
 
-func newDeleteWorkflowEventDefCmd() *cobra.Command {
+func newDeleteWorkflowEventDefCmd(provider ClientProvider) *cobra.Command {
 	deleteWorkflowEventDefCmd := &cobra.Command{
 		Use:   "workflowEventDef <name>",
 		Short: "Delete a WorkflowEventDef.",
@@ -113,8 +113,8 @@ WorkflowEventDef to delete.
 			name := args[0]
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).DeleteWorkflowEventDef(
-					requestContext(cmd),
+				provider.Client(cmd).DeleteWorkflowEventDef(
+					provider.RequestContext(cmd),
 					&lhproto.DeleteWorkflowEventDefRequest{
 						Id: &lhproto.WorkflowEventDefId{
 							Name: name,

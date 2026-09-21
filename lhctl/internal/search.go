@@ -5,7 +5,7 @@ import (
 )
 
 // newSearchCmd creates the search command
-func newSearchCmd() *cobra.Command {
+func newSearchCmd(provider ClientProvider) *cobra.Command {
 	searchCmd := &cobra.Command{
 		Use:   "search",
 		Short: "Search for API Resources based on criteria.",
@@ -19,27 +19,27 @@ For information about how to search for a specific resource, consult:
 	searchCmd.PersistentFlags().Int32("limit", 100, "Guideline for number of response items to fetch per request.")
 	searchCmd.PersistentFlags().BytesBase64("bookmark", nil, "Optional bookmark for paginated scans.")
 	searchCmd.AddCommand(
-		newSearchBulkJobCmd(),
-		newSearchCorrelatedEventCmd(),
-		newSearchExternalEventCmd(),
-		newSearchExternalEventDefCmd(),
-		newSearchNodeRunCmd(),
-		newSearchPrincipalCmd(),
-		newSearchQuotaCmd(),
-		newSearchStructDefCmd(),
-		newSearchTaskDefCmd(),
-		newSearchTaskRunCmd(),
-		newSearchTenantCmd(),
-		newSearchUserTaskDefCmd(),
-		newSearchUserTaskRunCmd(),
-		newSearchVariableCmd(),
-		newSearchWfMetricWindowCmd(),
-		newSearchWfRunCmd(),
-		newSearchScheduledWfsCmd(),
-		newSearchWfSpecCmd(),
-		newSearchWorkflowEventCmd(),
-		newSearchWorkflowEventDefCmd(),
-		newSearchWorkflowMigrationPlanCmd(),
+		newSearchBulkJobCmd(provider),
+		newSearchCorrelatedEventCmd(provider),
+		newSearchExternalEventCmd(provider),
+		newSearchExternalEventDefCmd(provider),
+		newSearchNodeRunCmd(provider),
+		newSearchPrincipalCmd(provider),
+		newSearchQuotaCmd(provider),
+		newSearchStructDefCmd(provider),
+		newSearchTaskDefCmd(provider),
+		newSearchTaskRunCmd(provider),
+		newSearchTenantCmd(provider),
+		newSearchUserTaskDefCmd(provider),
+		newSearchUserTaskRunCmd(provider),
+		newSearchVariableCmd(provider),
+		newSearchWfMetricWindowCmd(provider),
+		newSearchWfRunCmd(provider),
+		newSearchScheduledWfsCmd(provider),
+		newSearchWfSpecCmd(provider),
+		newSearchWorkflowEventCmd(provider),
+		newSearchWorkflowEventDefCmd(provider),
+		newSearchWorkflowMigrationPlanCmd(provider),
 	)
 	return searchCmd
 }

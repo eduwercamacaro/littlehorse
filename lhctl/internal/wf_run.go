@@ -10,14 +10,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newGetWfRunCmd() *cobra.Command {
+func newGetWfRunCmd(provider ClientProvider) *cobra.Command {
 	getWfRunCmd := &cobra.Command{
 		Use:   "wfRun <id>",
 		Short: "Get a Workflow Run.",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			littlehorse.PrintResp(getGlobalClient(cmd).GetWfRun(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).GetWfRun(
+				provider.RequestContext(cmd),
 				littlehorse.StrToWfRunId(args[0]),
 			))
 		},
@@ -25,14 +25,14 @@ func newGetWfRunCmd() *cobra.Command {
 	return getWfRunCmd
 }
 
-func newGetScheduledWfRun() *cobra.Command {
+func newGetScheduledWfRun(provider ClientProvider) *cobra.Command {
 	getScheduledWfRun := &cobra.Command{
 		Use:   "scheduled <id>",
 		Short: "Get a scheduled run.",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			littlehorse.PrintResp(getGlobalClient(cmd).GetScheduledWfRun(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).GetScheduledWfRun(
+				provider.RequestContext(cmd),
 				&lhproto.ScheduledWfRunId{
 					Id: args[0],
 				},
@@ -42,7 +42,7 @@ func newGetScheduledWfRun() *cobra.Command {
 	return getScheduledWfRun
 }
 
-func newSearchWfRunByParentCmd() *cobra.Command {
+func newSearchWfRunByParentCmd(provider ClientProvider) *cobra.Command {
 	searchWfRunByParentCmd := &cobra.Command{
 		Use:   "byParent <parentWfRunId>",
 		Short: "Search for child WfRuns by parent WfRun ID",
@@ -85,7 +85,7 @@ Returns a list of ObjectId's that can be passed into 'lhctl get wfRun'.
 				search.WfSpecName = wfSpecName
 			}
 
-			resp, err := getGlobalClient(cmd).SearchWfRun(requestContext(cmd), search)
+			resp, err := provider.Client(cmd).SearchWfRun(provider.RequestContext(cmd), search)
 			if err != nil {
 				log.Fatal("Failed to search WfRuns:", err)
 			}
@@ -100,7 +100,7 @@ Returns a list of ObjectId's that can be passed into 'lhctl get wfRun'.
 	return searchWfRunByParentCmd
 }
 
-func newSearchWfRunCmd() *cobra.Command {
+func newSearchWfRunCmd(provider ClientProvider) *cobra.Command {
 	searchWfRunCmd := &cobra.Command{
 		Use:   "wfRun <wfSpecName> [<majorVersion>] [<revision>]",
 		Short: "Search for WfRuns by workflow specification",
@@ -169,7 +169,7 @@ Returns a list of ObjectId's that can be passed into 'lhctl get wfRun'.
 				WfSpecRevision:     revision,
 			}
 
-			resp, err := getGlobalClient(cmd).SearchWfRun(requestContext(cmd), search)
+			resp, err := provider.Client(cmd).SearchWfRun(provider.RequestContext(cmd), search)
 			if err != nil {
 				log.Fatal("Failed to search WfRuns:", err)
 			}
@@ -177,14 +177,14 @@ Returns a list of ObjectId's that can be passed into 'lhctl get wfRun'.
 			littlehorse.PrintResp(resp, err)
 		},
 	}
-	searchWfRunCmd.AddCommand(newSearchWfRunByParentCmd())
+	searchWfRunCmd.AddCommand(newSearchWfRunByParentCmd(provider))
 	searchWfRunCmd.Flags().String("status", "", "Status of WfRuns to search for")
 	searchWfRunCmd.Flags().Int("earliestMinutesAgo", -1, "Search only for wfRuns that started no more than this number of minutes ago")
 	searchWfRunCmd.Flags().Int("latestMinutesAgo", -1, "Search only for wfRuns that started at least this number of minutes ago")
 	return searchWfRunCmd
 }
 
-func newStopWfRunCmd() *cobra.Command {
+func newStopWfRunCmd(provider ClientProvider) *cobra.Command {
 	stopWfRunCmd := &cobra.Command{
 		Use:   "wfRun <id>",
 		Short: "Stop a Workflow Run.",
@@ -193,8 +193,8 @@ func newStopWfRunCmd() *cobra.Command {
 			wfRunId := args[0]
 			trn, _ := cmd.Flags().GetInt32("threadRunNumber")
 
-			littlehorse.PrintResp(getGlobalClient(cmd).StopWfRun(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).StopWfRun(
+				provider.RequestContext(cmd),
 				&lhproto.StopWfRunRequest{
 					WfRunId:         littlehorse.StrToWfRunId(wfRunId),
 					ThreadRunNumber: trn,
@@ -206,7 +206,7 @@ func newStopWfRunCmd() *cobra.Command {
 	return stopWfRunCmd
 }
 
-func newResumeWfRunCmd() *cobra.Command {
+func newResumeWfRunCmd(provider ClientProvider) *cobra.Command {
 	resumeWfRunCmd := &cobra.Command{
 		Use:   "wfRun <id>",
 		Short: "Stop a Workflow Run.",
@@ -215,8 +215,8 @@ func newResumeWfRunCmd() *cobra.Command {
 			wfRunId := args[0]
 			trn, _ := cmd.Flags().GetInt32("threadRunNumber")
 
-			littlehorse.PrintResp(getGlobalClient(cmd).ResumeWfRun(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).ResumeWfRun(
+				provider.RequestContext(cmd),
 				&lhproto.ResumeWfRunRequest{
 					WfRunId:         littlehorse.StrToWfRunId(wfRunId),
 					ThreadRunNumber: trn,
@@ -228,15 +228,15 @@ func newResumeWfRunCmd() *cobra.Command {
 	return resumeWfRunCmd
 }
 
-func newDeleteWfRunCmd() *cobra.Command {
+func newDeleteWfRunCmd(provider ClientProvider) *cobra.Command {
 	deleteWfRunCmd := &cobra.Command{
 		Use:   "wfRun <id>",
 		Short: "Delete a Workflow Run.",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			wfRunId := args[0]
-			littlehorse.PrintResp(getGlobalClient(cmd).DeleteWfRun(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).DeleteWfRun(
+				provider.RequestContext(cmd),
 				&lhproto.DeleteWfRunRequest{
 					Id: &lhproto.WfRunId{
 						Id: wfRunId,
@@ -248,15 +248,15 @@ func newDeleteWfRunCmd() *cobra.Command {
 	return deleteWfRunCmd
 }
 
-func newDeleteScheduledWfRun() *cobra.Command {
+func newDeleteScheduledWfRun(provider ClientProvider) *cobra.Command {
 	deleteScheduledWfRun := &cobra.Command{
 		Use:   "schedule <id>",
 		Short: "Delete a Scheduled Workflow Run.",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			wfRunId := args[0]
-			littlehorse.PrintResp(getGlobalClient(cmd).DeleteScheduledWfRun(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).DeleteScheduledWfRun(
+				provider.RequestContext(cmd),
 				&lhproto.DeleteScheduledWfRunRequest{
 					Id: &lhproto.ScheduledWfRunId{
 						Id: wfRunId,
@@ -268,7 +268,7 @@ func newDeleteScheduledWfRun() *cobra.Command {
 	return deleteScheduledWfRun
 }
 
-func newScheduleWfCmd() *cobra.Command {
+func newScheduleWfCmd(provider ClientProvider) *cobra.Command {
 	scheduleWfCmd := &cobra.Command{
 		Use:   "run <cronExpression> <wfSpecName> <<var1 name>> <<var1 val>>...",
 		Short: "Run an instance of a WfSpec with provided Name and Input Variables.",
@@ -323,16 +323,16 @@ odd total number of args. See 'lhctl run --help' for details.`)
 				var err error
 
 				if revision == nil {
-					wfSpec, err = getGlobalClient(cmd).GetLatestWfSpec(
-						requestContext(cmd),
+					wfSpec, err = provider.Client(cmd).GetLatestWfSpec(
+						provider.RequestContext(cmd),
 						&lhproto.GetLatestWfSpecRequest{
 							Name:         wfSpecName,
 							MajorVersion: majorVersion,
 						},
 					)
 				} else {
-					wfSpec, err = getGlobalClient(cmd).GetWfSpec(
-						requestContext(cmd),
+					wfSpec, err = provider.Client(cmd).GetWfSpec(
+						provider.RequestContext(cmd),
 						&lhproto.WfSpecId{
 							Name:         wfSpecName,
 							MajorVersion: *majorVersion,
@@ -375,7 +375,7 @@ odd total number of args. See 'lhctl run --help' for details.`)
 			}
 
 			// At this point, we've loaded everything up, time to fire away.
-			littlehorse.PrintResp(getGlobalClient(cmd).ScheduleWf(requestContext(cmd), scheduleWfReq))
+			littlehorse.PrintResp(provider.Client(cmd).ScheduleWf(provider.RequestContext(cmd), scheduleWfReq))
 		},
 	}
 	scheduleWfCmd.Flags().Int32("majorVersion", -1, "WfSpec Major Version to search for")
@@ -384,7 +384,7 @@ odd total number of args. See 'lhctl run --help' for details.`)
 	return scheduleWfCmd
 }
 
-func newSearchScheduledWfsCmd() *cobra.Command {
+func newSearchScheduledWfsCmd(provider ClientProvider) *cobra.Command {
 	searchScheduledWfsCmd := &cobra.Command{
 		Use:   "schedule <wfSpecName> [<majorVersion>] [<revision>]",
 		Short: "List all scheduled wf runs for a given wf spec",
@@ -417,8 +417,8 @@ func newSearchScheduledWfsCmd() *cobra.Command {
 				Revision:     revision,
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).SearchScheduledWfRun(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).SearchScheduledWfRun(
+				provider.RequestContext(cmd),
 				req,
 			))
 		},

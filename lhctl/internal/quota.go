@@ -17,7 +17,7 @@ func quotaIdFromTenantArg(cmd *cobra.Command, tenantId string) *lhproto.QuotaId 
 	return quotaId
 }
 
-func newPutQuotaCmd() *cobra.Command {
+func newPutQuotaCmd(provider ClientProvider) *cobra.Command {
 	putQuotaCmd := &cobra.Command{
 		Use:   "quota <tenantId>",
 		Short: "Create or update a Quota.",
@@ -31,7 +31,7 @@ func newPutQuotaCmd() *cobra.Command {
 				WriteRequestsPerSecond: writeRequestsPerSecond,
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).PutQuota(requestContext(cmd), putQuotaReq))
+			littlehorse.PrintResp(provider.Client(cmd).PutQuota(provider.RequestContext(cmd), putQuotaReq))
 		},
 	}
 	putQuotaCmd.Flags().String("principal", "", "Quota applies only to this principal within the tenant")
@@ -40,14 +40,14 @@ func newPutQuotaCmd() *cobra.Command {
 	return putQuotaCmd
 }
 
-func newGetQuotaCmd() *cobra.Command {
+func newGetQuotaCmd(provider ClientProvider) *cobra.Command {
 	getQuotaCmd := &cobra.Command{
 		Use:   "quota <tenantId>",
 		Short: "Get a Quota",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			littlehorse.PrintResp(getGlobalClient(cmd).GetQuota(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).GetQuota(
+				provider.RequestContext(cmd),
 				quotaIdFromTenantArg(cmd, args[0]),
 			))
 		},
@@ -56,7 +56,7 @@ func newGetQuotaCmd() *cobra.Command {
 	return getQuotaCmd
 }
 
-func newSearchQuotaCmd() *cobra.Command {
+func newSearchQuotaCmd(provider ClientProvider) *cobra.Command {
 	searchQuotaCmd := &cobra.Command{
 		Use:   "quota",
 		Short: "Search for Quotas",
@@ -79,7 +79,7 @@ func newSearchQuotaCmd() *cobra.Command {
 				search.Principal = &lhproto.PrincipalId{Id: principal}
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).SearchQuota(requestContext(cmd), search))
+			littlehorse.PrintResp(provider.Client(cmd).SearchQuota(provider.RequestContext(cmd), search))
 		},
 	}
 	searchQuotaCmd.Flags().String("tenantId", "", "List Quotas associated with this Tenant ID")
@@ -87,14 +87,14 @@ func newSearchQuotaCmd() *cobra.Command {
 	return searchQuotaCmd
 }
 
-func newDeleteQuotaCmd() *cobra.Command {
+func newDeleteQuotaCmd(provider ClientProvider) *cobra.Command {
 	deleteQuotaCmd := &cobra.Command{
 		Use:   "quota <tenantId>",
 		Short: "Delete a Quota.",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			littlehorse.PrintResp(getGlobalClient(cmd).DeleteQuota(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).DeleteQuota(
+				provider.RequestContext(cmd),
 				&lhproto.DeleteQuotaRequest{Id: quotaIdFromTenantArg(cmd, args[0])},
 			))
 		},

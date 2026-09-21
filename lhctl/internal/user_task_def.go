@@ -14,7 +14,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func newGetUserTaskDefCmd() *cobra.Command {
+func newGetUserTaskDefCmd(provider ClientProvider) *cobra.Command {
 	getUserTaskDefCmd := &cobra.Command{
 		Use:   "userTaskDef <name>",
 		Short: "Get a UserTaskDef by Name and optionally Version.",
@@ -46,8 +46,8 @@ func newGetUserTaskDefCmd() *cobra.Command {
 
 			if !hasVersion {
 				littlehorse.PrintResp(
-					getGlobalClient(cmd).GetLatestUserTaskDef(
-						requestContext(cmd),
+					provider.Client(cmd).GetLatestUserTaskDef(
+						provider.RequestContext(cmd),
 						&lhproto.GetLatestUserTaskDefRequest{
 							Name: name,
 						},
@@ -55,8 +55,8 @@ func newGetUserTaskDefCmd() *cobra.Command {
 				)
 			} else {
 				littlehorse.PrintResp(
-					getGlobalClient(cmd).GetUserTaskDef(
-						requestContext(cmd),
+					provider.Client(cmd).GetUserTaskDef(
+						provider.RequestContext(cmd),
 						&lhproto.UserTaskDefId{
 							Name:    name,
 							Version: version,
@@ -70,7 +70,7 @@ func newGetUserTaskDefCmd() *cobra.Command {
 	return getUserTaskDefCmd
 }
 
-func newDeployUserTaskDefCmd() *cobra.Command {
+func newDeployUserTaskDefCmd(provider ClientProvider) *cobra.Command {
 	deployUserTaskDefCmd := &cobra.Command{
 		Use:   "userTaskDef <filename>",
 		Short: "Deploy a userTaskDef from a JSON or Protobuf file.",
@@ -97,13 +97,13 @@ func newDeployUserTaskDefCmd() *cobra.Command {
 				log.Fatal("Failed reading deploy file: " + err.Error())
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).PutUserTaskDef(requestContext(cmd), pws))
+			littlehorse.PrintResp(provider.Client(cmd).PutUserTaskDef(provider.RequestContext(cmd), pws))
 		},
 	}
 	return deployUserTaskDefCmd
 }
 
-func newSearchUserTaskDefCmd() *cobra.Command {
+func newSearchUserTaskDefCmd(provider ClientProvider) *cobra.Command {
 	searchUserTaskDefCmd := &cobra.Command{
 		Use:   "userTaskDef",
 		Short: "Search for UserTaskDefs",
@@ -139,7 +139,7 @@ Returns a list of ObjectId's that can be passed into 'lhctl get userTaskDef'.
 			}
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).SearchUserTaskDef(requestContext(cmd), search),
+				provider.Client(cmd).SearchUserTaskDef(provider.RequestContext(cmd), search),
 			)
 		},
 	}
@@ -149,7 +149,7 @@ Returns a list of ObjectId's that can be passed into 'lhctl get userTaskDef'.
 	return searchUserTaskDefCmd
 }
 
-func newDeleteUserTaskDefCmd() *cobra.Command {
+func newDeleteUserTaskDefCmd(provider ClientProvider) *cobra.Command {
 	deleteUserTaskDefCmd := &cobra.Command{
 		Use:   "userTaskDef <name> <version>",
 		Short: "Delete a UserTaskDef.",
@@ -167,8 +167,8 @@ UserTaskDef to delete.
 			}
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).DeleteUserTaskDef(
-					requestContext(cmd),
+				provider.Client(cmd).DeleteUserTaskDef(
+					provider.RequestContext(cmd),
 					&lhproto.DeleteUserTaskDefRequest{
 						Id: &lhproto.UserTaskDefId{
 							Name:    name,

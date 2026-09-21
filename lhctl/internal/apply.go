@@ -5,11 +5,11 @@ import (
 )
 
 // newApplyCmd creates the apply command
-func newApplyCmd() *cobra.Command {
+func newApplyCmd(provider ClientProvider) *cobra.Command {
 	applyCmd := &cobra.Command{
 		Use:   "apply",
 		Short: "Apply a resource to a running object.",
 	}
-	applyCmd.AddCommand(newApplyWorkflowMigrationPlanCmd())
+	applyCmd.AddCommand(newApplyWorkflowMigrationPlanCmd(provider))
 	return applyCmd
 }

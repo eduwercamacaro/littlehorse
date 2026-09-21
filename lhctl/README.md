@@ -38,14 +38,18 @@ To ensure consistency across our CLI commands, we adhere to the following standa
 
 ### Command construction
 
-Define commands with constructors such as `newPutTenantCmd()`, rather than package-level
-command variables or `init()` registration. Each constructor creates its command and flags;
-parent constructors attach children with `AddCommand(newPutTenantCmd())`.
+Define commands with constructor functions such as `newPutTenantCmd(provider)`, rather than
+package-level command variables or `init()` registration. Each constructor creates its
+command and flags; parent constructors attach children with `AddCommand(newPutTenantCmd(provider))`.
+RPC commands accept a `ClientProvider` for client and request context access. Login accepts
+a `ConfigProvider` for configuration and context access. The root creates one implementation
+that lazily caches the client and configuration and passes it through the constructors.
 `main()` calls `NewRootCommand(version, commit, date)` to build the complete tree.
 
-Tests can call `NewRootCommand` to get independent commands and flag state, then use
-`SetArgs`, `SetIn`, `SetOut`, and `SetErr` before `Execute`. Client/configuration caches
-and handlers that use process I/O or exit directly are not yet isolated.
+Tests can call `NewRootCommand` with `WithClient(fakeClient)` and `WithConfig(config)`
+to supply dependencies without changing globals. Each root has its own command, flag,
+client, and configuration caches. Use `SetArgs`, `SetIn`, `SetOut`, and `SetErr` before
+`Execute`. Handlers that use process I/O or exit directly are not yet isolated.
 
 Run the CLI tests from the `lhctl` directory with `go test ./...`.
 
@@ -55,7 +59,7 @@ Run the CLI tests from the `lhctl` directory with `go test ./...`.
 
 Example:
 ```go
-func newPutTenantCmd() *cobra.Command {
+func newPutTenantCmd(provider ClientProvider) *cobra.Command {
     return &cobra.Command{
         Use:   "tenant <id>",
         Short: "Create or update a Tenant.",

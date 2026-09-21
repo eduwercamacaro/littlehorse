@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newCountCmd() *cobra.Command {
+func newCountCmd(provider ClientProvider) *cobra.Command {
 	countCmd := &cobra.Command{
 		Use:   "count",
 		Short: "Count API Resources based on criteria.",
@@ -16,8 +16,8 @@ For information about how to count a specific resource, consult:
 `,
 	}
 	countCmd.AddCommand(
-		newCountNodeRunCmd(),
-		newCountTaskRunCmd(),
+		newCountNodeRunCmd(provider),
+		newCountTaskRunCmd(provider),
 	)
 	return countCmd
 }

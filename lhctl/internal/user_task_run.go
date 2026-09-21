@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newExecuteUserTaskRunCmd() *cobra.Command {
+func newExecuteUserTaskRunCmd(provider ClientProvider) *cobra.Command {
 	executeUserTaskRunCmd := &cobra.Command{
 		Use:   "userTaskRun <wfRunId> <userTaskGuid>",
 		Short: "Execute a UserTaskRun at the CLI",
@@ -24,14 +24,14 @@ for your userId and then prompts you to fill out each required field of the
 UserTaskRun. At the end, the UserTaskRun is submitted`,
 		Args: cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			client := getGlobalClient(cmd)
-			executeUserTask(cmd, args[0], args[1], &client)
+			client := provider.Client(cmd)
+			executeUserTask(provider, cmd, args[0], args[1], &client)
 		},
 	}
 	return executeUserTaskRunCmd
 }
 
-func newCancelUserTaskRunCmd() *cobra.Command {
+func newCancelUserTaskRunCmd(provider ClientProvider) *cobra.Command {
 	cancelUserTaskRunCmd := &cobra.Command{
 		Use:   "userTaskRun <wfRunId> <userTaskGuid>",
 		Short: "Cancel a UserTaskRun",
@@ -39,14 +39,14 @@ func newCancelUserTaskRunCmd() *cobra.Command {
 	cancel the specified UserTaskRun. Cancelling a UserTaskRun will halt the entire WfRun execution.`,
 		Args: cobra.ExactArgs(2),
 		Run: func(cmd *cobra.Command, args []string) {
-			client := getGlobalClient(cmd)
-			cancelUserTask(cmd, args[0], args[1], &client)
+			client := provider.Client(cmd)
+			cancelUserTask(provider, cmd, args[0], args[1], &client)
 		},
 	}
 	return cancelUserTaskRunCmd
 }
 
-func newListUserTaskRunCmd() *cobra.Command {
+func newListUserTaskRunCmd(provider ClientProvider) *cobra.Command {
 	listUserTaskRunCmd := &cobra.Command{
 		Use:   "userTaskRun <wfRunId>",
 		Short: "List all UserTaskRun's for a given WfRun Id.",
@@ -65,8 +65,8 @@ Lists all UserTaskRun's for a given WfRun Id.
 				Limit:    &limit,
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).ListUserTaskRuns(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).ListUserTaskRuns(
+				provider.RequestContext(cmd),
 				req,
 			))
 		},
@@ -74,7 +74,7 @@ Lists all UserTaskRun's for a given WfRun Id.
 	return listUserTaskRunCmd
 }
 
-func newAssignUserTaskRunCmd() *cobra.Command {
+func newAssignUserTaskRunCmd(provider ClientProvider) *cobra.Command {
 	assignUserTaskRunCmd := &cobra.Command{
 		Use:   "userTaskRun <wfRunId> <userTaskGuid>",
 		Short: "Reassign a UserTaskRun to a userGroup or specific userId",
@@ -114,8 +114,8 @@ The following option groups are supported:
 				log.Fatal("Must specify either --userId or --userGroup")
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).AssignUserTaskRun(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).AssignUserTaskRun(
+				provider.RequestContext(cmd),
 				reassign,
 			))
 		},
@@ -127,7 +127,7 @@ The following option groups are supported:
 }
 
 // newGetUserTaskRunCmd creates the nodeRun command
-func newGetUserTaskRunCmd() *cobra.Command {
+func newGetUserTaskRunCmd(provider ClientProvider) *cobra.Command {
 	getUserTaskRunCmd := &cobra.Command{
 		Use:   "userTaskRun <wfRunId> <userTaskGuid>",
 		Short: "Get a UserTaskRun by WfRun, ThreadRun, and UserTask Run Position",
@@ -157,8 +157,8 @@ func newGetUserTaskRunCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			wfRunId, userTaskGuid := args[0], args[1]
 
-			littlehorse.PrintResp(getGlobalClient(cmd).GetUserTaskRun(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).GetUserTaskRun(
+				provider.RequestContext(cmd),
 				&lhproto.UserTaskRunId{
 					WfRunId:      littlehorse.StrToWfRunId(wfRunId),
 					UserTaskGuid: userTaskGuid,
@@ -169,7 +169,7 @@ func newGetUserTaskRunCmd() *cobra.Command {
 	return getUserTaskRunCmd
 }
 
-func newSaveUserTaskRunProgressCmd() *cobra.Command {
+func newSaveUserTaskRunProgressCmd(provider ClientProvider) *cobra.Command {
 	saveUserTaskRunProgressCmd := &cobra.Command{
 		Use:   "userTaskRun",
 		Short: "Save progress on UserTaskRuns",
@@ -191,15 +191,15 @@ to save current progress on a UserTask before executing the it.
 			}
 
 			// First, get the UserTaskRun.
-			client := getGlobalClient(cmd)
-			userTaskRun, _ := getUserTaskRun(cmd, wfRunId, userTaskGuid, &client)
+			client := provider.Client(cmd)
+			userTaskRun, _ := getUserTaskRun(provider, cmd, wfRunId, userTaskGuid, &client)
 
 			if userTaskRun.Notes != nil {
 				fmt.Println("\nNotes: " + *userTaskRun.Notes + "\n")
 			}
 
 			// Next, get the UserTaskDef.
-			userTaskDef, err := getUserTaskDef(cmd, userTaskRun, &client)
+			userTaskDef, err := getUserTaskDef(provider, cmd, userTaskRun, &client)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -243,7 +243,7 @@ to save current progress on a UserTask before executing the it.
 			fmt.Println("completing userTaskRun!")
 			// Post the result
 			littlehorse.PrintResp(
-				(client).SaveUserTaskRunProgress(requestContext(cmd), saveUserTaskRunProgress),
+				(client).SaveUserTaskRunProgress(provider.RequestContext(cmd), saveUserTaskRunProgress),
 			)
 		},
 	}
@@ -254,7 +254,7 @@ to save current progress on a UserTask before executing the it.
 	return saveUserTaskRunProgressCmd
 }
 
-func newPutUserTaskRunCommentCmd() *cobra.Command {
+func newPutUserTaskRunCommentCmd(provider ClientProvider) *cobra.Command {
 	PutUserTaskRunCommentCmd := &cobra.Command{
 		Use:   "userTaskRunComment <wfRunId> <userTaskGuid> ",
 		Short: "Add a comment to a UserTaskRun",
@@ -292,13 +292,13 @@ This command allows you to attach feedback or notes to a specific UserTaskRun fo
 				Comment: comment.GetStr(),
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).PutUserTaskRunComment(requestContext(cmd), userTaskRunComment))
+			littlehorse.PrintResp(provider.Client(cmd).PutUserTaskRunComment(provider.RequestContext(cmd), userTaskRunComment))
 		},
 	}
 	return PutUserTaskRunCommentCmd
 }
 
-func newDeleteUserTaskRunCommentCmd() *cobra.Command {
+func newDeleteUserTaskRunCommentCmd(provider ClientProvider) *cobra.Command {
 	DeleteUserTaskRunCommentCmd := &cobra.Command{
 		Use:   "userTaskRunComment <wfRunId> <userTaskGuid> <commentId> <userId>",
 		Short: "Delete a comment from a userTaskRun",
@@ -324,13 +324,13 @@ This command allows you to remove a previously added comment from a UserTaskRun.
 				UserId:        args[3],
 				UserCommentId: int32(commentId),
 			}
-			littlehorse.PrintResp(getGlobalClient(cmd).DeleteUserTaskRunComment(requestContext(cmd), deleteUserTaskRunComment))
+			littlehorse.PrintResp(provider.Client(cmd).DeleteUserTaskRunComment(provider.RequestContext(cmd), deleteUserTaskRunComment))
 		},
 	}
 	return DeleteUserTaskRunCommentCmd
 }
 
-func newEditUserTaskRunCommentCmd() *cobra.Command {
+func newEditUserTaskRunCommentCmd(provider ClientProvider) *cobra.Command {
 	editUserTaskRunCommentCmd := &cobra.Command{
 		Use:   "userTaskRunComment <wfRunId> <userTaskGuid> <commentId> ",
 		Short: "Edit a comment on a UserTaskRun",
@@ -373,13 +373,13 @@ This command allows you to update the content of a previously added comment on a
 				UserCommentId: int32(commentId),
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).EditUserTaskRunComment(requestContext(cmd), userTaskRunComment))
+			littlehorse.PrintResp(provider.Client(cmd).EditUserTaskRunComment(provider.RequestContext(cmd), userTaskRunComment))
 		},
 	}
 	return editUserTaskRunCommentCmd
 }
 
-func newSearchUserTaskRunCmd() *cobra.Command {
+func newSearchUserTaskRunCmd(provider ClientProvider) *cobra.Command {
 	searchUserTaskRunCmd := &cobra.Command{
 		Use:   "userTaskRun",
 		Short: "Search for UserTaskRun's either by WfRunId or by {takDefId,Status}",
@@ -444,7 +444,7 @@ Choose one of the following option groups:
 			search.Bookmark = bookmark
 			search.Limit = &limit
 
-			littlehorse.PrintResp(getGlobalClient(cmd).SearchUserTaskRun(requestContext(cmd), search))
+			littlehorse.PrintResp(provider.Client(cmd).SearchUserTaskRun(provider.RequestContext(cmd), search))
 
 		},
 	}
@@ -457,7 +457,7 @@ Choose one of the following option groups:
 	return searchUserTaskRunCmd
 }
 
-func executeUserTask(cmd *cobra.Command, wfRunId string, userTaskGuid string, client *lhproto.LittleHorseClient) {
+func executeUserTask(provider ClientProvider, cmd *cobra.Command, wfRunId string, userTaskGuid string, client *lhproto.LittleHorseClient) {
 	fmt.Println("Executing UserTaskRun ", wfRunId, " ", userTaskGuid)
 
 	completeUserTask := &lhproto.CompleteUserTaskRunRequest{
@@ -469,7 +469,7 @@ func executeUserTask(cmd *cobra.Command, wfRunId string, userTaskGuid string, cl
 	}
 
 	// First, get the UserTaskRun.
-	userTaskRun, err := getUserTaskRun(cmd, wfRunId, userTaskGuid, client)
+	userTaskRun, err := getUserTaskRun(provider, cmd, wfRunId, userTaskGuid, client)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -479,7 +479,7 @@ func executeUserTask(cmd *cobra.Command, wfRunId string, userTaskGuid string, cl
 	}
 
 	// Next, get the UserTaskDef.
-	userTaskDef, err := getUserTaskDef(cmd, userTaskRun, client)
+	userTaskDef, err := getUserTaskDef(provider, cmd, userTaskRun, client)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -510,18 +510,18 @@ func executeUserTask(cmd *cobra.Command, wfRunId string, userTaskGuid string, cl
 	fmt.Println("Saving userTaskRun progress!")
 	// Post the result
 	littlehorse.PrintResp(
-		(*client).CompleteUserTaskRun(requestContext(cmd), completeUserTask),
+		(*client).CompleteUserTaskRun(provider.RequestContext(cmd), completeUserTask),
 	)
 }
 
-func cancelUserTask(cmd *cobra.Command, wfRunId string, userTaskGuid string, client *lhproto.LittleHorseClient) {
+func cancelUserTask(provider ClientProvider, cmd *cobra.Command, wfRunId string, userTaskGuid string, client *lhproto.LittleHorseClient) {
 	cancelUserTask := &lhproto.CancelUserTaskRunRequest{
 		UserTaskRunId: &lhproto.UserTaskRunId{
 			WfRunId:      littlehorse.StrToWfRunId(wfRunId),
 			UserTaskGuid: userTaskGuid,
 		},
 	}
-	(*client).CancelUserTaskRun(requestContext(cmd), cancelUserTask)
+	(*client).CancelUserTaskRun(provider.RequestContext(cmd), cancelUserTask)
 }
 
 func promptFor(prompt string, varType lhproto.VariableType) (*lhproto.VariableValue, error) {
@@ -535,16 +535,16 @@ func promptFor(prompt string, varType lhproto.VariableType) (*lhproto.VariableVa
 	return littlehorse.StrToVarVal(strings.TrimSpace(userInput), varType)
 }
 
-func getUserTaskDef(
+func getUserTaskDef(provider ClientProvider,
 	cmd *cobra.Command, userTaskRun *lhproto.UserTaskRun, client *lhproto.LittleHorseClient,
 ) (*lhproto.UserTaskDef, error) {
-	return (*client).GetUserTaskDef(requestContext(cmd), userTaskRun.UserTaskDefId)
+	return (*client).GetUserTaskDef(provider.RequestContext(cmd), userTaskRun.UserTaskDefId)
 }
 
-func getUserTaskRun(
+func getUserTaskRun(provider ClientProvider,
 	cmd *cobra.Command, wfRunId, userTaskGuid string, client *lhproto.LittleHorseClient,
 ) (*lhproto.UserTaskRun, error) {
-	resp, err := (*client).GetUserTaskRun(requestContext(cmd), &lhproto.UserTaskRunId{
+	resp, err := (*client).GetUserTaskRun(provider.RequestContext(cmd), &lhproto.UserTaskRunId{
 		WfRunId:      littlehorse.StrToWfRunId(wfRunId),
 		UserTaskGuid: userTaskGuid,
 	})

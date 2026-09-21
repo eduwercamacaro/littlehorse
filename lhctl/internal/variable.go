@@ -16,7 +16,7 @@ import (
 )
 
 // newGetVariableCmd creates the variable command
-func newGetVariableCmd() *cobra.Command {
+func newGetVariableCmd(provider ClientProvider) *cobra.Command {
 	getVariableCmd := &cobra.Command{
 		Use:   "variable <wfRunId> <threadRunNumber> <varName>",
 		Short: "Get a VariableValue by identifiers.",
@@ -56,8 +56,8 @@ func newGetVariableCmd() *cobra.Command {
 			}
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).GetVariable(
-					requestContext(cmd),
+				provider.Client(cmd).GetVariable(
+					provider.RequestContext(cmd),
 					&lhproto.VariableId{
 						WfRunId:         littlehorse.StrToWfRunId(args[0]),
 						ThreadRunNumber: int32(threadRunNumber),
@@ -70,7 +70,7 @@ func newGetVariableCmd() *cobra.Command {
 	return getVariableCmd
 }
 
-func newSearchVariableCmd() *cobra.Command {
+func newSearchVariableCmd(provider ClientProvider) *cobra.Command {
 	searchVariableCmd := &cobra.Command{
 		Use:   "variable",
 		Short: "Search for Variables by their value",
@@ -136,7 +136,7 @@ Choose one of the following option groups:
 			search.Limit = &limit
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).SearchVariable(requestContext(cmd), &search),
+				provider.Client(cmd).SearchVariable(provider.RequestContext(cmd), &search),
 			)
 		},
 	}
@@ -153,7 +153,7 @@ Choose one of the following option groups:
 	return searchVariableCmd
 }
 
-func newListVariableCmd() *cobra.Command {
+func newListVariableCmd(provider ClientProvider) *cobra.Command {
 	listVariableCmd := &cobra.Command{
 		Use:   "variable <wfRunId>",
 		Short: "List all Variable's for a given WfRun Id.",
@@ -176,8 +176,8 @@ Lists all Variable's for a given WfRun Id.
 				Limit:    &limit,
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).ListVariables(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).ListVariables(
+				provider.RequestContext(cmd),
 				req,
 			))
 		},

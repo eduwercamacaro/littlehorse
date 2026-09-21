@@ -5,19 +5,19 @@ import (
 )
 
 // newPutCmd creates the run command
-func newPutCmd() *cobra.Command {
+func newPutCmd(provider ClientProvider) *cobra.Command {
 	putCmd := &cobra.Command{
 		Use:   "put",
 		Short: "Create or update an object",
 	}
 	putCmd.AddCommand(
-		newPutCorrelatedEventCmd(),
-		newPutPrincipalCmd(),
-		newPutQuotaCmd(),
-		newPutTenantCmd(),
-		newPutUserTaskRunCommentCmd(),
-		newPutWorkflowEventDefCmd(),
-		newPutWorkflowMigrationPlanCmd(),
+		newPutCorrelatedEventCmd(provider),
+		newPutPrincipalCmd(provider),
+		newPutQuotaCmd(provider),
+		newPutTenantCmd(provider),
+		newPutUserTaskRunCommentCmd(provider),
+		newPutWorkflowEventDefCmd(provider),
+		newPutWorkflowMigrationPlanCmd(provider),
 	)
 	return putCmd
 }

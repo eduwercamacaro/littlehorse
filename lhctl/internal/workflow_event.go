@@ -11,7 +11,7 @@ import (
 )
 
 // newGetWorkflowEventCmd creates the workflowEvent command
-func newGetWorkflowEventCmd() *cobra.Command {
+func newGetWorkflowEventCmd(provider ClientProvider) *cobra.Command {
 	getWorkflowEventCmd := &cobra.Command{
 		Use:   "workflowEvent <wfRunId> <workflowEventDefName> <number>",
 		Short: "Get an WorkflowEvent by identifiers.",
@@ -32,9 +32,9 @@ func newGetWorkflowEventCmd() *cobra.Command {
 				log.Fatalf("Error converting string '%s' to integer:", args[2])
 				return
 			}
-			ctx := requestContext(cmd)
+			ctx := provider.RequestContext(cmd)
 
-			littlehorse.PrintResp(getGlobalClient(cmd).GetWorkflowEvent(
+			littlehorse.PrintResp(provider.Client(cmd).GetWorkflowEvent(
 				ctx,
 				&lhproto.WorkflowEventId{
 					WfRunId:            littlehorse.StrToWfRunId(wfRunId),
@@ -47,7 +47,7 @@ func newGetWorkflowEventCmd() *cobra.Command {
 	return getWorkflowEventCmd
 }
 
-func newSearchWorkflowEventCmd() *cobra.Command {
+func newSearchWorkflowEventCmd(provider ClientProvider) *cobra.Command {
 	searchWorkflowEventCmd := &cobra.Command{
 		Use:   "workflowEvent <workflowEventDefName>",
 		Short: "Search for WorkflowEvent's by WorkflowEventDef Name",
@@ -80,7 +80,7 @@ Returns a list of ObjectId's that can be passed into 'lhctl get workflowEvent'.
 				},
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).SearchWorkflowEvent(requestContext(cmd), search))
+			littlehorse.PrintResp(provider.Client(cmd).SearchWorkflowEvent(provider.RequestContext(cmd), search))
 		},
 	}
 	searchWorkflowEventCmd.Flags().Int("earliestMinutesAgo", -1, "Search only for Principals that were created no more than this number of minutes ago")
@@ -88,7 +88,7 @@ Returns a list of ObjectId's that can be passed into 'lhctl get workflowEvent'.
 	return searchWorkflowEventCmd
 }
 
-func newListWorkflowEventCmd() *cobra.Command {
+func newListWorkflowEventCmd(provider ClientProvider) *cobra.Command {
 	listWorkflowEventCmd := &cobra.Command{
 		Use:   "workflowEvent <wfRunId>",
 		Short: "List all WorkflowEvent's for a given WfRun Id.",
@@ -107,8 +107,8 @@ Lists all WorkflowEvent's for a given WfRun Id.
 				Limit:    &limit,
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).ListWorkflowEvents(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).ListWorkflowEvents(
+				provider.RequestContext(cmd),
 				req,
 			))
 		},

@@ -5,11 +5,11 @@ import (
 )
 
 // newAssignCmd creates the run command
-func newAssignCmd() *cobra.Command {
+func newAssignCmd(provider ClientProvider) *cobra.Command {
 	assignCmd := &cobra.Command{
 		Use:   "assign",
 		Short: "Assign something. Generally a UserTaskRun.",
 	}
-	assignCmd.AddCommand(newAssignUserTaskRunCmd())
+	assignCmd.AddCommand(newAssignUserTaskRunCmd(provider))
 	return assignCmd
 }

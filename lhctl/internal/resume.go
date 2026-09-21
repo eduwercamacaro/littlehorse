@@ -8,7 +8,7 @@ import (
 )
 
 // newResumeCmd creates the resume command
-func newResumeCmd() *cobra.Command {
+func newResumeCmd(provider ClientProvider) *cobra.Command {
 	resumeCmd := &cobra.Command{
 		Use:   "resume",
 		Short: "Resume a resource.",
@@ -16,6 +16,6 @@ func newResumeCmd() *cobra.Command {
 - wfRun
 `,
 	}
-	resumeCmd.AddCommand(newResumeWfRunCmd())
+	resumeCmd.AddCommand(newResumeWfRunCmd(provider))
 	return resumeCmd
 }

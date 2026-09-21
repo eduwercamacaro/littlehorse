@@ -6,15 +6,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newGetTaskWorkerGroup() *cobra.Command {
+func newGetTaskWorkerGroup(provider ClientProvider) *cobra.Command {
 	getTaskWorkerGroup := &cobra.Command{
 		Use:   "taskWorkerGroup <taskDefName>",
 		Short: "",
 		Long:  `Gets the registered task worker group associated with a specific TaskDef`,
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			littlehorse.PrintResp(getGlobalClient(cmd).GetTaskWorkerGroup(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).GetTaskWorkerGroup(
+				provider.RequestContext(cmd),
 				&lhproto.TaskDefId{
 					Name: args[0],
 				},

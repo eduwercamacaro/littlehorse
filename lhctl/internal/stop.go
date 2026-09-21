@@ -8,7 +8,7 @@ import (
 )
 
 // newStopCmd creates the stop command
-func newStopCmd() *cobra.Command {
+func newStopCmd(provider ClientProvider) *cobra.Command {
 	stopCmd := &cobra.Command{
 		Use:   "stop",
 		Short: "Stop a resource.",
@@ -16,6 +16,6 @@ func newStopCmd() *cobra.Command {
 - wfRun
 `,
 	}
-	stopCmd.AddCommand(newStopWfRunCmd())
+	stopCmd.AddCommand(newStopWfRunCmd(provider))
 	return stopCmd
 }

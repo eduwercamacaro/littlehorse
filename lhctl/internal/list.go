@@ -8,7 +8,7 @@ import (
 )
 
 // newListCmd creates the list command
-func newListCmd() *cobra.Command {
+func newListCmd(provider ClientProvider) *cobra.Command {
 	listCmd := &cobra.Command{
 		Use:   "list",
 		Short: "List objects according to some prefix",
@@ -17,18 +17,18 @@ func newListCmd() *cobra.Command {
 	Whereas 'lhctl search' returns the ID's of objects that satisfy a given
 	search, 'lhctl list' returns the actual objects.`,
 	}
-	listCmd.AddCommand(newListExternalEventCmd())
+	listCmd.AddCommand(newListExternalEventCmd(provider))
 	listCmd.PersistentFlags().Int32("limit", 100, "Guideline for number of response items to fetch per request.")
 	listCmd.PersistentFlags().BytesBase64("bookmark", nil, "Optional bookmark for paginated scans.")
 	listCmd.AddCommand(
-		newListWfMetricsCmd(),
-		newListNodeRunCmd(),
-		newListQuotaMetricsCmd(),
-		newListTaskMetricsCmd(),
-		newListTaskRunCmd(),
-		newListUserTaskRunCmd(),
-		newListVariableCmd(),
-		newListWorkflowEventCmd(),
+		newListWfMetricsCmd(provider),
+		newListNodeRunCmd(provider),
+		newListQuotaMetricsCmd(provider),
+		newListTaskMetricsCmd(provider),
+		newListTaskRunCmd(provider),
+		newListUserTaskRunCmd(provider),
+		newListVariableCmd(provider),
+		newListWorkflowEventCmd(provider),
 	)
 	return listCmd
 }

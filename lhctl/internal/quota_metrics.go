@@ -9,7 +9,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func newListQuotaMetricsCmd() *cobra.Command {
+func newListQuotaMetricsCmd(provider ClientProvider) *cobra.Command {
 	listQuotaMetricsCmd := &cobra.Command{
 		Use:   "quotaMetrics <tenantId>",
 		Short: "List quota usage metrics for a Tenant",
@@ -48,8 +48,8 @@ Examples:
 				WindowEnd:   windowEnd,
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).ListQuotaUsageMetrics(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).ListQuotaUsageMetrics(
+				provider.RequestContext(cmd),
 				req,
 			))
 		},

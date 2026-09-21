@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func newGetMetricWindowCmd() *cobra.Command {
+func newGetMetricWindowCmd(provider ClientProvider) *cobra.Command {
 	getMetricWindowCmd := &cobra.Command{
 		Use:   "wfMetricWindow <wfSpecName> <majorVersion> <revision> <windowStartMs>",
 		Short: "Get a MetricWindow by its ID.",
@@ -52,14 +52,14 @@ Arguments:
 			}
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).GetMetricWindow(requestContext(cmd), req),
+				provider.Client(cmd).GetMetricWindow(provider.RequestContext(cmd), req),
 			)
 		},
 	}
 	return getMetricWindowCmd
 }
 
-func newSearchWfMetricWindowCmd() *cobra.Command {
+func newSearchWfMetricWindowCmd(provider ClientProvider) *cobra.Command {
 	searchWfMetricWindowCmd := &cobra.Command{
 		Use:   "wfMetricWindow <wfSpecName>",
 		Short: "Search for workflow metric windows by WfSpec name.",
@@ -94,7 +94,7 @@ Returns a list of MetricWindowId's.
 				req.EarliestStart, req.LatestStart = loadEarliestAndLatestStart(cmd)
 			}
 
-			resp, err := getGlobalClient(cmd).SearchWfMetricWindow(requestContext(cmd), req)
+			resp, err := provider.Client(cmd).SearchWfMetricWindow(provider.RequestContext(cmd), req)
 			if err != nil {
 				log.Fatal("Failed to search WfMetric windows: ", err)
 			}

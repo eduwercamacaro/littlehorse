@@ -11,14 +11,14 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func newGetBulkJobCmd() *cobra.Command {
+func newGetBulkJobCmd(provider ClientProvider) *cobra.Command {
 	getBulkJobCmd := &cobra.Command{
 		Use:   "bulkJob <id>",
 		Short: "Get the status of a BulkJob.",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			littlehorse.PrintResp(getGlobalClient(cmd).GetBulkJob(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).GetBulkJob(
+				provider.RequestContext(cmd),
 				&lhproto.GetBulkJobRequest{
 					Id: &lhproto.BulkJobId{
 						Id: args[0],
@@ -30,7 +30,7 @@ func newGetBulkJobCmd() *cobra.Command {
 	return getBulkJobCmd
 }
 
-func newSearchBulkJobCmd() *cobra.Command {
+func newSearchBulkJobCmd(provider ClientProvider) *cobra.Command {
 	searchBulkJobCmd := &cobra.Command{
 		Use:   "bulkJob",
 		Short: "Search for BulkJob's, optionally filtering by status.",
@@ -60,21 +60,21 @@ Optional flags:
 				search.Status = &status
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).SearchBulkJob(requestContext(cmd), search))
+			littlehorse.PrintResp(provider.Client(cmd).SearchBulkJob(provider.RequestContext(cmd), search))
 		},
 	}
 	searchBulkJobCmd.Flags().String("status", "", "Only return BulkJob's with this status (BULK_JOB_RUNNING, BULK_JOB_COMPLETED, BULK_JOB_FAILED)")
 	return searchBulkJobCmd
 }
 
-func newDeleteBulkJobCmd() *cobra.Command {
+func newDeleteBulkJobCmd(provider ClientProvider) *cobra.Command {
 	deleteBulkJobCmd := &cobra.Command{
 		Use:   "bulkJob <id>",
 		Short: "Delete a BulkJob that has finished (COMPLETED or FAILED).",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			littlehorse.PrintResp(getGlobalClient(cmd).DeleteBulkJob(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).DeleteBulkJob(
+				provider.RequestContext(cmd),
 				&lhproto.DeleteBulkJobRequest{
 					Id: &lhproto.BulkJobId{
 						Id: args[0],
@@ -86,7 +86,7 @@ func newDeleteBulkJobCmd() *cobra.Command {
 	return deleteBulkJobCmd
 }
 
-func newBulkDeleteWfRunCmd() *cobra.Command {
+func newBulkDeleteWfRunCmd(provider ClientProvider) *cobra.Command {
 	bulkDeleteWfRunCmd := &cobra.Command{
 		Use:   "wfRunBulk <wfSpecName>",
 		Short: "Bulk delete WfRun's matching criteria (creates a BulkJob).",
@@ -149,7 +149,7 @@ Optional flags:
 				req.Id = &idStr
 			}
 
-			resp, err := getGlobalClient(cmd).CreateBulkJob(requestContext(cmd), req)
+			resp, err := provider.Client(cmd).CreateBulkJob(provider.RequestContext(cmd), req)
 			if err != nil {
 				log.Fatalf("Failed to create BulkJob: %v", err)
 			}

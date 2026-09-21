@@ -10,7 +10,7 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-func newVersionCmd() *cobra.Command {
+func newVersionCmd(provider ClientProvider) *cobra.Command {
 	versionCmd := &cobra.Command{
 		Use:   "version",
 		Short: "Print Client and Server Version Information.",
@@ -18,7 +18,7 @@ func newVersionCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			fmt.Println("lhctl version: " + cmd.Root().Version)
 
-			resp, err := getGlobalClient(cmd).GetServerVersion(requestContext(cmd), &emptypb.Empty{})
+			resp, err := provider.Client(cmd).GetServerVersion(provider.RequestContext(cmd), &emptypb.Empty{})
 			if err != nil {
 				if grpcStatus, ok := status.FromError(err); ok && grpcStatus.Code() == codes.Unimplemented {
 					fmt.Println("Server is outdated")

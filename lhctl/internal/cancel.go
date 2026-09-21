@@ -5,11 +5,11 @@ import (
 )
 
 // newCancelUserTaskCmd creates the run command
-func newCancelUserTaskCmd() *cobra.Command {
+func newCancelUserTaskCmd(provider ClientProvider) *cobra.Command {
 	cancelUserTaskCmd := &cobra.Command{
 		Use:   "cancel",
 		Short: "Cancel a LH object. Generally a UserTaskRun.",
 	}
-	cancelUserTaskCmd.AddCommand(newCancelUserTaskRunCmd())
+	cancelUserTaskCmd.AddCommand(newCancelUserTaskRunCmd(provider))
 	return cancelUserTaskCmd
 }

@@ -19,18 +19,26 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func newLoginCmd() *cobra.Command {
+// ConfigProvider supplies configuration and context without requiring an RPC client.
+type ConfigProvider interface {
+	Config(cmd *cobra.Command) littlehorse.LHConfig
+	RequestContext(cmd *cobra.Command) context.Context
+}
+
+func newLoginCmd(provider ConfigProvider) *cobra.Command {
 	loginCmd := &cobra.Command{
 		Use:   "login",
 		Short: "OAuth2 login.",
-		Run:   run,
+		Run: func(cmd *cobra.Command, args []string) {
+			runLogin(provider, cmd, args)
+		},
 	}
 	return loginCmd
 }
 
-func run(cmd *cobra.Command, args []string) {
+func runLogin(provider ConfigProvider, cmd *cobra.Command, args []string) {
 
-	lhConfig := getGlobalConfig(cmd)
+	lhConfig := provider.Config(cmd)
 
 	if !lhConfig.OauthConfig.IsEnabled() {
 		Fatal("OAuth configs not found")
@@ -43,7 +51,7 @@ func run(cmd *cobra.Command, args []string) {
 	fmt.Println("Starting OAuth2 PKCE authorization flow")
 
 	// https://github.com/coreos/go-oidc/blob/v3/example/idtoken/app.go
-	ctx := requestContext(cmd)
+	ctx := provider.RequestContext(cmd)
 
 	oauthProvider, err := oidc.NewProvider(ctx, lhConfig.OauthConfig.AuthServer)
 	if err != nil {

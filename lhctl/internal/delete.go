@@ -8,7 +8,7 @@ import (
 )
 
 // newDeleteCmd creates the delete command
-func newDeleteCmd() *cobra.Command {
+func newDeleteCmd(provider ClientProvider) *cobra.Command {
 	deleteCmd := &cobra.Command{
 		Use:   "delete",
 		Short: "Delete a resource.",
@@ -17,21 +17,21 @@ func newDeleteCmd() *cobra.Command {
 `,
 	}
 	deleteCmd.AddCommand(
-		newBulkDeleteWfRunCmd(),
-		newDeleteBulkJobCmd(),
-		newDeleteCorrelatedEventCmd(),
-		newDeleteExternalEventDefCmd(),
-		newDeletePrincipalCmd(),
-		newDeleteQuotaCmd(),
-		newDeleteStructDefCmd(),
-		newDeleteTaskDefCmd(),
-		newDeleteUserTaskDefCmd(),
-		newDeleteUserTaskRunCommentCmd(),
-		newDeleteWfRunCmd(),
-		newDeleteScheduledWfRun(),
-		newDeleteWfSpecCmd(),
-		newDeleteWorkflowEventDefCmd(),
-		newDeleteWorkflowMigrationPlanCmd(),
+		newBulkDeleteWfRunCmd(provider),
+		newDeleteBulkJobCmd(provider),
+		newDeleteCorrelatedEventCmd(provider),
+		newDeleteExternalEventDefCmd(provider),
+		newDeletePrincipalCmd(provider),
+		newDeleteQuotaCmd(provider),
+		newDeleteStructDefCmd(provider),
+		newDeleteTaskDefCmd(provider),
+		newDeleteUserTaskDefCmd(provider),
+		newDeleteUserTaskRunCommentCmd(provider),
+		newDeleteWfRunCmd(provider),
+		newDeleteScheduledWfRun(provider),
+		newDeleteWfSpecCmd(provider),
+		newDeleteWorkflowEventDefCmd(provider),
+		newDeleteWorkflowMigrationPlanCmd(provider),
 	)
 	return deleteCmd
 }

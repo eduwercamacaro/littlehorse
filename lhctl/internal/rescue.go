@@ -10,7 +10,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newRescueCmd() *cobra.Command {
+func newRescueCmd(provider ClientProvider) *cobra.Command {
 	rescueCmd := &cobra.Command{
 		Use:   "rescue <wfRunId> <threadRunNumber>",
 		Short: "Rescues a ThreadRun in the ERROR state by manually restarting the execution.",
@@ -36,7 +36,7 @@ the failure (or propagated failure) must not have been handled by a Failure Hand
 				SkipCurrentNode: skipCurrentNode,
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).RescueThreadRun(requestContext(cmd), rescueRequest))
+			littlehorse.PrintResp(provider.Client(cmd).RescueThreadRun(provider.RequestContext(cmd), rescueRequest))
 		},
 	}
 	rescueCmd.Flags().Bool("skipCurrentNode", false, "Whether to skip the current node (true) or retry it (false)")

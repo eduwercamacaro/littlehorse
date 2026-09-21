@@ -13,7 +13,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func newGetWfSpecCmd() *cobra.Command {
+func newGetWfSpecCmd(provider ClientProvider) *cobra.Command {
 	getWfSpecCmd := &cobra.Command{
 		Use:   "wfSpec <name>",
 		Short: "Get a WfSpec by Name and optionally Major Version and Revision.",
@@ -37,8 +37,8 @@ func newGetWfSpecCmd() *cobra.Command {
 
 			if majorVersion == nil || revision == nil {
 				littlehorse.PrintResp(
-					getGlobalClient(cmd).GetLatestWfSpec(
-						requestContext(cmd),
+					provider.Client(cmd).GetLatestWfSpec(
+						provider.RequestContext(cmd),
 						&lhproto.GetLatestWfSpecRequest{
 							Name:         name,
 							MajorVersion: majorVersion,
@@ -47,8 +47,8 @@ func newGetWfSpecCmd() *cobra.Command {
 				)
 			} else {
 				littlehorse.PrintResp(
-					getGlobalClient(cmd).GetWfSpec(
-						requestContext(cmd),
+					provider.Client(cmd).GetWfSpec(
+						provider.RequestContext(cmd),
 						&lhproto.WfSpecId{
 							Name:         name,
 							MajorVersion: *majorVersion,
@@ -64,7 +64,7 @@ func newGetWfSpecCmd() *cobra.Command {
 	return getWfSpecCmd
 }
 
-func newDeployWfSpecCmd() *cobra.Command {
+func newDeployWfSpecCmd(provider ClientProvider) *cobra.Command {
 	deployWfSpecCmd := &cobra.Command{
 		Use:   "wfSpec <filename>",
 		Short: "Deploy a wfSpec from a JSON or Protobuf file.",
@@ -91,13 +91,13 @@ func newDeployWfSpecCmd() *cobra.Command {
 				log.Fatal("Failed reading deploy file: " + err.Error())
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).PutWfSpec(requestContext(cmd), pws))
+			littlehorse.PrintResp(provider.Client(cmd).PutWfSpec(provider.RequestContext(cmd), pws))
 		},
 	}
 	return deployWfSpecCmd
 }
 
-func newSearchWfSpecCmd() *cobra.Command {
+func newSearchWfSpecCmd(provider ClientProvider) *cobra.Command {
 	searchWfSpecCmd := &cobra.Command{
 		Use:   "wfSpec",
 		Short: "Search for WfSpecs",
@@ -140,7 +140,7 @@ Returns a list of ObjectId's that can be passed into 'lhctl get wfSpec'.
 			// interprets that as "just give me all the WfSpec's".
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).SearchWfSpec(requestContext(cmd), search),
+				provider.Client(cmd).SearchWfSpec(provider.RequestContext(cmd), search),
 			)
 		},
 	}
@@ -151,7 +151,7 @@ Returns a list of ObjectId's that can be passed into 'lhctl get wfSpec'.
 	return searchWfSpecCmd
 }
 
-func newDeleteWfSpecCmd() *cobra.Command {
+func newDeleteWfSpecCmd(provider ClientProvider) *cobra.Command {
 	deleteWfSpecCmd := &cobra.Command{
 		Use:   "wfSpec <name> <majorVersionNumber> <revisionNumber>",
 		Short: "Delete a WfSpec.",
@@ -174,8 +174,8 @@ WfSpec to delete.
 			}
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).DeleteWfSpec(
-					requestContext(cmd),
+				provider.Client(cmd).DeleteWfSpec(
+					provider.RequestContext(cmd),
 					&lhproto.DeleteWfSpecRequest{
 						Id: &lhproto.WfSpecId{
 							Name:         name,

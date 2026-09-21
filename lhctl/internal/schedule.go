@@ -5,11 +5,11 @@ import (
 )
 
 // newScheduleCmd creates the run command
-func newScheduleCmd() *cobra.Command {
+func newScheduleCmd(provider ClientProvider) *cobra.Command {
 	scheduleCmd := &cobra.Command{
 		Use:   "schedule",
 		Short: "Schedule a repeated operation",
 	}
-	scheduleCmd.AddCommand(newScheduleWfCmd())
+	scheduleCmd.AddCommand(newScheduleWfCmd(provider))
 	return scheduleCmd
 }

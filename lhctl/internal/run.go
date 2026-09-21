@@ -11,7 +11,7 @@ import (
 )
 
 // newRunCmd creates the run command
-func newRunCmd() *cobra.Command {
+func newRunCmd(provider ClientProvider) *cobra.Command {
 	runCmd := &cobra.Command{
 		Use:   "run <wfSpecName> [(<var1 name> <var1 val>)]...",
 		Short: "Run an instance of a WfSpec with provided Name and Input Variables.",
@@ -75,16 +75,16 @@ odd total number of args. See 'lhctl run --help' for details.`)
 				var err error
 
 				if revision == nil {
-					wfSpec, err = getGlobalClient(cmd).GetLatestWfSpec(
-						requestContext(cmd),
+					wfSpec, err = provider.Client(cmd).GetLatestWfSpec(
+						provider.RequestContext(cmd),
 						&lhproto.GetLatestWfSpecRequest{
 							Name:         args[0],
 							MajorVersion: majorVersion,
 						},
 					)
 				} else {
-					wfSpec, err = getGlobalClient(cmd).GetWfSpec(
-						requestContext(cmd),
+					wfSpec, err = provider.Client(cmd).GetWfSpec(
+						provider.RequestContext(cmd),
 						&lhproto.WfSpecId{
 							Name:         args[0],
 							MajorVersion: *majorVersion,
@@ -107,7 +107,7 @@ odd total number of args. See 'lhctl run --help' for details.`)
 					if cached, ok := structDefCache[cacheKey]; ok {
 						return cached, nil
 					}
-					structDef, err := getGlobalClient(cmd).GetStructDef(requestContext(cmd), id)
+					structDef, err := provider.Client(cmd).GetStructDef(provider.RequestContext(cmd), id)
 					if err != nil {
 						return nil, err
 					}
@@ -143,7 +143,7 @@ odd total number of args. See 'lhctl run --help' for details.`)
 			}
 
 			// At this point, we've loaded everything up, time to fire away.
-			littlehorse.PrintResp(getGlobalClient(cmd).RunWf(requestContext(cmd), runReq))
+			littlehorse.PrintResp(provider.Client(cmd).RunWf(provider.RequestContext(cmd), runReq))
 		},
 	}
 	runCmd.Flags().String("wfRunId", "", "Set the id of the WfRun (for idempotence)")

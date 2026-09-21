@@ -15,7 +15,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func newListWfMetricsCmd() *cobra.Command {
+func newListWfMetricsCmd(provider ClientProvider) *cobra.Command {
 	listWfMetricsCmd := &cobra.Command{
 		Use:   "wfMetrics [wfSpecName] [wfSpecVersion]",
 		Short: "List metrics for a WfSpec (omit name to list all)",
@@ -75,8 +75,8 @@ Examples:
 				}
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).ListWfMetrics(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).ListWfMetrics(
+				provider.RequestContext(cmd),
 				req,
 			))
 		},

@@ -13,7 +13,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
-func newListTaskMetricsCmd() *cobra.Command {
+func newListTaskMetricsCmd(provider ClientProvider) *cobra.Command {
 	listTaskMetricsCmd := &cobra.Command{
 		Use:   "taskMetrics [taskDefName]",
 		Short: "List metrics for a TaskDef (omit name to list aggregated metrics)",
@@ -59,8 +59,8 @@ Examples:
 				req.TaskDef = &lhproto.TaskDefId{Name: taskDefName}
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).ListTaskMetrics(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).ListTaskMetrics(
+				provider.RequestContext(cmd),
 				req,
 			))
 		},

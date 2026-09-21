@@ -13,7 +13,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func newPutPrincipalCmd() *cobra.Command {
+func newPutPrincipalCmd(provider ClientProvider) *cobra.Command {
 	putPrincipalCmd := &cobra.Command{
 		Use:   "principal <id>",
 		Short: "Create a principal",
@@ -49,8 +49,8 @@ func newPutPrincipalCmd() *cobra.Command {
 				Overwrite:     overwrite,
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).PutPrincipal(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).PutPrincipal(
+				provider.RequestContext(cmd),
 				&putRequest,
 			))
 		},
@@ -61,14 +61,14 @@ func newPutPrincipalCmd() *cobra.Command {
 	return putPrincipalCmd
 }
 
-func newGetPrincipalCmd() *cobra.Command {
+func newGetPrincipalCmd(provider ClientProvider) *cobra.Command {
 	getPrincipalCmd := &cobra.Command{
 		Use:   "principal <id>",
 		Short: "Get a Principal",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			littlehorse.PrintResp(getGlobalClient(cmd).GetPrincipal(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).GetPrincipal(
+				provider.RequestContext(cmd),
 				&lhproto.PrincipalId{
 					Id: args[0],
 				},
@@ -78,7 +78,7 @@ func newGetPrincipalCmd() *cobra.Command {
 	return getPrincipalCmd
 }
 
-func newSearchPrincipalCmd() *cobra.Command {
+func newSearchPrincipalCmd(provider ClientProvider) *cobra.Command {
 	searchPrincipalCmd := &cobra.Command{
 		Use:   "principal",
 		Short: "Search for Principals",
@@ -124,7 +124,7 @@ Returns a list of ObjectId's that can be passed into 'lhctl get principals'.
 				}
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).SearchPrincipal(requestContext(cmd), search))
+			littlehorse.PrintResp(provider.Client(cmd).SearchPrincipal(provider.RequestContext(cmd), search))
 		},
 	}
 	searchPrincipalCmd.Flags().String("tenantId", "", "List Principals associated with this Tenant ID")
@@ -134,7 +134,7 @@ Returns a list of ObjectId's that can be passed into 'lhctl get principals'.
 	return searchPrincipalCmd
 }
 
-func newDeployPrincipalCmd() *cobra.Command {
+func newDeployPrincipalCmd(provider ClientProvider) *cobra.Command {
 	deployPrincipalCmd := &cobra.Command{
 		Use:   "principal <file>",
 		Short: "Deploy Principal from a file",
@@ -161,7 +161,7 @@ func newDeployPrincipalCmd() *cobra.Command {
 				log.Fatal("Failed reading deploy file: " + err.Error())
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).PutPrincipal(requestContext(cmd), putPrincipalReq))
+			littlehorse.PrintResp(provider.Client(cmd).PutPrincipal(provider.RequestContext(cmd), putPrincipalReq))
 		},
 	}
 	return deployPrincipalCmd
@@ -211,14 +211,14 @@ var (
 	}
 )
 
-func newDeletePrincipalCmd() *cobra.Command {
+func newDeletePrincipalCmd(provider ClientProvider) *cobra.Command {
 	deletePrincipalCmd := &cobra.Command{
 		Use:   "principal <id>",
 		Short: "Delete a Principal.",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
-			littlehorse.PrintResp(getGlobalClient(cmd).DeletePrincipal(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).DeletePrincipal(
+				provider.RequestContext(cmd),
 				&lhproto.DeletePrincipalRequest{
 					Id: &lhproto.PrincipalId{
 						Id: args[0],

@@ -12,7 +12,7 @@ import (
 )
 
 // newGetCorrelatedEventCmd creates the externalEvent command
-func newGetCorrelatedEventCmd() *cobra.Command {
+func newGetCorrelatedEventCmd(provider ClientProvider) *cobra.Command {
 	getCorrelatedEventCmd := &cobra.Command{
 		Use:   "correlatedEvent <key> <externalEventDefName>",
 		Short: "Get a CorrelatedEvent by identifiers.",
@@ -44,9 +44,9 @@ func newGetCorrelatedEventCmd() *cobra.Command {
 				args = strings.Split(args[0], "/")
 			}
 
-			ctx := requestContext(cmd)
+			ctx := provider.RequestContext(cmd)
 
-			littlehorse.PrintResp(getGlobalClient(cmd).GetCorrelatedEvent(
+			littlehorse.PrintResp(provider.Client(cmd).GetCorrelatedEvent(
 				ctx,
 				&lhproto.CorrelatedEventId{
 					Key:                args[0],
@@ -58,7 +58,7 @@ func newGetCorrelatedEventCmd() *cobra.Command {
 	return getCorrelatedEventCmd
 }
 
-func newPutCorrelatedEventCmd() *cobra.Command {
+func newPutCorrelatedEventCmd(provider ClientProvider) *cobra.Command {
 	putCorrelatedEventCmd := &cobra.Command{
 		Use:   "correlatedEvent <key> <externalEventName> [(<varType> <payload>)]",
 		Short: "Put (Create or Update) a CorrelatedEvent.",
@@ -107,8 +107,8 @@ lhctl put correlatedEvent <key> <externalEventName>
 			}
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).PutCorrelatedEvent(
-					requestContext(cmd),
+				provider.Client(cmd).PutCorrelatedEvent(
+					provider.RequestContext(cmd),
 					&req,
 				),
 			)
@@ -117,7 +117,7 @@ lhctl put correlatedEvent <key> <externalEventName>
 	return putCorrelatedEventCmd
 }
 
-func newDeleteCorrelatedEventCmd() *cobra.Command {
+func newDeleteCorrelatedEventCmd(provider ClientProvider) *cobra.Command {
 	deleteCorrelatedEventCmd := &cobra.Command{
 		Use:   "correlatedEvent <key> <externalEventDefName>",
 		Short: "Delete a CorrelatedEvent.",
@@ -125,8 +125,8 @@ func newDeleteCorrelatedEventCmd() *cobra.Command {
 		Run: func(cmd *cobra.Command, args []string) {
 			key := args[0]
 			externalEventDefName := args[1]
-			littlehorse.PrintResp(getGlobalClient(cmd).DeleteCorrelatedEvent(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).DeleteCorrelatedEvent(
+				provider.RequestContext(cmd),
 				&lhproto.DeleteCorrelatedEventRequest{
 					Id: &lhproto.CorrelatedEventId{
 						Key: key,
@@ -141,7 +141,7 @@ func newDeleteCorrelatedEventCmd() *cobra.Command {
 	return deleteCorrelatedEventCmd
 }
 
-func newSearchCorrelatedEventCmd() *cobra.Command {
+func newSearchCorrelatedEventCmd(provider ClientProvider) *cobra.Command {
 	searchCorrelatedEventCmd := &cobra.Command{
 		Use:   "correlatedEvent <externalEventDefName>",
 		Short: "Search for CorrelatedEvent's by ExternalEventDef Name",
@@ -181,7 +181,7 @@ Search for CorrelatedEvent's by their ExternalEventDef Name.
 				search.HasExternalEvents = &hasEvents
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).SearchCorrelatedEvent(requestContext(cmd), search))
+			littlehorse.PrintResp(provider.Client(cmd).SearchCorrelatedEvent(provider.RequestContext(cmd), search))
 		},
 	}
 	searchCorrelatedEventCmd.Flags().Bool("hasEvents", false, "List only CorrelatedEvents that have associated `ExternalEvent`s")

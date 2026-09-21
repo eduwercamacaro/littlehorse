@@ -7,12 +7,12 @@ import (
 )
 
 // newWhoamiCmd creates the run command
-func newWhoamiCmd() *cobra.Command {
+func newWhoamiCmd(provider ClientProvider) *cobra.Command {
 	whoamiCmd := &cobra.Command{
 		Use:   "whoami",
 		Short: "Prints the current logged principal",
 		Run: func(cmd *cobra.Command, args []string) {
-			littlehorse.PrintResp(getGlobalClient(cmd).Whoami(requestContext(cmd), &emptypb.Empty{}))
+			littlehorse.PrintResp(provider.Client(cmd).Whoami(provider.RequestContext(cmd), &emptypb.Empty{}))
 		},
 	}
 	return whoamiCmd

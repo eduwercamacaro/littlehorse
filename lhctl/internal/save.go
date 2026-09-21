@@ -8,11 +8,11 @@ import (
 )
 
 // newSaveCmd creates the save command
-func newSaveCmd() *cobra.Command {
+func newSaveCmd(provider ClientProvider) *cobra.Command {
 	saveCmd := &cobra.Command{
 		Use:   "save",
 		Short: "Save the state of an object.",
 	}
-	saveCmd.AddCommand(newSaveUserTaskRunProgressCmd())
+	saveCmd.AddCommand(newSaveUserTaskRunProgressCmd(provider))
 	return saveCmd
 }

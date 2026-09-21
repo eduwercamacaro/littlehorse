@@ -16,7 +16,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-func newDeployExternalEventDefCmd() *cobra.Command {
+func newDeployExternalEventDefCmd(provider ClientProvider) *cobra.Command {
 	deployExternalEventDefCmd := &cobra.Command{
 		Use:   "externalEventDef <filename>",
 		Short: "Create an ExternalEventDef from a JSON or Protobuf file.",
@@ -47,22 +47,22 @@ func newDeployExternalEventDefCmd() *cobra.Command {
 
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).PutExternalEventDef(requestContext(cmd), peed))
+			littlehorse.PrintResp(provider.Client(cmd).PutExternalEventDef(provider.RequestContext(cmd), peed))
 		},
 	}
 	return deployExternalEventDefCmd
 }
 
 // newGetExternalEventDefCmd creates the externalEventDef command
-func newGetExternalEventDefCmd() *cobra.Command {
+func newGetExternalEventDefCmd(provider ClientProvider) *cobra.Command {
 	getExternalEventDefCmd := &cobra.Command{
 		Use:   "externalEventDef <name>",
 		Short: "Get an ExternalEventDef by name.",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).GetExternalEventDef(
-					requestContext(cmd),
+				provider.Client(cmd).GetExternalEventDef(
+					provider.RequestContext(cmd),
 					&lhproto.ExternalEventDefId{
 						Name: args[0],
 					},
@@ -73,7 +73,7 @@ func newGetExternalEventDefCmd() *cobra.Command {
 	return getExternalEventDefCmd
 }
 
-func newSearchExternalEventDefCmd() *cobra.Command {
+func newSearchExternalEventDefCmd(provider ClientProvider) *cobra.Command {
 	searchExternalEventDefCmd := &cobra.Command{
 		Use:   "externalEventDef",
 		Short: "Search for ExternalEventDef",
@@ -88,8 +88,8 @@ searches for all ExternalEventDefs.
 			prefix, _ := cmd.Flags().GetString("prefix")
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).SearchExternalEventDef(
-					requestContext(cmd),
+				provider.Client(cmd).SearchExternalEventDef(
+					provider.RequestContext(cmd),
 					&lhproto.SearchExternalEventDefRequest{
 						Bookmark: bookmark,
 						Limit:    &limit,
@@ -101,7 +101,7 @@ searches for all ExternalEventDefs.
 	return searchExternalEventDefCmd
 }
 
-func newDeleteExternalEventDefCmd() *cobra.Command {
+func newDeleteExternalEventDefCmd(provider ClientProvider) *cobra.Command {
 	deleteExternalEventDefCmd := &cobra.Command{
 		Use:   "externalEventDef <name>",
 		Short: "Delete an ExternalEventDef.",
@@ -113,8 +113,8 @@ ExternalEventDef to delete.
 			name := args[0]
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).DeleteExternalEventDef(
-					requestContext(cmd),
+				provider.Client(cmd).DeleteExternalEventDef(
+					provider.RequestContext(cmd),
 					&lhproto.DeleteExternalEventDefRequest{
 						Id: &lhproto.ExternalEventDefId{
 							Name: name,

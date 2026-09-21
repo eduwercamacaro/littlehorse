@@ -14,7 +14,7 @@ import (
 )
 
 // newGetExternalEventCmd creates the externalEvent command
-func newGetExternalEventCmd() *cobra.Command {
+func newGetExternalEventCmd(provider ClientProvider) *cobra.Command {
 	getExternalEventCmd := &cobra.Command{
 		Use:   "externalEvent <wfRunId> <externalEventDefName> <guid>",
 		Short: "Get an ExternalEvent by identifiers.",
@@ -47,9 +47,9 @@ func newGetExternalEventCmd() *cobra.Command {
 				args = strings.Split(args[0], "/")
 			}
 
-			ctx := requestContext(cmd)
+			ctx := provider.RequestContext(cmd)
 
-			littlehorse.PrintResp(getGlobalClient(cmd).GetExternalEvent(
+			littlehorse.PrintResp(provider.Client(cmd).GetExternalEvent(
 				ctx,
 				&lhproto.ExternalEventId{
 					WfRunId:            littlehorse.StrToWfRunId(args[0]),
@@ -62,7 +62,7 @@ func newGetExternalEventCmd() *cobra.Command {
 	return getExternalEventCmd
 }
 
-func newSearchExternalEventCmd() *cobra.Command {
+func newSearchExternalEventCmd(provider ClientProvider) *cobra.Command {
 	searchExternalEventCmd := &cobra.Command{
 		Use:   "externalEvent [<externalEventDefName>]",
 		Short: "Search for ExternalEvent's by ExternalEventDef Name",
@@ -108,7 +108,7 @@ Returns a list of ObjectId's that can be passed into 'lhctl get externalEvent'.
 				search.IsClaimed = &isClaimed
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).SearchExternalEvent(requestContext(cmd), search))
+			littlehorse.PrintResp(provider.Client(cmd).SearchExternalEvent(provider.RequestContext(cmd), search))
 		},
 	}
 	searchExternalEventCmd.Flags().String("externalEventDefName", "", "ExternalEventDef Name of ExternalEvents to search for")
@@ -119,7 +119,7 @@ Returns a list of ObjectId's that can be passed into 'lhctl get externalEvent'.
 	return searchExternalEventCmd
 }
 
-func newListExternalEventCmd() *cobra.Command {
+func newListExternalEventCmd(provider ClientProvider) *cobra.Command {
 	listExternalEventCmd := &cobra.Command{
 		Use:   "externalEvent <wfRunId>",
 		Short: "List all ExternalEvent's for a given WfRun Id.",
@@ -138,8 +138,8 @@ Lists all ExternalEvent's for a given WfRun Id.
 				Limit:    &limit,
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).ListExternalEvents(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).ListExternalEvents(
+				provider.RequestContext(cmd),
 				req,
 			))
 		},

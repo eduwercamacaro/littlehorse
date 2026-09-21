@@ -15,7 +15,7 @@ import (
 )
 
 // newGetNodeRunCmd creates the nodeRun command
-func newGetNodeRunCmd() *cobra.Command {
+func newGetNodeRunCmd(provider ClientProvider) *cobra.Command {
 	getNodeRunCmd := &cobra.Command{
 		Use:   "nodeRun <wfRunId> <threadRunNumber> <nodeRunPosition>",
 		Short: "Get a NodeRun by WfRun, ThreadRun, and Node Run Position",
@@ -57,8 +57,8 @@ func newGetNodeRunCmd() *cobra.Command {
 				log.Fatal("Couldn't convert nodeRunPosition to int.")
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).GetNodeRun(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).GetNodeRun(
+				provider.RequestContext(cmd),
 				&lhproto.NodeRunId{
 					WfRunId:         littlehorse.StrToWfRunId(args[0]),
 					ThreadRunNumber: int32(trn),
@@ -70,7 +70,7 @@ func newGetNodeRunCmd() *cobra.Command {
 	return getNodeRunCmd
 }
 
-func newListNodeRunCmd() *cobra.Command {
+func newListNodeRunCmd(provider ClientProvider) *cobra.Command {
 	listNodeRunCmd := &cobra.Command{
 		Use:   "nodeRun <wfRunId>",
 		Short: "List all NodeRun's for a given WfRun Id.",
@@ -94,8 +94,8 @@ Lists all NodeRun's for a given WfRun Id.
 				req.ThreadRunNumber = &threadRunNumber
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).ListNodeRuns(
-				requestContext(cmd),
+			littlehorse.PrintResp(provider.Client(cmd).ListNodeRuns(
+				provider.RequestContext(cmd),
 				req,
 			))
 		},
@@ -104,7 +104,7 @@ Lists all NodeRun's for a given WfRun Id.
 	return listNodeRunCmd
 }
 
-func newSearchNodeRunCmd() *cobra.Command {
+func newSearchNodeRunCmd(provider ClientProvider) *cobra.Command {
 	searchNodeRunCmd := &cobra.Command{
 		Use:   "nodeRun <nodeType> <status>",
 		Short: "Search for NodeRun's by providing Node Type and Status",
@@ -161,7 +161,7 @@ for NodeRuns waiting on a specific type of external event.
 				},
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).SearchNodeRun(requestContext(cmd), search))
+			littlehorse.PrintResp(provider.Client(cmd).SearchNodeRun(provider.RequestContext(cmd), search))
 		},
 	}
 	searchNodeRunCmd.Flags().Int("earliestMinutesAgo", -1, "Search only for nodeRuns that started no more than this number of minutes ago")
@@ -194,7 +194,7 @@ func loadEarliestAndLatestStart(cmd *cobra.Command) (*timestamppb.Timestamp, *ti
 	return earliestStartTime, latestStartTime
 }
 
-func newCountNodeRunCmd() *cobra.Command {
+func newCountNodeRunCmd(provider ClientProvider) *cobra.Command {
 	countNodeRunCmd := &cobra.Command{
 		Use:   "nodeRun",
 		Short: "Count NodeRun's, optionally filtered by WfSpec name and version.",
@@ -237,7 +237,7 @@ Use --all to count all NodeRun's in the tenant, or --wfSpecName to filter by WfS
 				req.Filter = &lhproto.CountNodeRunRequest_WfSpecFilter_{WfSpecFilter: filter}
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).CountNodeRun(requestContext(cmd), req))
+			littlehorse.PrintResp(provider.Client(cmd).CountNodeRun(provider.RequestContext(cmd), req))
 		},
 	}
 	countNodeRunCmd.Flags().Bool("all", false, "Count all NodeRuns in the tenant")

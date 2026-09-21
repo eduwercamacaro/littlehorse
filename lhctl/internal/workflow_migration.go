@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func newPutWorkflowMigrationPlanCmd() *cobra.Command {
+func newPutWorkflowMigrationPlanCmd(provider ClientProvider) *cobra.Command {
 	putWorkflowMigrationPlanCmd := &cobra.Command{
 		Use:   "workflowMigrationPlan",
 		Short: "Interactively create a WorkflowMigrationPlan.",
@@ -87,21 +87,21 @@ Leave the "old threadSpec name" or "old node name" prompt empty to finish that s
 				ThreadMigrations: threadMigrations,
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).PutWorkflowMigrationPlan(requestContext(cmd), req))
+			littlehorse.PrintResp(provider.Client(cmd).PutWorkflowMigrationPlan(provider.RequestContext(cmd), req))
 		},
 	}
 	return putWorkflowMigrationPlanCmd
 }
 
-func newGetWorkflowMigrationPlanCmd() *cobra.Command {
+func newGetWorkflowMigrationPlanCmd(provider ClientProvider) *cobra.Command {
 	getWorkflowMigrationPlanCmd := &cobra.Command{
 		Use:   "workflowMigrationPlan <name>",
 		Short: "Get a WorkflowMigrationPlan by name.",
 		Args:  cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).GetWorkflowMigrationPlan(
-					requestContext(cmd),
+				provider.Client(cmd).GetWorkflowMigrationPlan(
+					provider.RequestContext(cmd),
 					&lhproto.WorkflowMigrationPlanId{
 						Name: args[0],
 					},
@@ -112,7 +112,7 @@ func newGetWorkflowMigrationPlanCmd() *cobra.Command {
 	return getWorkflowMigrationPlanCmd
 }
 
-func newDeleteWorkflowMigrationPlanCmd() *cobra.Command {
+func newDeleteWorkflowMigrationPlanCmd(provider ClientProvider) *cobra.Command {
 	deleteWorkflowMigrationPlanCmd := &cobra.Command{
 		Use:   "workflowMigrationPlan <name>",
 		Short: "Delete a WorkflowMigrationPlan.",
@@ -122,8 +122,8 @@ WorkflowMigrationPlan to delete.
 		Args: cobra.ExactArgs(1),
 		Run: func(cmd *cobra.Command, args []string) {
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).DeleteWorkflowMigrationPlan(
-					requestContext(cmd),
+				provider.Client(cmd).DeleteWorkflowMigrationPlan(
+					provider.RequestContext(cmd),
 					&lhproto.DeleteWorkflowMigrationPlanRequest{
 						Id: &lhproto.WorkflowMigrationPlanId{
 							Name: args[0],
@@ -135,7 +135,7 @@ WorkflowMigrationPlan to delete.
 	return deleteWorkflowMigrationPlanCmd
 }
 
-func newApplyWorkflowMigrationPlanCmd() *cobra.Command {
+func newApplyWorkflowMigrationPlanCmd(provider ClientProvider) *cobra.Command {
 	applyWorkflowMigrationPlanCmd := &cobra.Command{
 		Use:   "workflowMigrationPlan <planName> <wfRunId>",
 		Short: "Apply a WorkflowMigrationPlan to a running WfRun.",
@@ -192,13 +192,13 @@ are supported in lhctl. Leave the thread name (or variable name) empty to finish
 				MigrationVarsByThread: migrationVarsByThread,
 			}
 
-			littlehorse.PrintResp(getGlobalClient(cmd).ApplyWorkflowMigrationPlan(requestContext(cmd), req))
+			littlehorse.PrintResp(provider.Client(cmd).ApplyWorkflowMigrationPlan(provider.RequestContext(cmd), req))
 		},
 	}
 	return applyWorkflowMigrationPlanCmd
 }
 
-func newSearchWorkflowMigrationPlanCmd() *cobra.Command {
+func newSearchWorkflowMigrationPlanCmd(provider ClientProvider) *cobra.Command {
 	searchWorkflowMigrationPlanCmd := &cobra.Command{
 		Use:   "workflowMigrationPlan",
 		Short: "Search for WorkflowMigrationPlans",
@@ -229,8 +229,8 @@ provided, all WorkflowMigrationPlans are returned.
 			}
 
 			littlehorse.PrintResp(
-				getGlobalClient(cmd).SearchWorkflowMigrationPlan(
-					requestContext(cmd),
+				provider.Client(cmd).SearchWorkflowMigrationPlan(
+					provider.RequestContext(cmd),
 					search),
 			)
 		},

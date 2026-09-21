@@ -8,7 +8,7 @@ import (
 )
 
 // newDeployCmd creates the deploy command
-func newDeployCmd() *cobra.Command {
+func newDeployCmd(provider ClientProvider) *cobra.Command {
 	deployCmd := &cobra.Command{
 		Use:   "deploy",
 		Short: "Deploy a resource specification in a file on your system.",
@@ -23,11 +23,11 @@ Your file may be in protobuf or json format. Default is JSON.`,
 		"Whether file is in proto format. Default JSON",
 	)
 	deployCmd.AddCommand(
-		newDeployExternalEventDefCmd(),
-		newDeployPrincipalCmd(),
-		newDeployTaskDefCmd(),
-		newDeployUserTaskDefCmd(),
-		newDeployWfSpecCmd(),
+		newDeployExternalEventDefCmd(provider),
+		newDeployPrincipalCmd(provider),
+		newDeployTaskDefCmd(provider),
+		newDeployUserTaskDefCmd(provider),
+		newDeployWfSpecCmd(provider),
 	)
 	return deployCmd
 }

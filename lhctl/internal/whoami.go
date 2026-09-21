@@ -6,15 +6,14 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-// executeCmd represents the run command
-var whoamiCmd = &cobra.Command{
-	Use:   "whoami",
-	Short: "Prints the current logged principal",
-	Run: func(cmd *cobra.Command, args []string) {
-		littlehorse.PrintResp(getGlobalClient(cmd).Whoami(requestContext(cmd), &emptypb.Empty{}))
-	},
-}
-
-func init() {
-	rootCmd.AddCommand(whoamiCmd)
+// newWhoamiCmd creates the run command
+func newWhoamiCmd() *cobra.Command {
+	whoamiCmd := &cobra.Command{
+		Use:   "whoami",
+		Short: "Prints the current logged principal",
+		Run: func(cmd *cobra.Command, args []string) {
+			littlehorse.PrintResp(getGlobalClient(cmd).Whoami(requestContext(cmd), &emptypb.Empty{}))
+		},
+	}
+	return whoamiCmd
 }

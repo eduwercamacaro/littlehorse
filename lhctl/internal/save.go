@@ -7,12 +7,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// saveCmd represents the save command
-var saveCmd = &cobra.Command{
-	Use:   "save",
-	Short: "Save the state of an object.",
-}
-
-func init() {
-	rootCmd.AddCommand(saveCmd)
+// newSaveCmd creates the save command
+func newSaveCmd() *cobra.Command {
+	saveCmd := &cobra.Command{
+		Use:   "save",
+		Short: "Save the state of an object.",
+	}
+	saveCmd.AddCommand(newSaveUserTaskRunProgressCmd())
+	return saveCmd
 }

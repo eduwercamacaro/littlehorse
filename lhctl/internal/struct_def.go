@@ -10,99 +10,100 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var getStructDefCmd = &cobra.Command{
-	Use:   "structDef <name> [<version>]",
-	Short: "Get a StructDef by Name",
-	Args:  cobra.RangeArgs(1, 2),
-	Run: func(cmd *cobra.Command, args []string) {
-		name := args[0]
+func newGetStructDefCmd() *cobra.Command {
+	getStructDefCmd := &cobra.Command{
+		Use:   "structDef <name> [<version>]",
+		Short: "Get a StructDef by Name",
+		Args:  cobra.RangeArgs(1, 2),
+		Run: func(cmd *cobra.Command, args []string) {
+			name := args[0]
 
-		structDefId := &lhproto.StructDefId{
-			Name: name,
-		}
-
-		if len(args) > 1 {
-			versionInt, err := strconv.Atoi(args[1])
-
-			if err != nil {
-				log.Fatal("Couldn't convert version to int:\n", err)
+			structDefId := &lhproto.StructDefId{
+				Name: name,
 			}
 
-			structDefId.Version = int32(versionInt)
-		}
+			if len(args) > 1 {
+				versionInt, err := strconv.Atoi(args[1])
 
-		littlehorse.PrintResp(
-			getGlobalClient(cmd).GetStructDef(
-				requestContext(cmd),
-				structDefId,
-			),
-		)
-	},
+				if err != nil {
+					log.Fatal("Couldn't convert version to int:\n", err)
+				}
+
+				structDefId.Version = int32(versionInt)
+			}
+
+			littlehorse.PrintResp(
+				getGlobalClient(cmd).GetStructDef(
+					requestContext(cmd),
+					structDefId,
+				),
+			)
+		},
+	}
+	return getStructDefCmd
 }
 
-var searchStructDefCmd = &cobra.Command{
-	Use:   "structDef <prefix>",
-	Short: "Search for StructDefs",
-	Long: `Search for StructDefs.
+func newSearchStructDefCmd() *cobra.Command {
+	searchStructDefCmd := &cobra.Command{
+		Use:   "structDef <prefix>",
+		Short: "Search for StructDefs",
+		Long: `Search for StructDefs.
 
 Search for StructDefs according to a prefix.
 
 Future support will be added for searching for all versions of an exact StructDef name;
 	`,
-	Args: cobra.MaximumNArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		bookmark, _ := cmd.Flags().GetBytesBase64("bookmark")
-		limit, _ := cmd.Flags().GetInt32("limit")
-		searchCriteria := &lhproto.SearchStructDefRequest_Prefix{}
+		Args: cobra.MaximumNArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			bookmark, _ := cmd.Flags().GetBytesBase64("bookmark")
+			limit, _ := cmd.Flags().GetInt32("limit")
+			searchCriteria := &lhproto.SearchStructDefRequest_Prefix{}
 
-		if len(args) > 0 {
-			searchCriteria.Prefix = args[0]
-		}
+			if len(args) > 0 {
+				searchCriteria.Prefix = args[0]
+			}
 
-		littlehorse.PrintResp(
-			getGlobalClient(cmd).SearchStructDef(
-				requestContext(cmd),
-				&lhproto.SearchStructDefRequest{
-					Bookmark:          bookmark,
-					Limit:             &limit,
-					StructDefCriteria: searchCriteria,
-				}),
-		)
-	},
+			littlehorse.PrintResp(
+				getGlobalClient(cmd).SearchStructDef(
+					requestContext(cmd),
+					&lhproto.SearchStructDefRequest{
+						Bookmark:          bookmark,
+						Limit:             &limit,
+						StructDefCriteria: searchCriteria,
+					}),
+			)
+		},
+	}
+	return searchStructDefCmd
 }
 
-var deleteStructDefCmd = &cobra.Command{
-	Use:   "structDef <name> <version>",
-	Short: "Delete a StructDef.",
-	Long: `Delete a StructDef. You must provide the name and version of the StructDef to delete.
+func newDeleteStructDefCmd() *cobra.Command {
+	deleteStructDefCmd := &cobra.Command{
+		Use:   "structDef <name> <version>",
+		Short: "Delete a StructDef.",
+		Long: `Delete a StructDef. You must provide the name and version of the StructDef to delete.
 	`,
-	Args: cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
+		Args: cobra.ExactArgs(2),
+		Run: func(cmd *cobra.Command, args []string) {
 
-		name := args[0]
-		version, err := strconv.Atoi(args[1])
+			name := args[0]
+			version, err := strconv.Atoi(args[1])
 
-		if err != nil {
-			log.Fatal("Couldn't convert version to int:\n", err)
-		}
+			if err != nil {
+				log.Fatal("Couldn't convert version to int:\n", err)
+			}
 
-		littlehorse.PrintResp(
-			getGlobalClient(cmd).DeleteStructDef(
-				requestContext(cmd),
-				&lhproto.DeleteStructDefRequest{
-					Id: &lhproto.StructDefId{
-						Name:    name,
-						Version: int32(version),
-					},
-				}),
-		)
-	},
-}
-
-func init() {
-	getCmd.AddCommand(getStructDefCmd)
-
-	searchCmd.AddCommand(searchStructDefCmd)
-
-	deleteCmd.AddCommand(deleteStructDefCmd)
+			littlehorse.PrintResp(
+				getGlobalClient(cmd).DeleteStructDef(
+					requestContext(cmd),
+					&lhproto.DeleteStructDefRequest{
+						Id: &lhproto.StructDefId{
+							Name:    name,
+							Version: int32(version),
+						},
+					}),
+			)
+		},
+	}
+	return deleteStructDefCmd
 }

@@ -4,12 +4,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// executeCmd represents the run command
-var putCmd = &cobra.Command{
-	Use:   "put",
-	Short: "Create or update an object",
-}
-
-func init() {
-	rootCmd.AddCommand(putCmd)
+// newPutCmd creates the run command
+func newPutCmd() *cobra.Command {
+	putCmd := &cobra.Command{
+		Use:   "put",
+		Short: "Create or update an object",
+	}
+	putCmd.AddCommand(
+		newPutCorrelatedEventCmd(),
+		newPutPrincipalCmd(),
+		newPutQuotaCmd(),
+		newPutTenantCmd(),
+		newPutUserTaskRunCommentCmd(),
+		newPutWorkflowEventDefCmd(),
+		newPutWorkflowMigrationPlanCmd(),
+	)
+	return putCmd
 }

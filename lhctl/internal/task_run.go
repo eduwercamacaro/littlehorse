@@ -11,51 +11,55 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// getTaskRunCmd represents the nodeRun command
-var getTaskRunCmd = &cobra.Command{
-	Use:   "taskRun <wfRunId> <taskRunGuid>",
-	Short: "Get a TaskRun by WfRunId and Guid",
-	Long: `TaskRun's are identified uniquely by the combination of the following:
+// newGetTaskRunCmd creates the nodeRun command
+func newGetTaskRunCmd() *cobra.Command {
+	getTaskRunCmd := &cobra.Command{
+		Use:   "taskRun <wfRunId> <taskRunGuid>",
+		Short: "Get a TaskRun by WfRunId and Guid",
+		Long: `TaskRun's are identified uniquely by the combination of the following:
 	- Associated WfRun Id
 	- A unique guid
 
 	You may provide both identifiers as two separate arguments or you may provide
 	them delimited by the '/' character.`,
-	Args: func(cmd *cobra.Command, args []string) error {
-		needsHelp := false
-		if len(args) == 1 {
-			args = strings.Split(args[0], "/")
-		}
+		Args: func(cmd *cobra.Command, args []string) error {
+			needsHelp := false
+			if len(args) == 1 {
+				args = strings.Split(args[0], "/")
+			}
 
-		if len(args) != 2 {
-			needsHelp = true
-		}
+			if len(args) != 2 {
+				needsHelp = true
+			}
 
-		if needsHelp {
-			return errors.New("must provide 1 or 2 arguments. See 'lhctl get taskRun -h'")
-		}
+			if needsHelp {
+				return errors.New("must provide 1 or 2 arguments. See 'lhctl get taskRun -h'")
+			}
 
-		return nil
-	},
-	Run: func(cmd *cobra.Command, args []string) {
-		if len(args) == 1 {
-			args = strings.Split(args[0], "/")
-		}
+			return nil
+		},
+		Run: func(cmd *cobra.Command, args []string) {
+			if len(args) == 1 {
+				args = strings.Split(args[0], "/")
+			}
 
-		littlehorse.PrintResp(getGlobalClient(cmd).GetTaskRun(
-			requestContext(cmd),
-			&lhproto.TaskRunId{
-				WfRunId:  littlehorse.StrToWfRunId(args[0]),
-				TaskGuid: args[1],
-			},
-		))
-	},
+			littlehorse.PrintResp(getGlobalClient(cmd).GetTaskRun(
+				requestContext(cmd),
+				&lhproto.TaskRunId{
+					WfRunId:  littlehorse.StrToWfRunId(args[0]),
+					TaskGuid: args[1],
+				},
+			))
+		},
+	}
+	return getTaskRunCmd
 }
 
-var searchTaskRunCmd = &cobra.Command{
-	Use:   "taskRun [<taskDefName>]",
-	Short: "Search for TaskRun's.",
-	Long: `
+func newSearchTaskRunCmd() *cobra.Command {
+	searchTaskRunCmd := &cobra.Command{
+		Use:   "taskRun [<taskDefName>]",
+		Short: "Search for TaskRun's.",
+		Long: `
 Search for TaskRun's by their taskDefName and/or status. Returns a list of TaskRunId's.
 
 Choose one of the following option groups:
@@ -79,105 +83,104 @@ Choose one of the following option groups:
   - TASK_OUTPUT_SERDE_ERROR
   - TASK_INPUT_VAR_SUB_ERROR
 	`,
-	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		taskDefName := args[0]
+		Args: cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			taskDefName := args[0]
 
-		statusStr, _ := cmd.Flags().GetString("status")
-		bookmark, _ := cmd.Flags().GetBytesBase64("bookmark")
-		limit, _ := cmd.Flags().GetInt32("limit")
+			statusStr, _ := cmd.Flags().GetString("status")
+			bookmark, _ := cmd.Flags().GetBytesBase64("bookmark")
+			limit, _ := cmd.Flags().GetInt32("limit")
 
-		var status *lhproto.TaskStatus = nil
-		earliest, latest := loadEarliestAndLatestStart(cmd)
+			var status *lhproto.TaskStatus = nil
+			earliest, latest := loadEarliestAndLatestStart(cmd)
 
-		if statusStr != "" {
-			statusInt, ok := lhproto.TaskStatus_value[statusStr]
-			if !ok {
-				log.Fatal("Invalid status provided. See --help.")
+			if statusStr != "" {
+				statusInt, ok := lhproto.TaskStatus_value[statusStr]
+				if !ok {
+					log.Fatal("Invalid status provided. See --help.")
+				}
+				status = (*lhproto.TaskStatus)(&statusInt)
 			}
-			status = (*lhproto.TaskStatus)(&statusInt)
-		}
 
-		search := &lhproto.SearchTaskRunRequest{
-			Status:        status,
-			TaskDefName:   taskDefName,
-			EarliestStart: earliest,
-			LatestStart:   latest,
-			Bookmark:      bookmark,
-			Limit:         &limit,
-		}
-		littlehorse.PrintResp(getGlobalClient(cmd).SearchTaskRun(requestContext(cmd), search))
-	},
+			search := &lhproto.SearchTaskRunRequest{
+				Status:        status,
+				TaskDefName:   taskDefName,
+				EarliestStart: earliest,
+				LatestStart:   latest,
+				Bookmark:      bookmark,
+				Limit:         &limit,
+			}
+			littlehorse.PrintResp(getGlobalClient(cmd).SearchTaskRun(requestContext(cmd), search))
+		},
+	}
+	searchTaskRunCmd.Flags().String("status", "", "Status of TaskRun's to search for.")
+	searchTaskRunCmd.MarkFlagRequired("taskDefName")
+	searchTaskRunCmd.Flags().Int("earliestMinutesAgo", -1, "Search only for TaskRuns that started no more than this number of minutes ago")
+	searchTaskRunCmd.Flags().Int("latestMinutesAgo", -1, "Search only for TaskRuns that started at least this number of minutes ago")
+	return searchTaskRunCmd
 }
 
-var listTaskRunCmd = &cobra.Command{
-	Use:   "taskRun <wfRunId>",
-	Short: "List all TaskRun's for a given WfRun Id.",
-	Long: `
+func newListTaskRunCmd() *cobra.Command {
+	listTaskRunCmd := &cobra.Command{
+		Use:   "taskRun <wfRunId>",
+		Short: "List all TaskRun's for a given WfRun Id.",
+		Long: `
 Lists all TaskRun's for a given WfRun Id.
 `,
-	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		wfRunId := args[0]
-		bookmark, _ := cmd.Flags().GetBytesBase64("bookmark")
-		limit, _ := cmd.Flags().GetInt32("limit")
+		Args: cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			wfRunId := args[0]
+			bookmark, _ := cmd.Flags().GetBytesBase64("bookmark")
+			limit, _ := cmd.Flags().GetInt32("limit")
 
-		req := &lhproto.ListTaskRunsRequest{
-			WfRunId:  littlehorse.StrToWfRunId(wfRunId),
-			Bookmark: bookmark,
-			Limit:    &limit,
-		}
+			req := &lhproto.ListTaskRunsRequest{
+				WfRunId:  littlehorse.StrToWfRunId(wfRunId),
+				Bookmark: bookmark,
+				Limit:    &limit,
+			}
 
-		littlehorse.PrintResp(getGlobalClient(cmd).ListTaskRuns(
-			requestContext(cmd),
-			req,
-		))
-	},
+			littlehorse.PrintResp(getGlobalClient(cmd).ListTaskRuns(
+				requestContext(cmd),
+				req,
+			))
+		},
+	}
+	return listTaskRunCmd
 }
 
-var countTaskRunCmd = &cobra.Command{
-	Use:   "taskRun <taskDefName>",
-	Short: "Count TaskRun's by TaskDef name and status.",
-	Long: `Count the number of TaskRun's matching the given criteria for a specific TaskDef.
+func newCountTaskRunCmd() *cobra.Command {
+	countTaskRunCmd := &cobra.Command{
+		Use:   "taskRun <taskDefName>",
+		Short: "Count TaskRun's by TaskDef name and status.",
+		Long: `Count the number of TaskRun's matching the given criteria for a specific TaskDef.
 
 Usage:
   lhctl count taskRun <taskDefName> --status <status>
 
 Currently only TASK_SCHEDULED status is supported.
 `,
-	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		taskDefName := args[0]
+		Args: cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			taskDefName := args[0]
 
-		statusStr, _ := cmd.Flags().GetString("status")
-		if statusStr == "" {
-			log.Fatal("Must provide --status flag. See 'lhctl count taskRun --help'")
-		}
+			statusStr, _ := cmd.Flags().GetString("status")
+			if statusStr == "" {
+				log.Fatal("Must provide --status flag. See 'lhctl count taskRun --help'")
+			}
 
-		statusVal, ok := lhproto.TaskStatus_value[statusStr]
-		if !ok {
-			log.Fatal("Invalid status value. Must be a valid TaskStatus enum (e.g., TASK_SCHEDULED)")
-		}
+			statusVal, ok := lhproto.TaskStatus_value[statusStr]
+			if !ok {
+				log.Fatal("Invalid status value. Must be a valid TaskStatus enum (e.g., TASK_SCHEDULED)")
+			}
 
-		req := &lhproto.CountTaskRunRequest{
-			TaskDefName: taskDefName,
-			Status:      lhproto.TaskStatus(statusVal),
-		}
+			req := &lhproto.CountTaskRunRequest{
+				TaskDefName: taskDefName,
+				Status:      lhproto.TaskStatus(statusVal),
+			}
 
-		littlehorse.PrintResp(getGlobalClient(cmd).CountTaskRun(requestContext(cmd), req))
-	},
-}
-
-func init() {
-	getCmd.AddCommand(getTaskRunCmd)
-	searchCmd.AddCommand(searchTaskRunCmd)
-	listCmd.AddCommand(listTaskRunCmd)
-	countCmd.AddCommand(countTaskRunCmd)
-
+			littlehorse.PrintResp(getGlobalClient(cmd).CountTaskRun(requestContext(cmd), req))
+		},
+	}
 	countTaskRunCmd.Flags().String("status", "", "Status of TaskRun's to count (required). Currently only TASK_SCHEDULED is supported.")
-	searchTaskRunCmd.Flags().String("status", "", "Status of TaskRun's to search for.")
-	searchTaskRunCmd.MarkFlagRequired("taskDefName")
-	searchTaskRunCmd.Flags().Int("earliestMinutesAgo", -1, "Search only for TaskRuns that started no more than this number of minutes ago")
-	searchTaskRunCmd.Flags().Int("latestMinutesAgo", -1, "Search only for TaskRuns that started at least this number of minutes ago")
-
+	return countTaskRunCmd
 }

@@ -7,15 +7,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// resumeCmd represents the resume command
-var resumeCmd = &cobra.Command{
-	Use:   "resume",
-	Short: "Resume a resource.",
-	Long: `Resume a resource. Supported resources:
+// newResumeCmd creates the resume command
+func newResumeCmd() *cobra.Command {
+	resumeCmd := &cobra.Command{
+		Use:   "resume",
+		Short: "Resume a resource.",
+		Long: `Resume a resource. Supported resources:
 - wfRun
 `,
-}
-
-func init() {
-	rootCmd.AddCommand(resumeCmd)
+	}
+	resumeCmd.AddCommand(newResumeWfRunCmd())
+	return resumeCmd
 }

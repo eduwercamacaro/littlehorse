@@ -14,10 +14,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var putWorkflowMigrationPlanCmd = &cobra.Command{
-	Use:   "workflowMigrationPlan",
-	Short: "Interactively create a WorkflowMigrationPlan.",
-	Long: `Interactively create a WorkflowMigrationPlan.
+func newPutWorkflowMigrationPlanCmd() *cobra.Command {
+	putWorkflowMigrationPlanCmd := &cobra.Command{
+		Use:   "workflowMigrationPlan",
+		Short: "Interactively create a WorkflowMigrationPlan.",
+		Long: `Interactively create a WorkflowMigrationPlan.
 
 You will be prompted for:
   - The name of the WorkflowMigrationPlan
@@ -28,108 +29,117 @@ You will be prompted for:
 
 Leave the "old threadSpec name" or "old node name" prompt empty to finish that section.
 `,
-	Args: cobra.NoArgs,
-	Run: func(cmd *cobra.Command, args []string) {
-		reader := bufio.NewReader(os.Stdin)
+		Args: cobra.NoArgs,
+		Run: func(cmd *cobra.Command, args []string) {
+			reader := bufio.NewReader(os.Stdin)
 
-		name := mustPromptLine(reader, "Name of the WorkflowMigrationPlan")
+			name := mustPromptLine(reader, "Name of the WorkflowMigrationPlan")
 
-		oldWfSpecName := mustPromptLine(reader, "Old WfSpec name")
-		oldMajorVersion := mustPromptInt32(reader, "Old WfSpec major version")
-		oldRevision := mustPromptInt32(reader, "Old WfSpec revision")
+			oldWfSpecName := mustPromptLine(reader, "Old WfSpec name")
+			oldMajorVersion := mustPromptInt32(reader, "Old WfSpec major version")
+			oldRevision := mustPromptInt32(reader, "Old WfSpec revision")
 
-		newMajorVersion := mustPromptInt32(reader, "New (destination) major version")
-		newRevision := mustPromptInt32(reader, "New (destination) revision")
+			newMajorVersion := mustPromptInt32(reader, "New (destination) major version")
+			newRevision := mustPromptInt32(reader, "New (destination) revision")
 
-		threadMigrations := make(map[string]*lhproto.ThreadMigrationPlanRequest)
-		fmt.Println("\nThread migrations (leave the old threadSpec name empty to finish):")
-		for {
-			oldThreadName := promptLine(reader, "  Old threadSpec name")
-			if oldThreadName == "" {
-				break
-			}
-
-			newThreadName := mustPromptLine(reader, "  New threadSpec name")
-
-			nodeMigrations := make(map[string]*lhproto.NodeMigrationPlan)
-			fmt.Println("    Node migrations (leave the old node name empty to finish):")
+			threadMigrations := make(map[string]*lhproto.ThreadMigrationPlanRequest)
+			fmt.Println("\nThread migrations (leave the old threadSpec name empty to finish):")
 			for {
-				oldNodeName := promptLine(reader, "      Old node name")
-				if oldNodeName == "" {
+				oldThreadName := promptLine(reader, "  Old threadSpec name")
+				if oldThreadName == "" {
 					break
 				}
-				newNodeName := mustPromptLine(reader, "      New node name")
-				nodeMigrations[oldNodeName] = &lhproto.NodeMigrationPlan{
-					NewNodeName: newNodeName,
+
+				newThreadName := mustPromptLine(reader, "  New threadSpec name")
+
+				nodeMigrations := make(map[string]*lhproto.NodeMigrationPlan)
+				fmt.Println("    Node migrations (leave the old node name empty to finish):")
+				for {
+					oldNodeName := promptLine(reader, "      Old node name")
+					if oldNodeName == "" {
+						break
+					}
+					newNodeName := mustPromptLine(reader, "      New node name")
+					nodeMigrations[oldNodeName] = &lhproto.NodeMigrationPlan{
+						NewNodeName: newNodeName,
+					}
+				}
+
+				threadMigrations[oldThreadName] = &lhproto.ThreadMigrationPlanRequest{
+					NewThreadName:  newThreadName,
+					NodeMigrations: nodeMigrations,
 				}
 			}
 
-			threadMigrations[oldThreadName] = &lhproto.ThreadMigrationPlanRequest{
-				NewThreadName:  newThreadName,
-				NodeMigrations: nodeMigrations,
+			if len(threadMigrations) == 0 {
+				log.Fatal("At least one thread migration is required.")
 			}
-		}
 
-		if len(threadMigrations) == 0 {
-			log.Fatal("At least one thread migration is required.")
-		}
-
-		req := &lhproto.PutWorkflowMigrationPlanRequest{
-			Name: name,
-			OldWfSpec: &lhproto.WfSpecId{
-				Name:         oldWfSpecName,
-				MajorVersion: oldMajorVersion,
-				Revision:     oldRevision,
-			},
-			MajorVersion:     newMajorVersion,
-			Revision:         newRevision,
-			ThreadMigrations: threadMigrations,
-		}
-
-		littlehorse.PrintResp(getGlobalClient(cmd).PutWorkflowMigrationPlan(requestContext(cmd), req))
-	},
-}
-
-var getWorkflowMigrationPlanCmd = &cobra.Command{
-	Use:   "workflowMigrationPlan <name>",
-	Short: "Get a WorkflowMigrationPlan by name.",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		littlehorse.PrintResp(
-			getGlobalClient(cmd).GetWorkflowMigrationPlan(
-				requestContext(cmd),
-				&lhproto.WorkflowMigrationPlanId{
-					Name: args[0],
+			req := &lhproto.PutWorkflowMigrationPlanRequest{
+				Name: name,
+				OldWfSpec: &lhproto.WfSpecId{
+					Name:         oldWfSpecName,
+					MajorVersion: oldMajorVersion,
+					Revision:     oldRevision,
 				},
-			),
-		)
-	},
+				MajorVersion:     newMajorVersion,
+				Revision:         newRevision,
+				ThreadMigrations: threadMigrations,
+			}
+
+			littlehorse.PrintResp(getGlobalClient(cmd).PutWorkflowMigrationPlan(requestContext(cmd), req))
+		},
+	}
+	return putWorkflowMigrationPlanCmd
 }
 
-var deleteWorkflowMigrationPlanCmd = &cobra.Command{
-	Use:   "workflowMigrationPlan <name>",
-	Short: "Delete a WorkflowMigrationPlan.",
-	Long: `Delete a WorkflowMigrationPlan. You must provide the name of the
-WorkflowMigrationPlan to delete.
-	`,
-	Args: cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		littlehorse.PrintResp(
-			getGlobalClient(cmd).DeleteWorkflowMigrationPlan(
-				requestContext(cmd),
-				&lhproto.DeleteWorkflowMigrationPlanRequest{
-					Id: &lhproto.WorkflowMigrationPlanId{
+func newGetWorkflowMigrationPlanCmd() *cobra.Command {
+	getWorkflowMigrationPlanCmd := &cobra.Command{
+		Use:   "workflowMigrationPlan <name>",
+		Short: "Get a WorkflowMigrationPlan by name.",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			littlehorse.PrintResp(
+				getGlobalClient(cmd).GetWorkflowMigrationPlan(
+					requestContext(cmd),
+					&lhproto.WorkflowMigrationPlanId{
 						Name: args[0],
 					},
-				}),
-		)
-	},
+				),
+			)
+		},
+	}
+	return getWorkflowMigrationPlanCmd
 }
 
-var applyWorkflowMigrationPlanCmd = &cobra.Command{
-	Use:   "workflowMigrationPlan <planName> <wfRunId>",
-	Short: "Apply a WorkflowMigrationPlan to a running WfRun.",
-	Long: `Apply a WorkflowMigrationPlan to a running WfRun.
+func newDeleteWorkflowMigrationPlanCmd() *cobra.Command {
+	deleteWorkflowMigrationPlanCmd := &cobra.Command{
+		Use:   "workflowMigrationPlan <name>",
+		Short: "Delete a WorkflowMigrationPlan.",
+		Long: `Delete a WorkflowMigrationPlan. You must provide the name of the
+WorkflowMigrationPlan to delete.
+	`,
+		Args: cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			littlehorse.PrintResp(
+				getGlobalClient(cmd).DeleteWorkflowMigrationPlan(
+					requestContext(cmd),
+					&lhproto.DeleteWorkflowMigrationPlanRequest{
+						Id: &lhproto.WorkflowMigrationPlanId{
+							Name: args[0],
+						},
+					}),
+			)
+		},
+	}
+	return deleteWorkflowMigrationPlanCmd
+}
+
+func newApplyWorkflowMigrationPlanCmd() *cobra.Command {
+	applyWorkflowMigrationPlanCmd := &cobra.Command{
+		Use:   "workflowMigrationPlan <planName> <wfRunId>",
+		Short: "Apply a WorkflowMigrationPlan to a running WfRun.",
+		Long: `Apply a WorkflowMigrationPlan to a running WfRun.
 
 Stamps the given WfRun with the WorkflowMigrationPlan so that its ThreadRuns
 migrate lazily to the new WfSpec version.
@@ -138,89 +148,97 @@ You will then be prompted to optionally provide migration variables. These let y
 reassign variable values per thread as part of the migration. Only literal values
 are supported in lhctl. Leave the thread name (or variable name) empty to finish.
 `,
-	Args: cobra.ExactArgs(2),
-	Run: func(cmd *cobra.Command, args []string) {
-		planName := args[0]
-		wfRunId := args[1]
+		Args: cobra.ExactArgs(2),
+		Run: func(cmd *cobra.Command, args []string) {
+			planName := args[0]
+			wfRunId := args[1]
 
-		reader := bufio.NewReader(os.Stdin)
+			reader := bufio.NewReader(os.Stdin)
 
-		migrationVarsByThread := make(map[string]*lhproto.MigrationVars)
-		fmt.Println("\nMigration variables (leave the thread name empty to finish):")
-		for {
-			threadName := promptLine(reader, "  Thread name")
-			if threadName == "" {
-				break
-			}
-
-			varAssignments := make(map[string]*lhproto.VariableAssignment)
-			fmt.Println("    Variable assignments (leave the variable name empty to finish):")
+			migrationVarsByThread := make(map[string]*lhproto.MigrationVars)
+			fmt.Println("\nMigration variables (leave the thread name empty to finish):")
 			for {
-				varName := promptLine(reader, "      Variable name")
-				if varName == "" {
+				threadName := promptLine(reader, "  Thread name")
+				if threadName == "" {
 					break
 				}
-				varAssignments[varName] = &lhproto.VariableAssignment{
-					Source: &lhproto.VariableAssignment_LiteralValue{
-						LiteralValue: mustPromptLiteralValue(reader),
-					},
+
+				varAssignments := make(map[string]*lhproto.VariableAssignment)
+				fmt.Println("    Variable assignments (leave the variable name empty to finish):")
+				for {
+					varName := promptLine(reader, "      Variable name")
+					if varName == "" {
+						break
+					}
+					varAssignments[varName] = &lhproto.VariableAssignment{
+						Source: &lhproto.VariableAssignment_LiteralValue{
+							LiteralValue: mustPromptLiteralValue(reader),
+						},
+					}
+				}
+
+				if len(varAssignments) > 0 {
+					migrationVarsByThread[threadName] = &lhproto.MigrationVars{
+						VarAssignmentByVarName: varAssignments,
+					}
 				}
 			}
 
-			if len(varAssignments) > 0 {
-				migrationVarsByThread[threadName] = &lhproto.MigrationVars{
-					VarAssignmentByVarName: varAssignments,
-				}
+			req := &lhproto.ApplyWorkflowMigrationPlanRequest{
+				Id: &lhproto.WorkflowMigrationPlanId{
+					Name: planName,
+				},
+				WfRunId:               littlehorse.StrToWfRunId(wfRunId),
+				MigrationVarsByThread: migrationVarsByThread,
 			}
-		}
 
-		req := &lhproto.ApplyWorkflowMigrationPlanRequest{
-			Id: &lhproto.WorkflowMigrationPlanId{
-				Name: planName,
-			},
-			WfRunId:               littlehorse.StrToWfRunId(wfRunId),
-			MigrationVarsByThread: migrationVarsByThread,
-		}
-
-		littlehorse.PrintResp(getGlobalClient(cmd).ApplyWorkflowMigrationPlan(requestContext(cmd), req))
-	},
+			littlehorse.PrintResp(getGlobalClient(cmd).ApplyWorkflowMigrationPlan(requestContext(cmd), req))
+		},
+	}
+	return applyWorkflowMigrationPlanCmd
 }
 
-var searchWorkflowMigrationPlanCmd = &cobra.Command{
-	Use:   "workflowMigrationPlan",
-	Short: "Search for WorkflowMigrationPlans",
-	Long: `Search for WorkflowMigrationPlans.
+func newSearchWorkflowMigrationPlanCmd() *cobra.Command {
+	searchWorkflowMigrationPlanCmd := &cobra.Command{
+		Use:   "workflowMigrationPlan",
+		Short: "Search for WorkflowMigrationPlans",
+		Long: `Search for WorkflowMigrationPlans.
 
 Optionally provide a --prefix to search for WorkflowMigrationPlans whose name starts
 with that prefix, or --wfSpecName to search by source WfSpec name. If neither is
 provided, all WorkflowMigrationPlans are returned.
 	`,
-	Run: func(cmd *cobra.Command, args []string) {
-		bookmark, _ := cmd.Flags().GetBytesBase64("bookmark")
-		limit, _ := cmd.Flags().GetInt32("limit")
-		prefix, _ := cmd.Flags().GetString("prefix")
-		wfSpecName, _ := cmd.Flags().GetString("wfSpecName")
+		Run: func(cmd *cobra.Command, args []string) {
+			bookmark, _ := cmd.Flags().GetBytesBase64("bookmark")
+			limit, _ := cmd.Flags().GetInt32("limit")
+			prefix, _ := cmd.Flags().GetString("prefix")
+			wfSpecName, _ := cmd.Flags().GetString("wfSpecName")
 
-		search := &lhproto.SearchWorkflowMigrationPlanRequest{
-			Bookmark: bookmark,
-			Limit:    &limit,
-		}
-		if prefix != "" {
-			search.WorkflowMigrationPlanCriteria = &lhproto.SearchWorkflowMigrationPlanRequest_Prefix{
-				Prefix: prefix,
+			search := &lhproto.SearchWorkflowMigrationPlanRequest{
+				Bookmark: bookmark,
+				Limit:    &limit,
 			}
-		} else if wfSpecName != "" {
-			search.WorkflowMigrationPlanCriteria = &lhproto.SearchWorkflowMigrationPlanRequest_WfSpecName{
-				WfSpecName: wfSpecName,
+			if prefix != "" {
+				search.WorkflowMigrationPlanCriteria = &lhproto.SearchWorkflowMigrationPlanRequest_Prefix{
+					Prefix: prefix,
+				}
+			} else if wfSpecName != "" {
+				search.WorkflowMigrationPlanCriteria = &lhproto.SearchWorkflowMigrationPlanRequest_WfSpecName{
+					WfSpecName: wfSpecName,
+				}
 			}
-		}
 
-		littlehorse.PrintResp(
-			getGlobalClient(cmd).SearchWorkflowMigrationPlan(
-				requestContext(cmd),
-				search),
-		)
-	},
+			littlehorse.PrintResp(
+				getGlobalClient(cmd).SearchWorkflowMigrationPlan(
+					requestContext(cmd),
+					search),
+			)
+		},
+	}
+	searchWorkflowMigrationPlanCmd.Flags().String("prefix", "", "Prefix of name of WorkflowMigrationPlans to search for.")
+	searchWorkflowMigrationPlanCmd.Flags().String("wfSpecName", "", "Source WfSpec name of WorkflowMigrationPlans to search for.")
+	searchWorkflowMigrationPlanCmd.MarkFlagsMutuallyExclusive("prefix", "wfSpecName")
+	return searchWorkflowMigrationPlanCmd
 }
 
 // promptLine prints a prompt and returns the trimmed line entered by the user.
@@ -276,15 +294,4 @@ func mustPromptLiteralValue(reader *bufio.Reader) *lhproto.VariableValue {
 		}
 		return content
 	}
-}
-
-func init() {
-	putCmd.AddCommand(putWorkflowMigrationPlanCmd)
-	getCmd.AddCommand(getWorkflowMigrationPlanCmd)
-	deleteCmd.AddCommand(deleteWorkflowMigrationPlanCmd)
-	applyCmd.AddCommand(applyWorkflowMigrationPlanCmd)
-	searchCmd.AddCommand(searchWorkflowMigrationPlanCmd)
-	searchWorkflowMigrationPlanCmd.Flags().String("prefix", "", "Prefix of name of WorkflowMigrationPlans to search for.")
-	searchWorkflowMigrationPlanCmd.Flags().String("wfSpecName", "", "Source WfSpec name of WorkflowMigrationPlans to search for.")
-	searchWorkflowMigrationPlanCmd.MarkFlagsMutuallyExclusive("prefix", "wfSpecName")
 }

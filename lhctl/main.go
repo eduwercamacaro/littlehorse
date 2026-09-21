@@ -3,7 +3,11 @@ Copyright © 2022 NAME HERE <EMAIL ADDRESS>
 */
 package main
 
-import "github.com/littlehorse-enterprises/lhctl/internal"
+import (
+	"os"
+
+	"github.com/littlehorse-enterprises/lhctl/internal"
+)
 
 var (
 	version = "0.0.0-development"
@@ -12,6 +16,8 @@ var (
 )
 
 func main() {
-	internal.SetVersionInfo(version, commit, date)
-	internal.Execute()
+	root := internal.NewRootCommand(version, commit, date)
+	if err := root.Execute(); err != nil {
+		os.Exit(1)
+	}
 }

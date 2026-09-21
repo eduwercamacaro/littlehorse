@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// executeCmd represents the run command
-var scheduleCmd = &cobra.Command{
-	Use:   "schedule",
-	Short: "Schedule a repeated operation",
-}
-
-func init() {
-	rootCmd.AddCommand(scheduleCmd)
+// newScheduleCmd creates the run command
+func newScheduleCmd() *cobra.Command {
+	scheduleCmd := &cobra.Command{
+		Use:   "schedule",
+		Short: "Schedule a repeated operation",
+	}
+	scheduleCmd.AddCommand(newScheduleWfCmd())
+	return scheduleCmd
 }

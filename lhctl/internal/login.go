@@ -19,14 +19,13 @@ import (
 	"golang.org/x/oauth2"
 )
 
-var loginCmd = &cobra.Command{
-	Use:   "login",
-	Short: "OAuth2 login.",
-	Run:   run,
-}
-
-func init() {
-	rootCmd.AddCommand(loginCmd)
+func newLoginCmd() *cobra.Command {
+	loginCmd := &cobra.Command{
+		Use:   "login",
+		Short: "OAuth2 login.",
+		Run:   run,
+	}
+	return loginCmd
 }
 
 func run(cmd *cobra.Command, args []string) {

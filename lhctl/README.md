@@ -36,19 +36,34 @@ lhctl
 
 To ensure consistency across our CLI commands, we adhere to the following standards, inspired by [Docopt](http://docopt.org) and the [Cobra User Guide](https://github.com/spf13/cobra/blob/main/site/content/user_guide.md). 
 
+### Command construction
+
+Define commands with constructors such as `newPutTenantCmd()`, rather than package-level
+command variables or `init()` registration. Each constructor creates its command and flags;
+parent constructors attach children with `AddCommand(newPutTenantCmd())`.
+`main()` calls `NewRootCommand(version, commit, date)` to build the complete tree.
+
+Tests can call `NewRootCommand` to get independent commands and flag state, then use
+`SetArgs`, `SetIn`, `SetOut`, and `SetErr` before `Execute`. Client/configuration caches
+and handlers that use process I/O or exit directly are not yet isolated.
+
+Run the CLI tests from the `lhctl` directory with `go test ./...`.
+
 ### Arguments
 
 1. Arguments are validated using the `Args` field of the Cobra command
 
 Example:
 ```go
-var putTenantCmd = &cobra.Command{
-	Use:   "tenant <id>",
-	Short: "Create a Tenant. Currently, updating Tenants is not supported.",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-      // No argument validation here
-   }
+func newPutTenantCmd() *cobra.Command {
+    return &cobra.Command{
+        Use:   "tenant <id>",
+        Short: "Create or update a Tenant.",
+        Args:  cobra.ExactArgs(1),
+        Run: func(cmd *cobra.Command, args []string) {
+            // No argument validation here
+        },
+    }
 }
 ```
 2. Required arguments are surrounded by `<` and `>`

@@ -4,11 +4,11 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var editCmd = &cobra.Command{
-	Use:   "edit",
-	Short: "Edit an object",
-}
-
-func init() {
-	rootCmd.AddCommand(editCmd)
+func newEditCmd() *cobra.Command {
+	editCmd := &cobra.Command{
+		Use:   "edit",
+		Short: "Edit an object",
+	}
+	editCmd.AddCommand(newEditUserTaskRunCommentCmd())
+	return editCmd
 }

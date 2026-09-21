@@ -10,40 +10,35 @@ import (
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
-var versionCmd = &cobra.Command{
-	Use:   "version",
-	Short: "Print Client and Server Version Information.",
-	Args:  cobra.ExactArgs(0),
-	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("lhctl version: " + rootCmd.Version)
+func newVersionCmd() *cobra.Command {
+	versionCmd := &cobra.Command{
+		Use:   "version",
+		Short: "Print Client and Server Version Information.",
+		Args:  cobra.ExactArgs(0),
+		Run: func(cmd *cobra.Command, args []string) {
+			fmt.Println("lhctl version: " + cmd.Root().Version)
 
-		resp, err := getGlobalClient(cmd).GetServerVersion(requestContext(cmd), &emptypb.Empty{})
-		if err != nil {
-			if grpcStatus, ok := status.FromError(err); ok && grpcStatus.Code() == codes.Unimplemented {
-				fmt.Println("Server is outdated")
+			resp, err := getGlobalClient(cmd).GetServerVersion(requestContext(cmd), &emptypb.Empty{})
+			if err != nil {
+				if grpcStatus, ok := status.FromError(err); ok && grpcStatus.Code() == codes.Unimplemented {
+					fmt.Println("Server is outdated")
+				} else {
+					log.Fatal(err)
+				}
 			} else {
-				log.Fatal(err)
+				serverVersion := fmt.Sprintf("%d.%d", resp.MajorVersion, resp.MinorVersion)
+
+				if resp.PatchVersion != nil {
+					serverVersion = fmt.Sprintf("%s.%d", serverVersion, *resp.PatchVersion)
+				}
+
+				if resp.PreReleaseIdentifier != nil {
+					serverVersion = serverVersion + "-" + *resp.PreReleaseIdentifier
+				}
+
+				fmt.Println("Server version: " + serverVersion)
 			}
-		} else {
-			serverVersion := fmt.Sprintf("%d.%d", resp.MajorVersion, resp.MinorVersion)
-
-			if resp.PatchVersion != nil {
-				serverVersion = fmt.Sprintf("%s.%d", serverVersion, *resp.PatchVersion)
-			}
-
-			if resp.PreReleaseIdentifier != nil {
-				serverVersion = serverVersion + "-" + *resp.PreReleaseIdentifier
-			}
-
-			fmt.Println("Server version: " + serverVersion)
-		}
-	},
-}
-
-func SetVersionInfo(version, commit, date string) {
-	rootCmd.Version = fmt.Sprintf("%s (Git SHA %s)", version, commit)
-}
-
-func init() {
-	rootCmd.AddCommand(versionCmd)
+		},
+	}
+	return versionCmd
 }

@@ -13,66 +13,76 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-var putPrincipalCmd = &cobra.Command{
-	Use:   "principal <id>",
-	Short: "Create a principal",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		acl, _ := cmd.Flags().GetString("acl")
-		tenantId, _ := cmd.Flags().GetString("tenantId")
-		overwrite, _ := cmd.Flags().GetBool("overwrite")
-		id := args[0]
-		serverAcls := []*lhproto.ServerACL{}
-		per_tenant_acls := make(map[string]*lhproto.ServerACLs)
+func newPutPrincipalCmd() *cobra.Command {
+	putPrincipalCmd := &cobra.Command{
+		Use:   "principal <id>",
+		Short: "Create a principal",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			acl, _ := cmd.Flags().GetString("acl")
+			tenantId, _ := cmd.Flags().GetString("tenantId")
+			overwrite, _ := cmd.Flags().GetBool("overwrite")
+			id := args[0]
+			serverAcls := []*lhproto.ServerACL{}
+			per_tenant_acls := make(map[string]*lhproto.ServerACLs)
 
-		if cmd.Flags().Lookup("acl").Changed {
-			for resource, actions := range parseAcl(acl) {
-				allowedResources := []lhproto.ACLResource{resource}
-				serverAcl := lhproto.ServerACL{
-					Resources:      allowedResources,
-					AllowedActions: actions,
+			if cmd.Flags().Lookup("acl").Changed {
+				for resource, actions := range parseAcl(acl) {
+					allowedResources := []lhproto.ACLResource{resource}
+					serverAcl := lhproto.ServerACL{
+						Resources:      allowedResources,
+						AllowedActions: actions,
+					}
+					serverAcls = append(serverAcls, &serverAcl)
 				}
-				serverAcls = append(serverAcls, &serverAcl)
 			}
-		}
 
-		if cmd.Flags().Lookup("tenantId").Changed {
-			per_tenant_acls[tenantId] = &lhproto.ServerACLs{
-				Acls: serverAcls,
+			if cmd.Flags().Lookup("tenantId").Changed {
+				per_tenant_acls[tenantId] = &lhproto.ServerACLs{
+					Acls: serverAcls,
+				}
 			}
-		}
 
-		putRequest := lhproto.PutPrincipalRequest{
-			Id:            id,
-			PerTenantAcls: per_tenant_acls,
-			Overwrite:     overwrite,
-		}
+			putRequest := lhproto.PutPrincipalRequest{
+				Id:            id,
+				PerTenantAcls: per_tenant_acls,
+				Overwrite:     overwrite,
+			}
 
-		littlehorse.PrintResp(getGlobalClient(cmd).PutPrincipal(
-			requestContext(cmd),
-			&putRequest,
-		))
-	},
+			littlehorse.PrintResp(getGlobalClient(cmd).PutPrincipal(
+				requestContext(cmd),
+				&putRequest,
+			))
+		},
+	}
+	putPrincipalCmd.Flags().String("acl", "", "ACLs")
+	putPrincipalCmd.Flags().Bool("overwrite", false, "Overwrites principal information")
+	putPrincipalCmd.Flags().String("tenantId", "", "Tenant associated with the principal")
+	return putPrincipalCmd
 }
 
-var getPrincipalCmd = &cobra.Command{
-	Use:   "principal <id>",
-	Short: "Get a Principal",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		littlehorse.PrintResp(getGlobalClient(cmd).GetPrincipal(
-			requestContext(cmd),
-			&lhproto.PrincipalId{
-				Id: args[0],
-			},
-		))
-	},
+func newGetPrincipalCmd() *cobra.Command {
+	getPrincipalCmd := &cobra.Command{
+		Use:   "principal <id>",
+		Short: "Get a Principal",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			littlehorse.PrintResp(getGlobalClient(cmd).GetPrincipal(
+				requestContext(cmd),
+				&lhproto.PrincipalId{
+					Id: args[0],
+				},
+			))
+		},
+	}
+	return getPrincipalCmd
 }
 
-var searchPrincipalCmd = &cobra.Command{
-	Use:   "principal",
-	Short: "Search for Principals",
-	Long: `
+func newSearchPrincipalCmd() *cobra.Command {
+	searchPrincipalCmd := &cobra.Command{
+		Use:   "principal",
+		Short: "Search for Principals",
+		Long: `
 Search for Principals. You may provide any of the following option groups:
 
 [isAdmin, tenantId]
@@ -88,64 +98,73 @@ The time bound applies to the time that the Principal was created.
 
 Returns a list of ObjectId's that can be passed into 'lhctl get principals'.
 	`,
-	Args: cobra.ExactArgs(0),
-	Run: func(cmd *cobra.Command, args []string) {
-		isAdmin, _ := cmd.Flags().GetBool("isAdmin")
-		tenantId, _ := cmd.Flags().GetString("tenantId")
-		bookmark, _ := cmd.Flags().GetBytesBase64("bookmark")
-		limit, _ := cmd.Flags().GetInt32("limit")
+		Args: cobra.ExactArgs(0),
+		Run: func(cmd *cobra.Command, args []string) {
+			isAdmin, _ := cmd.Flags().GetBool("isAdmin")
+			tenantId, _ := cmd.Flags().GetString("tenantId")
+			bookmark, _ := cmd.Flags().GetBytesBase64("bookmark")
+			limit, _ := cmd.Flags().GetInt32("limit")
 
-		earliest, latest := loadEarliestAndLatestStart(cmd)
+			earliest, latest := loadEarliestAndLatestStart(cmd)
 
-		search := &lhproto.SearchPrincipalRequest{
-			Bookmark:      bookmark,
-			Limit:         &limit,
-			EarliestStart: earliest,
-			LatestStart:   latest,
-		}
-
-		if cmd.Flags().Lookup("isAdmin").Changed {
-			search.PrincipalCriteria = &lhproto.SearchPrincipalRequest_IsAdmin{
-				IsAdmin: isAdmin,
+			search := &lhproto.SearchPrincipalRequest{
+				Bookmark:      bookmark,
+				Limit:         &limit,
+				EarliestStart: earliest,
+				LatestStart:   latest,
 			}
-		} else if tenantId != "" {
-			search.PrincipalCriteria = &lhproto.SearchPrincipalRequest_TenantId{
-				TenantId: tenantId,
-			}
-		}
 
-		littlehorse.PrintResp(getGlobalClient(cmd).SearchPrincipal(requestContext(cmd), search))
-	},
+			if cmd.Flags().Lookup("isAdmin").Changed {
+				search.PrincipalCriteria = &lhproto.SearchPrincipalRequest_IsAdmin{
+					IsAdmin: isAdmin,
+				}
+			} else if tenantId != "" {
+				search.PrincipalCriteria = &lhproto.SearchPrincipalRequest_TenantId{
+					TenantId: tenantId,
+				}
+			}
+
+			littlehorse.PrintResp(getGlobalClient(cmd).SearchPrincipal(requestContext(cmd), search))
+		},
+	}
+	searchPrincipalCmd.Flags().String("tenantId", "", "List Principals associated with this Tenant ID")
+	searchPrincipalCmd.Flags().Bool("isAdmin", false, "List only Principals that are admins")
+	searchPrincipalCmd.Flags().Int("earliestMinutesAgo", -1, "Search only for Principals that were created no more than this number of minutes ago")
+	searchPrincipalCmd.Flags().Int("latestMinutesAgo", -1, "Search only for Principals that were created at least this number of minutes ago")
+	return searchPrincipalCmd
 }
 
-var deployPrincipalCmd = &cobra.Command{
-	Use:   "principal <file>",
-	Short: "Deploy Principal from a file",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		putPrincipalReq := &lhproto.PutPrincipalRequest{}
+func newDeployPrincipalCmd() *cobra.Command {
+	deployPrincipalCmd := &cobra.Command{
+		Use:   "principal <file>",
+		Short: "Deploy Principal from a file",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			putPrincipalReq := &lhproto.PutPrincipalRequest{}
 
-		// First, read the file
-		dat, err := os.ReadFile(args[0])
-		if err != nil {
-			log.Fatal("Failed to read file: ", err)
-		}
+			// First, read the file
+			dat, err := os.ReadFile(args[0])
+			if err != nil {
+				log.Fatal("Failed to read file: ", err)
+			}
 
-		useProto, err := cmd.Flags().GetBool("proto")
-		if err != nil {
-			log.Fatal("Unexpected error: ", err)
-		}
-		if useProto {
-			err = proto.Unmarshal(dat, putPrincipalReq)
-		} else {
-			err = protojson.Unmarshal(dat, putPrincipalReq)
-		}
-		if err != nil {
-			log.Fatal("Failed reading deploy file: " + err.Error())
-		}
+			useProto, err := cmd.Flags().GetBool("proto")
+			if err != nil {
+				log.Fatal("Unexpected error: ", err)
+			}
+			if useProto {
+				err = proto.Unmarshal(dat, putPrincipalReq)
+			} else {
+				err = protojson.Unmarshal(dat, putPrincipalReq)
+			}
+			if err != nil {
+				log.Fatal("Failed reading deploy file: " + err.Error())
+			}
 
-		littlehorse.PrintResp(getGlobalClient(cmd).PutPrincipal(requestContext(cmd), putPrincipalReq))
-	},
+			littlehorse.PrintResp(getGlobalClient(cmd).PutPrincipal(requestContext(cmd), putPrincipalReq))
+		},
+	}
+	return deployPrincipalCmd
 }
 
 func parseAcl(input string) map[lhproto.ACLResource][]lhproto.ACLAction {
@@ -192,36 +211,21 @@ var (
 	}
 )
 
-var deletePrincipalCmd = &cobra.Command{
-	Use:   "principal <id>",
-	Short: "Delete a Principal.",
-	Args:  cobra.ExactArgs(1),
-	Run: func(cmd *cobra.Command, args []string) {
-		littlehorse.PrintResp(getGlobalClient(cmd).DeletePrincipal(
-			requestContext(cmd),
-			&lhproto.DeletePrincipalRequest{
-				Id: &lhproto.PrincipalId{
-					Id: args[0],
+func newDeletePrincipalCmd() *cobra.Command {
+	deletePrincipalCmd := &cobra.Command{
+		Use:   "principal <id>",
+		Short: "Delete a Principal.",
+		Args:  cobra.ExactArgs(1),
+		Run: func(cmd *cobra.Command, args []string) {
+			littlehorse.PrintResp(getGlobalClient(cmd).DeletePrincipal(
+				requestContext(cmd),
+				&lhproto.DeletePrincipalRequest{
+					Id: &lhproto.PrincipalId{
+						Id: args[0],
+					},
 				},
-			},
-		))
-	},
-}
-
-func init() {
-	putCmd.AddCommand(putPrincipalCmd)
-	putPrincipalCmd.Flags().String("acl", "", "ACLs")
-	putPrincipalCmd.Flags().Bool("overwrite", false, "Overwrites principal information")
-	putPrincipalCmd.Flags().String("tenantId", "", "Tenant associated with the principal")
-
-	searchCmd.AddCommand(searchPrincipalCmd)
-	searchPrincipalCmd.Flags().String("tenantId", "", "List Principals associated with this Tenant ID")
-	searchPrincipalCmd.Flags().Bool("isAdmin", false, "List only Principals that are admins")
-	searchPrincipalCmd.Flags().Int("earliestMinutesAgo", -1, "Search only for Principals that were created no more than this number of minutes ago")
-	searchPrincipalCmd.Flags().Int("latestMinutesAgo", -1, "Search only for Principals that were created at least this number of minutes ago")
-
-	getCmd.AddCommand(getPrincipalCmd)
-
-	deployCmd.AddCommand(deployPrincipalCmd)
-	deleteCmd.AddCommand(deletePrincipalCmd)
+			))
+		},
+	}
+	return deletePrincipalCmd
 }

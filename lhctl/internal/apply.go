@@ -4,12 +4,12 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// applyCmd represents the apply command
-var applyCmd = &cobra.Command{
-	Use:   "apply",
-	Short: "Apply a resource to a running object.",
-}
-
-func init() {
-	rootCmd.AddCommand(applyCmd)
+// newApplyCmd creates the apply command
+func newApplyCmd() *cobra.Command {
+	applyCmd := &cobra.Command{
+		Use:   "apply",
+		Short: "Apply a resource to a running object.",
+	}
+	applyCmd.AddCommand(newApplyWorkflowMigrationPlanCmd())
+	return applyCmd
 }

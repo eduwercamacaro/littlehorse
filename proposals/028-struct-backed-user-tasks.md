@@ -52,6 +52,16 @@ Consequently, addressing these User Task limitations is essential to unlocking t
 - Preserve the ability to save incomplete User Task progress.
 - Allow `lhctl` users to complete and save progress on struct-backed User Tasks.
 
+## Design Limitations
+
+Struct-backed User Tasks require a separately registered, named `StructDef`. Clients first register the `StructDef`, then register a `UserTaskDef` referencing its exact `StructDefId`, and finally reference that `UserTaskDef` from the workflow.
+
+This proposal does not support an `InlineStructDef` as the User Task's result contract or declaring a workflow-specific form directly inside the workflow builder. Even a form used by only one workflow requires separate `StructDef` and `UserTaskDef` registration. `UserTaskNode` continues to reference a registered `UserTaskDef`; it does not own a form schema.
+
+The desired experience for inline forms is to declare them directly inside the workflow builder. Adding an `InlineStructDef` field to `PutUserTaskDefRequest` alone would not provide that experience: the form would still need separate UserTaskDef registration. Supporting workflow-local forms instead requires designing how a `UserTaskNode` owns its schema, how a `UserTaskRun` identifies that contract without a registered `UserTaskDef`, and how completion validation and form-rendering clients resolve the schema from the pinned workflow. Those changes are deferred to a separate proposal so this proposal can preserve the existing registration and lookup model while replacing the result schema with a StructDef reference.
+
+This limitation concerns the top-level result contract. Fields within the referenced `StructDef` retain the nested types supported by the existing Struct system.
+
 ## Public API Changes
 
 ### `UserTaskDef`
@@ -189,5 +199,3 @@ Changing an existing UserTaskDef name from a legacy field schema to a StructDef-
 Potential follow-up proposals may cover:
 
 - Removing `UserTaskField`, `UserTaskDef.fields`, and completion `results` in the next major API version.
-
-

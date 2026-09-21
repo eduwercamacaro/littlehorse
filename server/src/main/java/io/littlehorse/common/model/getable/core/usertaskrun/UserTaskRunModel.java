@@ -389,12 +389,6 @@ public class UserTaskRunModel extends CoreGetable<UserTaskRun> implements CoreOu
                         Status.INVALID_ARGUMENT,
                         "Progress for a struct-backed UserTaskDef must contain a Struct output");
             }
-            if (!userTaskDef
-                    .getResultStructDefId()
-                    .equals(partialProgress.getStruct().getStructDefId())) {
-                throw new LHApiException(
-                        Status.INVALID_ARGUMENT, "Progress output must use the UserTaskDef's result StructDefId");
-            }
             validatePartialStructResults(
                     partialProgress.getStruct().getInlineStruct().getFields(), userTaskDef);
             output = partialProgress;

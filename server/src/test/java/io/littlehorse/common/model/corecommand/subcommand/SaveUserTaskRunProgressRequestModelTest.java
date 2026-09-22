@@ -5,6 +5,7 @@ import io.littlehorse.common.exceptions.LHApiException;
 import io.littlehorse.common.model.getable.core.usertaskrun.UserTaskRunModel;
 import io.littlehorse.common.model.getable.global.structdef.StructDefModel;
 import io.littlehorse.common.model.getable.global.wfspec.node.subnode.usertasks.UserTaskDefModel;
+import io.littlehorse.common.model.getable.global.wfspec.node.subnode.usertasks.UserTaskFieldModel;
 import io.littlehorse.common.model.getable.objectId.NodeRunIdModel;
 import io.littlehorse.common.model.getable.objectId.StructDefIdModel;
 import io.littlehorse.common.model.getable.objectId.UserTaskDefIdModel;
@@ -28,6 +29,7 @@ import io.littlehorse.server.TestCoreProcessorContext;
 import io.littlehorse.server.streams.topology.core.CommandProcessorOutput;
 import io.littlehorse.server.streams.util.HeadersUtil;
 import java.util.Date;
+import java.util.function.Function;
 import org.apache.kafka.streams.processor.api.MockProcessorContext;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -106,6 +108,51 @@ public class SaveUserTaskRunProgressRequestModelTest {
         assertInvalidField(testData, "Field '%s' is invalid".formatted(STRUCT_FIELD));
     }
 
+    @Test
+    @SuppressWarnings("deprecation")
+    void shouldRejectLegacyResultsForStructBackedUserTaskDef() {
+        VariableValue partialResult =
+                VariableValue.newBuilder().setStr("partial value").build();
+        TestData testData = arrangeStructScenario(taskId -> SaveUserTaskRunProgressRequest.newBuilder()
+                .setUserTaskRunId(taskId.toProto())
+                .setPolicy(SaveUserTaskRunAssignmentPolicy.FAIL_IF_CLAIMED_BY_OTHER)
+                .setUserId("anakin")
+                .putResults(STR_FIELD, partialResult)
+                .build());
+
+        assertInvalidField(testData, "Use output instead of results for a struct-backed UserTaskDef");
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    void shouldSaveProgressForLegacyUserTaskDef() {
+        VariableValue result = VariableValue.newBuilder().setStr("legacy value").build();
+        TestData testData = arrangeLegacyScenarioWithResult(STR_FIELD, result);
+
+        testData.request().process(testData.context(), testData.context().getLhConfig());
+        testData.context().endExecution();
+
+        UserTaskRunModel storedTask = testData.context().getableManager().get(testData.taskId());
+        Assertions.assertThat(storedTask.getOutput()).isNull();
+        Assertions.assertThat(storedTask.getResults()).containsOnlyKeys(STR_FIELD);
+        Assertions.assertThat(storedTask.getResults().get(STR_FIELD).toProto().build())
+                .isEqualTo(result);
+    }
+
+    @Test
+    void shouldRejectStructOutputForLegacyUserTaskDef() {
+        TestData testData = arrangeLegacyScenario(STR_FIELD, taskId -> SaveUserTaskRunProgressRequest.newBuilder()
+                .setUserTaskRunId(taskId.toProto())
+                .setPolicy(SaveUserTaskRunAssignmentPolicy.FAIL_IF_CLAIMED_BY_OTHER)
+                .setUserId("anakin")
+                .setOutput(structOutput(inlineStruct(
+                        STR_FIELD,
+                        VariableValue.newBuilder().setStr("partial value").build())))
+                .build());
+
+        assertInvalidField(testData, "Use results instead of output for a legacy UserTaskDef");
+    }
+
     private void assertInvalidField(TestData testData, String expectedMessage) {
         Throwable thrown = Assertions.catchThrowable(() -> testData.request()
                 .process(testData.context(), testData.context().getLhConfig()));
@@ -121,11 +168,16 @@ public class SaveUserTaskRunProgressRequestModelTest {
     }
 
     private TestData arrangeScenarioWithOutput(InlineStruct output) {
+        return arrangeStructScenario(taskId -> createProgressRequest(taskId, output));
+    }
+
+    private TestData arrangeStructScenario(
+            Function<UserTaskRunIdModel, SaveUserTaskRunProgressRequest> requestFactory) {
         Date savedAt = new Date(1_000L);
         NodeRunIdModel nodeRunId = new NodeRunIdModel("wf-run", 0, 1);
         UserTaskRunIdModel taskId = new UserTaskRunIdModel(nodeRunId);
         StructDefIdModel structDefId = resultStructDefId();
-        SaveUserTaskRunProgressRequest progress = createProgressRequest(taskId, output);
+        SaveUserTaskRunProgressRequest progress = requestFactory.apply(taskId);
         MockProcessorContext<String, CommandProcessorOutput> mockProcessorContext = new MockProcessorContext<>();
         // The shared harness registers Kafka Streams in-memory stores with this
         // MockProcessorContext and uses real metadata and Getable managers.
@@ -140,6 +192,39 @@ public class SaveUserTaskRunProgressRequestModelTest {
         freshContext.metadataManager().put(taskDef);
         freshContext.metadataManager().put(createStructDef(structDefId, freshContext));
         freshContext.metadataManager().put(createNestedStructDef(freshContext));
+        freshContext.getableManager().put(createUserTaskRun(nodeRunId, taskDef.getObjectId(), freshContext));
+        freshContext.endExecution();
+
+        return new TestData(
+                freshContext, taskId, progress, freshContext.currentCommand().getSaveUserTaskRunProgress(), savedAt);
+    }
+
+    @SuppressWarnings("deprecation")
+    private TestData arrangeLegacyScenarioWithResult(String fieldName, VariableValue result) {
+        return arrangeLegacyScenario(fieldName, taskId -> SaveUserTaskRunProgressRequest.newBuilder()
+                .setUserTaskRunId(taskId.toProto())
+                .setPolicy(SaveUserTaskRunAssignmentPolicy.FAIL_IF_CLAIMED_BY_OTHER)
+                .setUserId("anakin")
+                .putResults(fieldName, result)
+                .build());
+    }
+
+    private TestData arrangeLegacyScenario(
+            String fieldName, Function<UserTaskRunIdModel, SaveUserTaskRunProgressRequest> requestFactory) {
+        Date savedAt = new Date(2_000L);
+        NodeRunIdModel nodeRunId = new NodeRunIdModel("legacy-wf-run", 0, 1);
+        UserTaskRunIdModel taskId = new UserTaskRunIdModel(nodeRunId);
+        SaveUserTaskRunProgressRequest progress = requestFactory.apply(taskId);
+        MockProcessorContext<String, CommandProcessorOutput> mockProcessorContext = new MockProcessorContext<>();
+        TestCoreProcessorContext freshContext = freshContext(
+                Command.newBuilder()
+                        .setTime(LHUtil.fromDate(savedAt))
+                        .setSaveUserTaskRunProgress(progress)
+                        .build(),
+                mockProcessorContext);
+
+        UserTaskDefModel taskDef = createLegacyUserTaskDef(fieldName);
+        freshContext.metadataManager().put(taskDef);
         freshContext.getableManager().put(createUserTaskRun(nodeRunId, taskDef.getObjectId(), freshContext));
         freshContext.endExecution();
 
@@ -174,6 +259,21 @@ public class SaveUserTaskRunProgressRequestModelTest {
         taskDef.version = 0;
         taskDef.createdAt = new Date(0);
         taskDef.setResultStructDefId(structDefId);
+        return taskDef;
+    }
+
+    private UserTaskDefModel createLegacyUserTaskDef(String fieldName) {
+        UserTaskDefModel taskDef = new UserTaskDefModel();
+        taskDef.name = "legacy-user-task";
+        taskDef.version = 0;
+        taskDef.createdAt = new Date(0);
+
+        UserTaskFieldModel field = new UserTaskFieldModel();
+        field.setName(fieldName);
+        field.setDisplayName(fieldName);
+        field.setType(VariableType.STR);
+        field.setRequired(true);
+        taskDef.getFields().add(field);
         return taskDef;
     }
 

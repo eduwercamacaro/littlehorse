@@ -140,7 +140,7 @@ public class SaveUserTaskRunProgressRequestModelTest {
     }
 
     @Test
-    void shouldRejectStructOutputForLegacyUserTaskDef() {
+    void shouldSaveStructOutputForLegacyUserTaskDef() {
         TestData testData = arrangeLegacyScenario(STR_FIELD, taskId -> SaveUserTaskRunProgressRequest.newBuilder()
                 .setUserTaskRunId(taskId.toProto())
                 .setPolicy(SaveUserTaskRunAssignmentPolicy.FAIL_IF_CLAIMED_BY_OTHER)
@@ -150,7 +150,73 @@ public class SaveUserTaskRunProgressRequestModelTest {
                         VariableValue.newBuilder().setStr("partial value").build())))
                 .build());
 
-        assertInvalidField(testData, "Use results instead of output for a legacy UserTaskDef");
+        testData.request().process(testData.context(), testData.context().getLhConfig());
+        testData.context().endExecution();
+        UserTaskRunModel stored = testData.context().getableManager().get(testData.taskId());
+        Assertions.assertThat(stored.getOutput()).isNull();
+        Assertions.assertThat(stored.getStatus()).isEqualTo(UserTaskRunStatus.ASSIGNED);
+        Assertions.assertThat(stored.getResults()).containsOnlyKeys(STR_FIELD);
+        Assertions.assertThat(stored.getResults().get(STR_FIELD).toProto().getStr())
+                .isEqualTo("partial value");
+        Assertions.assertThat(stored.getEvents()).singleElement().satisfies(event -> {
+            Assertions.assertThat(event.getType()).isEqualTo(EventCase.SAVED);
+            Assertions.assertThat(event.getSaved().toProto().getResultsMap())
+                    .isEqualTo(stored.toProto().getResultsMap());
+        });
+    }
+
+    @Test
+    void shouldAllowMissingRequiredLegacyFieldWhenSavingStruct() {
+        TestData data = arrangeLegacyScenarioWithOutput(structOutput(InlineStruct.getDefaultInstance()));
+        data.request().process(data.context(), data.context().getLhConfig());
+        data.context().endExecution();
+        UserTaskRunModel stored = data.context().getableManager().get(data.taskId());
+        Assertions.assertThat(stored.getStatus()).isEqualTo(UserTaskRunStatus.ASSIGNED);
+        Assertions.assertThat(stored.getResults()).isEmpty();
+        Assertions.assertThat(stored.getOutput()).isNull();
+        Assertions.assertThat(stored.getEvents()).hasSize(1);
+    }
+
+    @Test
+    void shouldRejectIncompatibleStructFieldForLegacyProgress() {
+        TestData data = arrangeLegacyScenarioWithOutput(structOutput(
+                inlineStruct(STR_FIELD, VariableValue.newBuilder().setBool(true).build())));
+        assertInvalidField(data, "is not defined in UserTask schema or has different type");
+    }
+
+    @Test
+    void shouldRejectUnknownStructFieldForLegacyProgress() {
+        TestData data = arrangeLegacyScenarioWithOutput(structOutput(inlineStruct(
+                "unknownField", VariableValue.newBuilder().setStr("value").build())));
+        assertInvalidField(data, "is not defined in UserTask schema or has different type");
+    }
+
+    @Test
+    void shouldRejectNonStructOutputForLegacyProgress() {
+        TestData data = arrangeLegacyScenarioWithOutput(
+                VariableValue.newBuilder().setStr("value").build());
+        assertInvalidField(data, "must contain a Struct value");
+    }
+
+    @Test
+    @SuppressWarnings("deprecation")
+    void shouldRejectBothRepresentationsForLegacyProgress() {
+        TestData data = arrangeLegacyScenario(STR_FIELD, taskId -> SaveUserTaskRunProgressRequest.newBuilder()
+                .setUserTaskRunId(taskId.toProto())
+                .setUserId("anakin")
+                .putResults(
+                        STR_FIELD, VariableValue.newBuilder().setStr("value").build())
+                .setOutput(structOutput(InlineStruct.getDefaultInstance()))
+                .build());
+        assertInvalidField(data, "Cannot supply both results and output");
+    }
+
+    private TestData arrangeLegacyScenarioWithOutput(VariableValue output) {
+        return arrangeLegacyScenario(STR_FIELD, taskId -> SaveUserTaskRunProgressRequest.newBuilder()
+                .setUserTaskRunId(taskId.toProto())
+                .setUserId("anakin")
+                .setOutput(output)
+                .build());
     }
 
     private void assertInvalidField(TestData testData, String expectedMessage) {

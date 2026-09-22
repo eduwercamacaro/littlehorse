@@ -35,6 +35,7 @@ import io.littlehorse.server.TestCoreProcessorContext;
 import io.littlehorse.server.streams.topology.core.CommandProcessorOutput;
 import io.littlehorse.server.streams.util.HeadersUtil;
 import java.util.Date;
+import java.util.Map;
 import java.util.function.Consumer;
 import org.apache.kafka.streams.processor.api.MockProcessorContext;
 import org.junit.jupiter.api.Test;
@@ -185,14 +186,60 @@ class CompleteUserTaskRunRequestModelTest {
         UserTaskRunModel stored = completeAndReload(data);
 
         assertThat(stored.getOutput()).isNull();
-        assertThat(stored.toProto().getResultsMap()).containsOnly(java.util.Map.entry(STR_FIELD, result));
+        assertThat(stored.toProto().getResultsMap()).containsOnly(Map.entry(STR_FIELD, result));
     }
 
     @Test
-    void shouldRejectStructOutputForLegacyUserTaskDef() {
-        TestData data = arrangeLegacyScenario(request -> request.setOutput(structOutput(validFields())));
+    void shouldCompleteLegacyUserTaskDefWithStructOutput() {
+        VariableValue value = VariableValue.newBuilder().setStr("legacy value").build();
+        TestData data = arrangeLegacyScenario(request -> request.setOutput(structOutput(
+                InlineStruct.newBuilder().putFields(STR_FIELD, field(value)).build())));
 
-        assertInvalidRequest(data, "Use results instead of output for a legacy UserTaskDef");
+        UserTaskRunModel stored = completeAndReload(data);
+        assertThat(stored.getOutput()).isNull();
+        assertThat(stored.toProto().getResultsMap()).containsOnly(Map.entry(STR_FIELD, value));
+    }
+
+    @Test
+    void shouldRejectMissingRequiredLegacyFieldInStructOutput() {
+        TestData data =
+                arrangeLegacyScenario(request -> request.setOutput(structOutput(InlineStruct.getDefaultInstance())));
+        assertInvalidRequest(data, "[" + STR_FIELD + "] are mandatory fields");
+    }
+
+    @Test
+    void shouldRejectIncompatibleStructFieldForLegacyCompletion() {
+        TestData data = arrangeLegacyScenario(request -> request.setOutput(structOutput(InlineStruct.newBuilder()
+                .putFields(
+                        STR_FIELD,
+                        field(VariableValue.newBuilder().setBool(true).build()))
+                .build())));
+        assertInvalidRequest(data, "is not defined in UserTask schema or has different type");
+    }
+
+    @Test
+    void shouldRejectUnknownStructFieldForLegacyCompletion() {
+        TestData data = arrangeLegacyScenario(request -> request.setOutput(structOutput(InlineStruct.newBuilder()
+                .putFields(
+                        "unknownField",
+                        field(VariableValue.newBuilder().setStr("value").build()))
+                .build())));
+        assertInvalidRequest(data, "is not defined in UserTask schema or has different type");
+    }
+
+    @Test
+    void shouldRejectNonStructOutputForLegacyCompletion() {
+        TestData data = arrangeLegacyScenario(
+                request -> request.setOutput(VariableValue.newBuilder().setStr("value")));
+        assertInvalidRequest(data, "must contain a Struct value");
+    }
+
+    @Test
+    void shouldRejectBothRepresentationsForLegacyCompletion() {
+        TestData data = arrangeLegacyScenario(request -> request.putResults(
+                        STR_FIELD, VariableValue.newBuilder().setStr("value").build())
+                .setOutput(structOutput(InlineStruct.getDefaultInstance())));
+        assertInvalidRequest(data, "Cannot supply both results and output");
     }
 
     @Test

@@ -120,9 +120,9 @@ public class UserTaskTest {
     }
 
     @Test
-    void shouldRejectStructOutputForLegacyUserTask() {
+    void shouldSaveAndCompleteLegacyUserTaskWithStructOutput() {
         workflowVerifier
-                .prepareRun(userTaskCancel)
+                .prepareRun(deadlineReassignmentWorkflow)
                 .waitForStatus(RUNNING)
                 .thenVerifyWfRun(wfRun -> {
                     UserTaskRunId userTaskRunId = client.listUserTaskRuns(ListUserTaskRunRequest.newBuilder()
@@ -130,24 +130,41 @@ public class UserTaskTest {
                                     .build())
                             .getResults(0)
                             .getId();
-                    VariableValue output = VariableValue.newBuilder()
-                            .setStruct(Struct.newBuilder().setStruct(InlineStruct.getDefaultInstance()))
-                            .build();
-
-                    Assertions.assertThatThrownBy(
-                                    () -> client.completeUserTaskRun(CompleteUserTaskRunRequest.newBuilder()
-                                            .setUserTaskRunId(userTaskRunId)
-                                            .setUserId("obiwan")
-                                            .setOutput(output)
-                                            .build()))
-                            .isInstanceOf(StatusRuntimeException.class)
-                            .hasMessageContaining("Use results instead of output");
-
-                    client.cancelUserTaskRun(io.littlehorse.sdk.common.proto.CancelUserTaskRunRequest.newBuilder()
+                    InlineStruct.Builder fields = InlineStruct.newBuilder()
+                            .putFields(
+                                    "myStr",
+                                    io.littlehorse.sdk.common.proto.StructField.newBuilder()
+                                            .setValue(LHLibUtil.objToVarVal("kenobi"))
+                                            .build());
+                    UserTaskRun saved = client.saveUserTaskRunProgress(SaveUserTaskRunProgressRequest.newBuilder()
                             .setUserTaskRunId(userTaskRunId)
+                            .setUserId("obiwan")
+                            .setPolicy(SaveUserTaskRunAssignmentPolicy.IGNORE_CLAIM)
+                            .setOutput(VariableValue.newBuilder()
+                                    .setStruct(Struct.newBuilder().setStruct(fields)))
+                            .build());
+                    Assertions.assertThat(saved.getResultsMap()).containsOnlyKeys("myStr");
+                    Assertions.assertThat(saved.hasOutput()).isFalse();
+                    Assertions.assertThat(saved.getStatus()).isNotEqualTo(UserTaskRunStatus.DONE);
+
+                    fields.putFields(
+                            "myInt",
+                            io.littlehorse.sdk.common.proto.StructField.newBuilder()
+                                    .setValue(LHLibUtil.objToVarVal(137))
+                                    .build());
+                    client.completeUserTaskRun(CompleteUserTaskRunRequest.newBuilder()
+                            .setUserTaskRunId(userTaskRunId)
+                            .setUserId("obiwan")
+                            .setOutput(VariableValue.newBuilder()
+                                    .setStruct(Struct.newBuilder().setStruct(fields)))
                             .build());
                 })
                 .waitForStatus(COMPLETED)
+                .thenVerifyTaskRun(0, 2, taskRun -> {
+                    Assertions.assertThat(taskRun.getAttempts(0).getOutput().getStr())
+                            .contains("kenobi")
+                            .contains("137");
+                })
                 .start();
     }
 

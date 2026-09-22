@@ -150,15 +150,17 @@ The accepted completion representation depends on the `UserTaskDef`:
 
 | UserTaskDef type | Accepted request field | Node output |
 |---|---|---|
-| Legacy `fields` | `results` | `JSON_OBJ` |
+| Legacy `fields` | `results` or compatible Struct `output` | `JSON_OBJ` |
 | `result_struct_def_id` | `output` | `STRUCT` |
 | No result schema | Neither | `VOID` |
 
-Supplying both `results` and `output`, or supplying the representation that does not match the `UserTaskDef`, returns `INVALID_ARGUMENT`.
+Legacy field-backed definitions also accept Struct `output`. Its supplied fields must match the names and primitive types declared in `UserTaskDef.fields`, and completion requires all required fields. The server stores those values in `UserTaskRun.results`, leaves `UserTaskRun.output` unset, and continues producing a `JSON_OBJ` workflow node output. Clients do not need to supply a StructDefId for this compatibility path.
+
+Supplying both nonempty `results` and `output`, non-Struct `output`, or legacy `results` for a Struct-backed definition returns `INVALID_ARGUMENT`.
 
 ### `SaveUserTaskRunProgressRequest`
 
-Use the same representation as completion: Struct-backed tasks accept `output`, while legacy field-backed tasks continue to accept `results`. The existing assignment policy remains unchanged.
+Use the same representation as completion: Struct-backed tasks accept `output`, while legacy field-backed tasks accept either `results` or compatible Struct `output`. When saving Struct output against legacy fields, validate each supplied field but allow required fields to be omitted. Store the snapshot and saved-event values in the legacy results maps. The existing assignment policy remains unchanged.
 
 ```protobuf
 message SaveUserTaskRunProgressRequest {

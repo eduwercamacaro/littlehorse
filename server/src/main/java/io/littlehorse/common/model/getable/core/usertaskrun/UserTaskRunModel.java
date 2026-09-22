@@ -400,13 +400,15 @@ public class UserTaskRunModel extends CoreGetable<UserTaskRun> implements CoreOu
                                     Map.Entry::getKey, entry -> entry.getValue().getValue())));
             this.events.add(new UserTaskEventModel(saved, ctx.currentCommand().getTime()));
             return;
-        } else if (req.getOutput() != null) {
-            throw new LHApiException(Status.INVALID_ARGUMENT, "Use results instead of output for a legacy UserTaskDef");
         }
 
-        this.results = req.getResults();
+        Map<String, VariableValueModel> progress = legacyResults(req.getResults(), req.getOutput());
+        if (req.getOutput() != null) {
+            validateLegacyResults(progress, userTaskDef, false);
+        }
+        this.results = progress;
         this.output = null;
-        UTESavedModel saved = new UTESavedModel(req.getUserId(), req.getResults());
+        UTESavedModel saved = new UTESavedModel(req.getUserId(), progress);
         this.events.add(new UserTaskEventModel(saved, ctx.currentCommand().getTime()));
     }
 
@@ -499,15 +501,33 @@ public class UserTaskRunModel extends CoreGetable<UserTaskRun> implements CoreOu
     }
 
     private void processLegacyTaskCompletedEvent(CompleteUserTaskRunRequestModel event, UserTaskDefModel userTaskDef) {
-        if (event.getOutput() != null) {
-            throw new LHApiException(Status.INVALID_ARGUMENT, "Use results instead of output for a legacy UserTaskDef");
-        }
+        Map<String, VariableValueModel> completedResults = legacyResults(event.getResults(), event.getOutput());
+        validateLegacyResults(completedResults, userTaskDef, true);
+        results.putAll(completedResults);
         output = null;
+    }
 
+    private Map<String, VariableValueModel> legacyResults(
+            Map<String, VariableValueModel> legacyResults, VariableValueModel structOutput) {
+        if (structOutput == null) return legacyResults;
+        if (!legacyResults.isEmpty()) {
+            throw new LHApiException(Status.INVALID_ARGUMENT, "Cannot supply both results and output");
+        }
+        if (structOutput.getStruct() == null) {
+            throw new LHApiException(
+                    Status.INVALID_ARGUMENT, "Output for a legacy UserTaskDef must contain a Struct value");
+        }
+        return structOutput.getStruct().getInlineStruct().getFields().entrySet().stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey, entry -> entry.getValue().getValue()));
+    }
+
+    private void validateLegacyResults(
+            Map<String, VariableValueModel> submittedResults, UserTaskDefModel userTaskDef, boolean completing) {
         Map<String, UserTaskFieldModel> userTaskFieldsGroupedByName = userTaskDef.getFields().stream()
                 .collect(Collectors.toMap(UserTaskFieldModel::getName, Function.identity()));
 
-        for (Map.Entry<String, VariableValueModel> field : event.getResults().entrySet()) {
+        for (Map.Entry<String, VariableValueModel> field : submittedResults.entrySet()) {
             UserTaskFieldModel userTaskFieldFromTaskDef = userTaskFieldsGroupedByName.get(field.getKey());
             // TODO: Support StructDefs
             if (field.getValue().getTypeDefinition().getDefinedTypeCase() != DefinedTypeCase.PRIMITIVE_TYPE) {
@@ -530,10 +550,10 @@ public class UserTaskRunModel extends CoreGetable<UserTaskRun> implements CoreOu
                                         field.getKey(),
                                         field.getValue().getTypeDefinition().getPrimitiveType()));
             }
-            results.put(field.getKey(), field.getValue());
         }
-        validateMandatoryFieldsFromCompletedEvent(
-                userTaskFieldsGroupedByName.values(), event.getResults().keySet());
+        if (completing) {
+            validateMandatoryFieldsFromCompletedEvent(userTaskFieldsGroupedByName.values(), submittedResults.keySet());
+        }
     }
 
     private void validateMandatoryFieldsFromCompletedEvent(

@@ -124,7 +124,6 @@ public class UserTasksExample {
                 .build();
         client.putUserTaskDef(requestForm);
 
-
         PutUserTaskDefRequest approvalForm = PutUserTaskDefRequest.newBuilder()
                 .setName(APPROVAL_FORM)
                 .setResultStructDefId(approvalFormStructDef.getId())
@@ -137,8 +136,8 @@ public class UserTasksExample {
         worker.start();
     }
 
-
-    private static StructDef registerStructDef(LittleHorseGrpc.LittleHorseBlockingStub client, Class<?> structDefClass) {
+    private static StructDef registerStructDef(
+            LittleHorseGrpc.LittleHorseBlockingStub client, Class<?> structDefClass) {
         StructDefCompatibilityType compatibilityType = StructDefCompatibilityType.NO_SCHEMA_UPDATES;
 
         LHStructDefType structDefType = new LHStructDefType(structDefClass);

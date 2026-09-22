@@ -1,6 +1,5 @@
 package io.littlehorse.examples;
 
-
 import io.littlehorse.sdk.worker.LHStructDef;
 import io.littlehorse.sdk.worker.LHStructField;
 
@@ -9,12 +8,11 @@ public class ItemRequestForm {
 
     @LHStructField(description = "The item being requested.")
     public String requestedItem;
+
     @LHStructField(description = "The justification for requesting the item.")
     public String justification;
 
-    public ItemRequestForm() {
-
-    }
+    public ItemRequestForm() {}
 
     public ItemRequestForm(String requestedItem, String justification) {
         this.requestedItem = requestedItem;

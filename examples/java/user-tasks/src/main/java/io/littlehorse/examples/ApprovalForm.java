@@ -9,13 +9,11 @@ public class ApprovalForm {
     @LHStructField(description = "Whether the request is approved or not.")
     public boolean isApproved;
 
+    public ApprovalForm() {}
 
-    public ApprovalForm() {
-    }
     public ApprovalForm(boolean isApproved) {
         this.isApproved = isApproved;
     }
-
 
     public boolean isApproved() {
         return isApproved;

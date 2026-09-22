@@ -37,6 +37,7 @@ const (
 	LittleHorse_GetUserTaskDef_FullMethodName              = "/littlehorse.LittleHorse/GetUserTaskDef"
 	LittleHorse_GetLatestUserTaskDef_FullMethodName        = "/littlehorse.LittleHorse/GetLatestUserTaskDef"
 	LittleHorse_RunWf_FullMethodName                       = "/littlehorse.LittleHorse/RunWf"
+	LittleHorse_RunInlineWf_FullMethodName                 = "/littlehorse.LittleHorse/RunInlineWf"
 	LittleHorse_ScheduleWf_FullMethodName                  = "/littlehorse.LittleHorse/ScheduleWf"
 	LittleHorse_SearchScheduledWfRun_FullMethodName        = "/littlehorse.LittleHorse/SearchScheduledWfRun"
 	LittleHorse_GetScheduledWfRun_FullMethodName           = "/littlehorse.LittleHorse/GetScheduledWfRun"
@@ -186,6 +187,8 @@ type LittleHorseClient interface {
 	GetLatestUserTaskDef(ctx context.Context, in *GetLatestUserTaskDefRequest, opts ...grpc.CallOption) (*UserTaskDef, error)
 	// Runs a WfSpec to create a WfRun.
 	RunWf(ctx context.Context, in *RunWfRequest, opts ...grpc.CallOption) (*WfRun, error)
+	// EXPERIMENTAL: Starts a durable run from an unregistered workflow definition.
+	RunInlineWf(ctx context.Context, in *RunInlineWfRequest, opts ...grpc.CallOption) (*WfRun, error)
 	// Schedule repeated WfRun based on a cron expression
 	ScheduleWf(ctx context.Context, in *ScheduleWfRequest, opts ...grpc.CallOption) (*ScheduledWfRun, error)
 	// Search for existing schedules
@@ -581,6 +584,15 @@ func (c *littleHorseClient) GetLatestUserTaskDef(ctx context.Context, in *GetLat
 func (c *littleHorseClient) RunWf(ctx context.Context, in *RunWfRequest, opts ...grpc.CallOption) (*WfRun, error) {
 	out := new(WfRun)
 	err := c.cc.Invoke(ctx, LittleHorse_RunWf_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *littleHorseClient) RunInlineWf(ctx context.Context, in *RunInlineWfRequest, opts ...grpc.CallOption) (*WfRun, error) {
+	out := new(WfRun)
+	err := c.cc.Invoke(ctx, LittleHorse_RunInlineWf_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1484,6 +1496,8 @@ type LittleHorseServer interface {
 	GetLatestUserTaskDef(context.Context, *GetLatestUserTaskDefRequest) (*UserTaskDef, error)
 	// Runs a WfSpec to create a WfRun.
 	RunWf(context.Context, *RunWfRequest) (*WfRun, error)
+	// EXPERIMENTAL: Starts a durable run from an unregistered workflow definition.
+	RunInlineWf(context.Context, *RunInlineWfRequest) (*WfRun, error)
 	// Schedule repeated WfRun based on a cron expression
 	ScheduleWf(context.Context, *ScheduleWfRequest) (*ScheduledWfRun, error)
 	// Search for existing schedules
@@ -1779,6 +1793,9 @@ func (UnimplementedLittleHorseServer) GetLatestUserTaskDef(context.Context, *Get
 }
 func (UnimplementedLittleHorseServer) RunWf(context.Context, *RunWfRequest) (*WfRun, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RunWf not implemented")
+}
+func (UnimplementedLittleHorseServer) RunInlineWf(context.Context, *RunInlineWfRequest) (*WfRun, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RunInlineWf not implemented")
 }
 func (UnimplementedLittleHorseServer) ScheduleWf(context.Context, *ScheduleWfRequest) (*ScheduledWfRun, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ScheduleWf not implemented")
@@ -2368,6 +2385,24 @@ func _LittleHorse_RunWf_Handler(srv interface{}, ctx context.Context, dec func(i
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LittleHorseServer).RunWf(ctx, req.(*RunWfRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LittleHorse_RunInlineWf_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RunInlineWfRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LittleHorseServer).RunInlineWf(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: LittleHorse_RunInlineWf_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LittleHorseServer).RunInlineWf(ctx, req.(*RunInlineWfRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -4092,6 +4127,10 @@ var LittleHorse_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RunWf",
 			Handler:    _LittleHorse_RunWf_Handler,
+		},
+		{
+			MethodName: "RunInlineWf",
+			Handler:    _LittleHorse_RunInlineWf_Handler,
 		},
 		{
 			MethodName: "ScheduleWf",

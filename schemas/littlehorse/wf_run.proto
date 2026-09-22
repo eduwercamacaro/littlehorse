@@ -7,19 +7,25 @@ import "common_enums.proto";
 import "object_id.proto";
 import "type_definition.proto";
 import "workflow_migration.proto";
+import "wf_spec.proto";
 
 option go_package = ".;lhproto";
 option java_multiple_files = true;
 option java_package = "io.littlehorse.sdk.common.proto";
 option csharp_namespace = "LittleHorse.Sdk.Common.Proto";
 
-// A WfRun is a running instance of a WfSpec.
+// A WfRun is a running instance of a registered or inline workflow definition.
 message WfRun {
   // The ID of the WfRun.
   WfRunId id = 1;
 
-  // The ID of the WfSpec that this WfRun belongs to.
-  WfSpecId wf_spec_id = 2;
+  oneof wf_spec_source {
+    // The ID of the registered WfSpec that this WfRun belongs to.
+    WfSpecId wf_spec_id = 2;
+
+    // An immutable workflow definition owned by this WfRun.
+    InlineWfSpec inline_wf_spec = 15;
+  }
 
   // When a WfRun is migrated from an old verison of a WfSpec to a newer one, we add the
   // old WfSpecId to this list for historical auditing and debugging purposes.

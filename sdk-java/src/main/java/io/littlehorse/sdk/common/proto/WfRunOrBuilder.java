@@ -39,7 +39,7 @@ public interface WfRunOrBuilder extends
 
   /**
    * <pre>
-   * The ID of the WfSpec that this WfRun belongs to.
+   * The ID of the registered WfSpec that this WfRun belongs to.
    * </pre>
    *
    * <code>.littlehorse.WfSpecId wf_spec_id = 2;</code>
@@ -48,7 +48,7 @@ public interface WfRunOrBuilder extends
   boolean hasWfSpecId();
   /**
    * <pre>
-   * The ID of the WfSpec that this WfRun belongs to.
+   * The ID of the registered WfSpec that this WfRun belongs to.
    * </pre>
    *
    * <code>.littlehorse.WfSpecId wf_spec_id = 2;</code>
@@ -57,12 +57,39 @@ public interface WfRunOrBuilder extends
   io.littlehorse.sdk.common.proto.WfSpecId getWfSpecId();
   /**
    * <pre>
-   * The ID of the WfSpec that this WfRun belongs to.
+   * The ID of the registered WfSpec that this WfRun belongs to.
    * </pre>
    *
    * <code>.littlehorse.WfSpecId wf_spec_id = 2;</code>
    */
   io.littlehorse.sdk.common.proto.WfSpecIdOrBuilder getWfSpecIdOrBuilder();
+
+  /**
+   * <pre>
+   * An immutable workflow definition owned by this WfRun.
+   * </pre>
+   *
+   * <code>.littlehorse.InlineWfSpec inline_wf_spec = 15;</code>
+   * @return Whether the inlineWfSpec field is set.
+   */
+  boolean hasInlineWfSpec();
+  /**
+   * <pre>
+   * An immutable workflow definition owned by this WfRun.
+   * </pre>
+   *
+   * <code>.littlehorse.InlineWfSpec inline_wf_spec = 15;</code>
+   * @return The inlineWfSpec.
+   */
+  io.littlehorse.sdk.common.proto.InlineWfSpec getInlineWfSpec();
+  /**
+   * <pre>
+   * An immutable workflow definition owned by this WfRun.
+   * </pre>
+   *
+   * <code>.littlehorse.InlineWfSpec inline_wf_spec = 15;</code>
+   */
+  io.littlehorse.sdk.common.proto.InlineWfSpecOrBuilder getInlineWfSpecOrBuilder();
 
   /**
    * <pre>
@@ -489,4 +516,6 @@ io.littlehorse.sdk.common.proto.MigrationVars defaultValue);
    * @return The threadRunQueue at the given index.
    */
   int getThreadRunQueue(int index);
+
+  io.littlehorse.sdk.common.proto.WfRun.WfSpecSourceCase getWfSpecSourceCase();
 }

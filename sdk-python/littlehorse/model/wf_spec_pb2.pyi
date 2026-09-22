@@ -405,3 +405,28 @@ class NodeMigration(_message.Message):
     NEW_NODE_NAME_FIELD_NUMBER: _ClassVar[int]
     new_node_name: str
     def __init__(self, new_node_name: _Optional[str] = ...) -> None: ...
+
+class InlineWfSpecDefinition(_message.Message):
+    __slots__ = ("thread_specs", "entrypoint_thread_name", "retention_policy")
+    class ThreadSpecsEntry(_message.Message):
+        __slots__ = ("key", "value")
+        KEY_FIELD_NUMBER: _ClassVar[int]
+        VALUE_FIELD_NUMBER: _ClassVar[int]
+        key: str
+        value: ThreadSpec
+        def __init__(self, key: _Optional[str] = ..., value: _Optional[_Union[ThreadSpec, _Mapping]] = ...) -> None: ...
+    THREAD_SPECS_FIELD_NUMBER: _ClassVar[int]
+    ENTRYPOINT_THREAD_NAME_FIELD_NUMBER: _ClassVar[int]
+    RETENTION_POLICY_FIELD_NUMBER: _ClassVar[int]
+    thread_specs: _containers.MessageMap[str, ThreadSpec]
+    entrypoint_thread_name: str
+    retention_policy: WorkflowRetentionPolicy
+    def __init__(self, thread_specs: _Optional[_Mapping[str, ThreadSpec]] = ..., entrypoint_thread_name: _Optional[str] = ..., retention_policy: _Optional[_Union[WorkflowRetentionPolicy, _Mapping]] = ...) -> None: ...
+
+class InlineWfSpec(_message.Message):
+    __slots__ = ("definition", "checksum")
+    DEFINITION_FIELD_NUMBER: _ClassVar[int]
+    CHECKSUM_FIELD_NUMBER: _ClassVar[int]
+    definition: InlineWfSpecDefinition
+    checksum: str
+    def __init__(self, definition: _Optional[_Union[InlineWfSpecDefinition, _Mapping]] = ..., checksum: _Optional[str] = ...) -> None: ...

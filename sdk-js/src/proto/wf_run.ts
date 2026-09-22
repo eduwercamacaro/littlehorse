@@ -18,10 +18,11 @@ import { MigrationVars } from "./workflow_migration";
 import { WorkflowMigrationPlanId } from "./object_id";
 import { Timestamp } from "./google/protobuf/timestamp";
 import { LHStatus } from "./common_enums";
+import { InlineWfSpec } from "./wf_spec";
 import { WfSpecId } from "./object_id";
 import { WfRunId } from "./object_id";
 /**
- * A WfRun is a running instance of a WfSpec.
+ * A WfRun is a running instance of a registered or inline workflow definition.
  *
  * @generated from protobuf message littlehorse.WfRun
  */
@@ -33,11 +34,27 @@ export interface WfRun {
      */
     id?: WfRunId;
     /**
-     * The ID of the WfSpec that this WfRun belongs to.
-     *
-     * @generated from protobuf field: littlehorse.WfSpecId wf_spec_id = 2
+     * @generated from protobuf oneof: wf_spec_source
      */
-    wfSpecId?: WfSpecId;
+    wfSpecSource: {
+        oneofKind: "wfSpecId";
+        /**
+         * The ID of the registered WfSpec that this WfRun belongs to.
+         *
+         * @generated from protobuf field: littlehorse.WfSpecId wf_spec_id = 2
+         */
+        wfSpecId: WfSpecId;
+    } | {
+        oneofKind: "inlineWfSpec";
+        /**
+         * An immutable workflow definition owned by this WfRun.
+         *
+         * @generated from protobuf field: littlehorse.InlineWfSpec inline_wf_spec = 15
+         */
+        inlineWfSpec: InlineWfSpec;
+    } | {
+        oneofKind: undefined;
+    };
     /**
      * When a WfRun is migrated from an old verison of a WfSpec to a newer one, we add the
      * old WfSpecId to this list for historical auditing and debugging purposes.
@@ -594,7 +611,8 @@ class WfRun$Type extends MessageType<WfRun> {
     constructor() {
         super("littlehorse.WfRun", [
             { no: 1, name: "id", kind: "message", T: () => WfRunId },
-            { no: 2, name: "wf_spec_id", kind: "message", T: () => WfSpecId },
+            { no: 2, name: "wf_spec_id", kind: "message", oneof: "wfSpecSource", T: () => WfSpecId },
+            { no: 15, name: "inline_wf_spec", kind: "message", oneof: "wfSpecSource", T: () => InlineWfSpec },
             { no: 3, name: "old_wf_spec_versions", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => WfSpecId },
             { no: 4, name: "status", kind: "enum", T: () => ["littlehorse.LHStatus", LHStatus] },
             { no: 5, name: "greatest_threadrun_number", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
@@ -611,6 +629,7 @@ class WfRun$Type extends MessageType<WfRun> {
     }
     create(value?: PartialMessage<WfRun>): WfRun {
         const message = globalThis.Object.create((this.messagePrototype!));
+        message.wfSpecSource = { oneofKind: undefined };
         message.oldWfSpecVersions = [];
         message.status = 0;
         message.greatestThreadrunNumber = 0;
@@ -632,7 +651,16 @@ class WfRun$Type extends MessageType<WfRun> {
                     message.id = WfRunId.internalBinaryRead(reader, reader.uint32(), options, message.id);
                     break;
                 case /* littlehorse.WfSpecId wf_spec_id */ 2:
-                    message.wfSpecId = WfSpecId.internalBinaryRead(reader, reader.uint32(), options, message.wfSpecId);
+                    message.wfSpecSource = {
+                        oneofKind: "wfSpecId",
+                        wfSpecId: WfSpecId.internalBinaryRead(reader, reader.uint32(), options, (message.wfSpecSource as any).wfSpecId)
+                    };
+                    break;
+                case /* littlehorse.InlineWfSpec inline_wf_spec */ 15:
+                    message.wfSpecSource = {
+                        oneofKind: "inlineWfSpec",
+                        inlineWfSpec: InlineWfSpec.internalBinaryRead(reader, reader.uint32(), options, (message.wfSpecSource as any).inlineWfSpec)
+                    };
                     break;
                 case /* repeated littlehorse.WfSpecId old_wf_spec_versions */ 3:
                     message.oldWfSpecVersions.push(WfSpecId.internalBinaryRead(reader, reader.uint32(), options));
@@ -706,8 +734,8 @@ class WfRun$Type extends MessageType<WfRun> {
         if (message.id)
             WfRunId.internalBinaryWrite(message.id, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         /* littlehorse.WfSpecId wf_spec_id = 2; */
-        if (message.wfSpecId)
-            WfSpecId.internalBinaryWrite(message.wfSpecId, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
+        if (message.wfSpecSource.oneofKind === "wfSpecId")
+            WfSpecId.internalBinaryWrite(message.wfSpecSource.wfSpecId, writer.tag(2, WireType.LengthDelimited).fork(), options).join();
         /* repeated littlehorse.WfSpecId old_wf_spec_versions = 3; */
         for (let i = 0; i < message.oldWfSpecVersions.length; i++)
             WfSpecId.internalBinaryWrite(message.oldWfSpecVersions[i], writer.tag(3, WireType.LengthDelimited).fork(), options).join();
@@ -752,6 +780,9 @@ class WfRun$Type extends MessageType<WfRun> {
                 writer.int32(message.threadRunQueue[i]);
             writer.join();
         }
+        /* littlehorse.InlineWfSpec inline_wf_spec = 15; */
+        if (message.wfSpecSource.oneofKind === "inlineWfSpec")
+            InlineWfSpec.internalBinaryWrite(message.wfSpecSource.inlineWfSpec, writer.tag(15, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

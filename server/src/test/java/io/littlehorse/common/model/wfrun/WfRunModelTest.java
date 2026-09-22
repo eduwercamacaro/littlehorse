@@ -14,8 +14,13 @@ import io.littlehorse.common.model.getable.objectId.WfRunIdModel;
 import io.littlehorse.common.model.getable.objectId.WfSpecIdModel;
 import io.littlehorse.common.proto.Command;
 import io.littlehorse.common.util.LHUtil;
+import io.littlehorse.sdk.common.proto.InlineWfSpec;
+import io.littlehorse.sdk.common.proto.InlineWfSpecDefinition;
 import io.littlehorse.sdk.common.proto.LHStatus;
 import io.littlehorse.sdk.common.proto.MetricWindowType;
+import io.littlehorse.sdk.common.proto.WfRun;
+import io.littlehorse.sdk.common.proto.WfRunId;
+import io.littlehorse.sdk.common.proto.WfSpecId;
 import io.littlehorse.server.TestCoreProcessorContext;
 import io.littlehorse.server.streams.ServerTopology;
 import io.littlehorse.server.streams.stores.ClusterScopedStore;
@@ -32,6 +37,45 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import org.junit.jupiter.api.Test;
 
 public class WfRunModelTest {
+
+    @Test
+    void preservesInlineWorkflowDefinitionAcrossSerialization() {
+        InlineWfSpec inlineSpec = InlineWfSpec.newBuilder()
+                .setDefinition(InlineWfSpecDefinition.newBuilder().setEntrypointThreadName("main"))
+                .setChecksum("abc123")
+                .build();
+        WfRun proto = WfRun.newBuilder()
+                .setId(WfRunId.newBuilder().setId("inline-run"))
+                .setInlineWfSpec(inlineSpec)
+                .setStatus(LHStatus.RUNNING)
+                .build();
+
+        WfRunModel model = WfRunModel.fromProto(proto, WfRunModel.class, null);
+        WfRun serialized = model.toProto().build();
+
+        assertThat(model.getWfSpecId()).isNull();
+        assertThat(serialized.getWfSpecSourceCase()).isEqualTo(WfRun.WfSpecSourceCase.INLINE_WF_SPEC);
+        assertThat(serialized.getInlineWfSpec()).isEqualTo(inlineSpec);
+        assertThat(model.getIndexConfigurations()).allSatisfy(index -> assertThat(index.getAttributes())
+                .noneMatch(field -> field.getLeft().equals("wfSpecId")));
+    }
+
+    @Test
+    void preservesRegisteredWorkflowReferenceAcrossSerialization() {
+        WfSpecId specId = WfSpecId.newBuilder().setName("registered").build();
+        WfRun proto = WfRun.newBuilder()
+                .setId(WfRunId.newBuilder().setId("registered-run"))
+                .setWfSpecId(specId)
+                .setStatus(LHStatus.RUNNING)
+                .build();
+
+        WfRunModel model = WfRunModel.fromProto(proto, WfRunModel.class, null);
+        WfRun serialized = model.toProto().build();
+
+        assertThat(model.getInlineWfSpec()).isNull();
+        assertThat(serialized.getWfSpecSourceCase()).isEqualTo(WfRun.WfSpecSourceCase.WF_SPEC_ID);
+        assertThat(serialized.getWfSpecId()).isEqualTo(specId);
+    }
 
     private final MockProcessorContext<String, CommandProcessorOutput> mockProcessorContext =
             new MockProcessorContext<>();

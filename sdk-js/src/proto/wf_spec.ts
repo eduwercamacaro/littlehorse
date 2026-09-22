@@ -1113,6 +1113,56 @@ export interface NodeMigration {
     newNodeName: string;
 }
 /**
+ * A caller-provided workflow definition that is executed by exactly one WfRun.
+ *
+ * Unlike a WfSpec, this definition is not registered, named, versioned,
+ * searchable, updated, or independently addressable.
+ *
+ * @generated from protobuf message littlehorse.InlineWfSpecDefinition
+ */
+export interface InlineWfSpecDefinition {
+    /**
+     * ThreadSpecs that comprise the workflow.
+     *
+     * @generated from protobuf field: map<string, littlehorse.ThreadSpec> thread_specs = 1
+     */
+    threadSpecs: {
+        [key: string]: ThreadSpec;
+    };
+    /**
+     * ThreadSpec used as the workflow entrypoint.
+     *
+     * @generated from protobuf field: string entrypoint_thread_name = 2
+     */
+    entrypointThreadName: string;
+    /**
+     * Controls cleanup of the owning WfRun after it terminates.
+     *
+     * @generated from protobuf field: optional littlehorse.WorkflowRetentionPolicy retention_policy = 3
+     */
+    retentionPolicy?: WorkflowRetentionPolicy;
+}
+/**
+ * Immutable, server-normalized snapshot stored with the WfRun.
+ *
+ * @generated from protobuf message littlehorse.InlineWfSpec
+ */
+export interface InlineWfSpec {
+    /**
+     * @generated from protobuf field: littlehorse.InlineWfSpecDefinition definition = 1
+     */
+    definition?: InlineWfSpecDefinition;
+    /**
+     * Server-generated fingerprint of the canonical definition.
+     *
+     * Intended for diagnostics, comparison, and integrity validation.
+     * It does not make the definition globally addressable.
+     *
+     * @generated from protobuf field: string checksum = 2
+     */
+    checksum: string;
+}
+/**
  * Determines the Access Level for a Variable in a ThreadSpec/WfSpec.
  *
  * @generated from protobuf enum littlehorse.WfRunVariableAccessLevel
@@ -3359,3 +3409,139 @@ class NodeMigration$Type extends MessageType<NodeMigration> {
  * @generated MessageType for protobuf message littlehorse.NodeMigration
  */
 export const NodeMigration = new NodeMigration$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class InlineWfSpecDefinition$Type extends MessageType<InlineWfSpecDefinition> {
+    constructor() {
+        super("littlehorse.InlineWfSpecDefinition", [
+            { no: 1, name: "thread_specs", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "message", T: () => ThreadSpec } },
+            { no: 2, name: "entrypoint_thread_name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "retention_policy", kind: "message", T: () => WorkflowRetentionPolicy }
+        ]);
+    }
+    create(value?: PartialMessage<InlineWfSpecDefinition>): InlineWfSpecDefinition {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.threadSpecs = {};
+        message.entrypointThreadName = "";
+        if (value !== undefined)
+            reflectionMergePartial<InlineWfSpecDefinition>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: InlineWfSpecDefinition): InlineWfSpecDefinition {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* map<string, littlehorse.ThreadSpec> thread_specs */ 1:
+                    this.binaryReadMap1(message.threadSpecs, reader, options);
+                    break;
+                case /* string entrypoint_thread_name */ 2:
+                    message.entrypointThreadName = reader.string();
+                    break;
+                case /* optional littlehorse.WorkflowRetentionPolicy retention_policy */ 3:
+                    message.retentionPolicy = WorkflowRetentionPolicy.internalBinaryRead(reader, reader.uint32(), options, message.retentionPolicy);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    private binaryReadMap1(map: InlineWfSpecDefinition["threadSpecs"], reader: IBinaryReader, options: BinaryReadOptions): void {
+        let len = reader.uint32(), end = reader.pos + len, key: keyof InlineWfSpecDefinition["threadSpecs"] | undefined, val: InlineWfSpecDefinition["threadSpecs"][any] | undefined;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case 1:
+                    key = reader.string();
+                    break;
+                case 2:
+                    val = ThreadSpec.internalBinaryRead(reader, reader.uint32(), options);
+                    break;
+                default: throw new globalThis.Error("unknown map entry field for littlehorse.InlineWfSpecDefinition.thread_specs");
+            }
+        }
+        map[key ?? ""] = val ?? ThreadSpec.create();
+    }
+    internalBinaryWrite(message: InlineWfSpecDefinition, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* map<string, littlehorse.ThreadSpec> thread_specs = 1; */
+        for (let k of globalThis.Object.keys(message.threadSpecs)) {
+            writer.tag(1, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k);
+            writer.tag(2, WireType.LengthDelimited).fork();
+            ThreadSpec.internalBinaryWrite(message.threadSpecs[k], writer, options);
+            writer.join().join();
+        }
+        /* string entrypoint_thread_name = 2; */
+        if (message.entrypointThreadName !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.entrypointThreadName);
+        /* optional littlehorse.WorkflowRetentionPolicy retention_policy = 3; */
+        if (message.retentionPolicy)
+            WorkflowRetentionPolicy.internalBinaryWrite(message.retentionPolicy, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message littlehorse.InlineWfSpecDefinition
+ */
+export const InlineWfSpecDefinition = new InlineWfSpecDefinition$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class InlineWfSpec$Type extends MessageType<InlineWfSpec> {
+    constructor() {
+        super("littlehorse.InlineWfSpec", [
+            { no: 1, name: "definition", kind: "message", T: () => InlineWfSpecDefinition },
+            { no: 2, name: "checksum", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+        ]);
+    }
+    create(value?: PartialMessage<InlineWfSpec>): InlineWfSpec {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        message.checksum = "";
+        if (value !== undefined)
+            reflectionMergePartial<InlineWfSpec>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: InlineWfSpec): InlineWfSpec {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* littlehorse.InlineWfSpecDefinition definition */ 1:
+                    message.definition = InlineWfSpecDefinition.internalBinaryRead(reader, reader.uint32(), options, message.definition);
+                    break;
+                case /* string checksum */ 2:
+                    message.checksum = reader.string();
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: InlineWfSpec, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* littlehorse.InlineWfSpecDefinition definition = 1; */
+        if (message.definition)
+            InlineWfSpecDefinition.internalBinaryWrite(message.definition, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        /* string checksum = 2; */
+        if (message.checksum !== "")
+            writer.tag(2, WireType.LengthDelimited).string(message.checksum);
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message littlehorse.InlineWfSpec
+ */
+export const InlineWfSpec = new InlineWfSpec$Type();

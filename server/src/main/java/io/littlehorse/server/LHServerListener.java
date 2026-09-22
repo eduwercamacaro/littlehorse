@@ -703,6 +703,15 @@ public class LHServerListener extends LittleHorseImplBase implements Closeable {
     }
 
     @Override
+    @Authorize(
+            resources = ACLResource.ACL_WORKFLOW,
+            actions = {ACLAction.RUN, ACLAction.WRITE_METADATA})
+    public void runInlineWf(RunInlineWfRequest req, StreamObserver<WfRun> ctx) {
+        RunInlineWfRequestModel model = LHSerializable.fromProto(req, RunInlineWfRequestModel.class, requestContext());
+        processCommand(new CommandModel(model), ctx, WfRun.class);
+    }
+
+    @Override
     @Authorize(resources = ACLResource.ACL_WORKFLOW, actions = ACLAction.RUN)
     public void scheduleWf(ScheduleWfRequest req, StreamObserver<ScheduledWfRun> ctx) {
         ScheduleWfRequestModel reqModel = LHSerializable.fromProto(req, ScheduleWfRequestModel.class, requestContext());

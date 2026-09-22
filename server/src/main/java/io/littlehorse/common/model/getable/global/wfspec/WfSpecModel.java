@@ -36,7 +36,6 @@ import io.littlehorse.server.streams.storeinternals.ReadOnlyMetadataManager;
 import io.littlehorse.server.streams.storeinternals.index.IndexedField;
 import io.littlehorse.server.streams.topology.core.CoreProcessorContext;
 import io.littlehorse.server.streams.topology.core.ExecutionContext;
-import io.littlehorse.server.streams.topology.core.MetadataProcessorContext;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -71,13 +70,13 @@ public class WfSpecModel extends MetadataGetable<WfSpec> {
     // Internal, not related to Proto.
     private Map<String, String> varToThreadSpec = new HashMap<>();
     private boolean initializedVarToThreadSpec = false;
-    private MetadataProcessorContext executionContext;
+    private ExecutionContext executionContext;
 
     public WfSpecModel() {
         // default constructor used by LHDeserializers
     }
 
-    public WfSpecModel(MetadataProcessorContext executionContext) {
+    public WfSpecModel(ExecutionContext executionContext) {
         this.executionContext = executionContext;
     }
 
@@ -232,7 +231,7 @@ public class WfSpecModel extends MetadataGetable<WfSpec> {
         return Pair.of(tspecName, out);
     }
 
-    public void validateAndMaybeBumpVersion(Optional<WfSpecModel> oldVersion, MetadataProcessorContext ctx)
+    public void validateAndMaybeBumpVersion(Optional<WfSpecModel> oldVersion, ExecutionContext ctx)
             throws InvalidWfSpecException {
         if (threadSpecs.get(entrypointThreadName) == null) {
             throw new InvalidWfSpecException("unknown entrypoint thread: " + entrypointThreadName);
@@ -319,7 +318,7 @@ public class WfSpecModel extends MetadataGetable<WfSpec> {
      * 2. Validating variable types for mutations, assignments, and task input.
      * 3. Incorporation of JsonSchema or Protobuf Schema for further validation.
      */
-    private void validateVariablesHelper(MetadataProcessorContext ctx) throws InvalidWfSpecException {
+    private void validateVariablesHelper(ExecutionContext ctx) throws InvalidWfSpecException {
         varToThreadSpec = new HashMap<>();
         boolean hasParentWorkflow = parentWfSpec != null;
         WfSpecModel parentWfSpec = null;
@@ -468,7 +467,7 @@ public class WfSpecModel extends MetadataGetable<WfSpec> {
      * checking of variables, though. That is a future feature we will add in 1.0
      * or 1.1
      */
-    private WfSpecModel getParentWfSpec(MetadataProcessorContext ctx) {
+    private WfSpecModel getParentWfSpec(ExecutionContext ctx) {
         WfSpecModel parent =
                 ctx.service().getWfSpec(parentWfSpec.getWfSpecName(), parentWfSpec.getWfSpecMajorVersion(), 0);
         return parent;

@@ -76,6 +76,22 @@ lhctl get nodeRun <wfRunId> 0 1
 
 You should see in `$.result.userTask.userTaskRunId` the same ID that resulted from all of the searches above.
 
+#### Save Progress Before Completing the User Task
+
+You can save the requested item before deciding on a justification. Use `lhctl`
+built from this checkout and create a JSON file containing only the field to save:
+
+```bash
+cat > /tmp/it-request-progress.json <<'EOF'
+{
+  "requestedItem": "the rank of master"
+}
+EOF
+
+lhctl save userTaskRun --wfRunId <wfRunId> --userTaskGuid <userTaskGuid> \
+  --resultFile /tmp/it-request-progress.json
+```
+
 #### Execute the User Task Run
 
 Now that we have the `userTaskGuid`, we can use `lhctl` to execute the User Task Run. But first, let's inspect the `userTaskRun`:
@@ -88,7 +104,9 @@ Note that its status is `CLAIMED` and it's assigned to `anakin`.
 
 _Note that in production, there would be a web frontend that users log in to in order to execute the User Task Runs. The LittleHorse server tracks the state of these User Tasks (including whom they are assigned to) but does not present them on a web front-end. This is because each user would likely need a highly-customized presentation of the tasks, such as on their mobile-app, internal tooling, customer-facing web app, etc. If you wish for a custom web front-end, please contact LittleHorse Professional Services (`sales@littlehorse.io`)._
 
-Let's execute the task:
+Let's execute the task. If you saved progress above, submit the complete form,
+including the previously saved `requestedItem` and the new `justification`.
+The interactive command prompts for all fields; it does not prefill saved values.
 
 ```
 lhctl execute userTaskRun <wfRunId> <userTaskGuid>

@@ -189,6 +189,8 @@ public class InternalDeleteWfRunRequestModel extends CoreSubCommand<InternalDele
 
         log.trace("Completing WfRun deletion for {}", wfRunId);
 
+        // Keep the definition available until all resumable cleanup has finished.
+        if (wfRun.getInlineWfSpecId() != null) manager.delete(wfRun.getInlineWfSpecId());
         manager.delete(wfRunId);
         return null;
     }

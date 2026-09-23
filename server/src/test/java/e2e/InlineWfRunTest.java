@@ -51,9 +51,13 @@ public class InlineWfRunTest {
     @Test
     void executesWithoutRegisteredMetadataAcrossEventsAndTaskRetries() {
         WfRun run = client.runInlineWf(request(UUID.randomUUID().toString()));
-        assertThat(run.hasInlineWfSpec()).isTrue();
+        assertThat(run.hasInlineWfSpec()).isFalse();
+        assertThat(run.hasInlineWfSpecId()).isTrue();
         assertThat(run.hasWfSpecId()).isFalse();
-        assertThat(run.getInlineWfSpec().getChecksum()).hasSize(64);
+        InlineWfSpec snapshot = client.getInlineWfSpec(run.getInlineWfSpecId());
+        assertThat(snapshot.getChecksum()).hasSize(64);
+        assertThat(snapshot.getId().getWfRunId()).isEqualTo(run.getId());
+        assertThat(snapshot.hasCreatedAt()).isTrue();
         assertThatThrownBy(() -> client.getLatestWfSpec(GetLatestWfSpecRequest.newBuilder()
                         .setName("unregistered-inline-prototype")
                         .build()))
@@ -61,7 +65,7 @@ public class InlineWfRunTest {
                         StatusRuntimeException.class,
                         ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.NOT_FOUND));
 
-        // A later command must reload and resolve the embedded definition from the run.
+        // A later command must reload the separate definition through the run's reference.
         client.putExternalEvent(PutExternalEventRequest.newBuilder()
                 .setWfRunId(run.getId())
                 .setExternalEventDefId(ExternalEventDefId.newBuilder().setName("inline-prototype-release"))
@@ -72,7 +76,9 @@ public class InlineWfRunTest {
 
         WfRun completed = client.getWfRun(run.getId());
         assertThat(completed.getThreadRuns(0).getOutput().getStr()).isEqualTo("hello world");
-        assertThat(completed.getInlineWfSpec()).isEqualTo(run.getInlineWfSpec());
+        assertThat(completed.getInlineWfSpecId()).isEqualTo(run.getInlineWfSpecId());
+        assertThat(completed.hasInlineWfSpec()).isFalse();
+        assertThat(client.getInlineWfSpec(completed.getInlineWfSpecId())).isEqualTo(snapshot);
         assertThat(completed.getThreadRuns(0).hasWfSpecId()).isFalse();
         var tasks = client.listTaskRuns(
                 ListTaskRunsRequest.newBuilder().setWfRunId(run.getId()).build());
@@ -92,6 +98,7 @@ public class InlineWfRunTest {
         assertThat(variable.hasWfSpecId()).isFalse();
 
         client.deleteWfRun(DeleteWfRunRequest.newBuilder().setId(run.getId()).build());
+        assertDefinitionDeleted(run.getInlineWfSpecId());
         assertThatThrownBy(() -> client.getWfRun(run.getId()))
                 .isInstanceOfSatisfying(
                         StatusRuntimeException.class,
@@ -102,6 +109,7 @@ public class InlineWfRunTest {
     void rejectsDuplicatesAndMigrationAndPreservesExistingDefinition() {
         RunInlineWfRequest request = request(UUID.randomUUID().toString());
         WfRun run = client.runInlineWf(request);
+        InlineWfSpec snapshot = client.getInlineWfSpec(run.getInlineWfSpecId());
         assertThatThrownBy(() -> client.runInlineWf(request))
                 .isInstanceOfSatisfying(
                         StatusRuntimeException.class,
@@ -112,12 +120,15 @@ public class InlineWfRunTest {
                 .isInstanceOfSatisfying(
                         StatusRuntimeException.class,
                         ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.FAILED_PRECONDITION));
-        assertThat(client.getWfRun(run.getId()).getInlineWfSpec()).isEqualTo(run.getInlineWfSpec());
+        assertThat(client.getInlineWfSpec(run.getInlineWfSpecId())).isEqualTo(snapshot);
         WfRun second = client.runInlineWf(
                 request.toBuilder().setId(UUID.randomUUID().toString()).build());
-        assertThat(second.getInlineWfSpec().getChecksum())
-                .isEqualTo(run.getInlineWfSpec().getChecksum());
+        InlineWfSpec secondSnapshot = client.getInlineWfSpec(second.getInlineWfSpecId());
+        assertThat(secondSnapshot.getChecksum()).isEqualTo(snapshot.getChecksum());
+        assertThat(secondSnapshot.getId()).isNotEqualTo(snapshot.getId());
         client.deleteWfRun(DeleteWfRunRequest.newBuilder().setId(run.getId()).build());
+        assertDefinitionDeleted(run.getInlineWfSpecId());
+        assertThat(client.getInlineWfSpec(second.getInlineWfSpecId())).isEqualTo(secondSnapshot);
         client.deleteWfRun(DeleteWfRunRequest.newBuilder().setId(second.getId()).build());
     }
 
@@ -170,6 +181,7 @@ public class InlineWfRunTest {
                 .isInstanceOfSatisfying(
                         StatusRuntimeException.class,
                         ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.NOT_FOUND)));
+        assertDefinitionDeleted(run.getInlineWfSpecId());
     }
 
     @Test
@@ -190,6 +202,24 @@ public class InlineWfRunTest {
                 .isInstanceOfSatisfying(
                         StatusRuntimeException.class,
                         ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.NOT_FOUND));
+        assertDefinitionDeleted(InlineWfSpecId.newBuilder()
+                .setWfRunId(WfRunId.newBuilder().setId(id))
+                .build());
+    }
+
+    private void assertDefinitionDeleted(InlineWfSpecId id) {
+        assertThatThrownBy(() -> client.getInlineWfSpec(id))
+                .isInstanceOfSatisfying(
+                        StatusRuntimeException.class,
+                        ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.NOT_FOUND));
+    }
+
+    @Test
+    void rejectsLookupWithoutOwner() {
+        assertThatThrownBy(() -> client.getInlineWfSpec(InlineWfSpecId.getDefaultInstance()))
+                .isInstanceOfSatisfying(
+                        StatusRuntimeException.class,
+                        ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.INVALID_ARGUMENT));
     }
 
     @LHTaskMethod("inline-prototype-task")

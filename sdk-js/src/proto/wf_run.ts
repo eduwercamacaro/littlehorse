@@ -18,6 +18,7 @@ import { MigrationVars } from "./workflow_migration";
 import { WorkflowMigrationPlanId } from "./object_id";
 import { Timestamp } from "./google/protobuf/timestamp";
 import { LHStatus } from "./common_enums";
+import { InlineWfSpecId } from "./object_id";
 import { InlineWfSpec } from "./wf_spec";
 import { WfSpecId } from "./object_id";
 import { WfRunId } from "./object_id";
@@ -47,11 +48,20 @@ export interface WfRun {
     } | {
         oneofKind: "inlineWfSpec";
         /**
-         * An immutable workflow definition owned by this WfRun.
+         * Legacy embedded format. New runs store a separate, co-partitioned record.
          *
-         * @generated from protobuf field: littlehorse.InlineWfSpec inline_wf_spec = 15
+         * @deprecated
+         * @generated from protobuf field: littlehorse.InlineWfSpec inline_wf_spec = 15 [deprecated = true]
          */
         inlineWfSpec: InlineWfSpec;
+    } | {
+        oneofKind: "inlineWfSpecId";
+        /**
+         * The immutable inline definition owned by this WfRun.
+         *
+         * @generated from protobuf field: littlehorse.InlineWfSpecId inline_wf_spec_id = 16
+         */
+        inlineWfSpecId: InlineWfSpecId;
     } | {
         oneofKind: undefined;
     };
@@ -613,6 +623,7 @@ class WfRun$Type extends MessageType<WfRun> {
             { no: 1, name: "id", kind: "message", T: () => WfRunId },
             { no: 2, name: "wf_spec_id", kind: "message", oneof: "wfSpecSource", T: () => WfSpecId },
             { no: 15, name: "inline_wf_spec", kind: "message", oneof: "wfSpecSource", T: () => InlineWfSpec },
+            { no: 16, name: "inline_wf_spec_id", kind: "message", oneof: "wfSpecSource", T: () => InlineWfSpecId },
             { no: 3, name: "old_wf_spec_versions", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => WfSpecId },
             { no: 4, name: "status", kind: "enum", T: () => ["littlehorse.LHStatus", LHStatus] },
             { no: 5, name: "greatest_threadrun_number", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
@@ -656,10 +667,16 @@ class WfRun$Type extends MessageType<WfRun> {
                         wfSpecId: WfSpecId.internalBinaryRead(reader, reader.uint32(), options, (message.wfSpecSource as any).wfSpecId)
                     };
                     break;
-                case /* littlehorse.InlineWfSpec inline_wf_spec */ 15:
+                case /* littlehorse.InlineWfSpec inline_wf_spec = 15 [deprecated = true] */ 15:
                     message.wfSpecSource = {
                         oneofKind: "inlineWfSpec",
                         inlineWfSpec: InlineWfSpec.internalBinaryRead(reader, reader.uint32(), options, (message.wfSpecSource as any).inlineWfSpec)
+                    };
+                    break;
+                case /* littlehorse.InlineWfSpecId inline_wf_spec_id */ 16:
+                    message.wfSpecSource = {
+                        oneofKind: "inlineWfSpecId",
+                        inlineWfSpecId: InlineWfSpecId.internalBinaryRead(reader, reader.uint32(), options, (message.wfSpecSource as any).inlineWfSpecId)
                     };
                     break;
                 case /* repeated littlehorse.WfSpecId old_wf_spec_versions */ 3:
@@ -780,9 +797,12 @@ class WfRun$Type extends MessageType<WfRun> {
                 writer.int32(message.threadRunQueue[i]);
             writer.join();
         }
-        /* littlehorse.InlineWfSpec inline_wf_spec = 15; */
+        /* littlehorse.InlineWfSpec inline_wf_spec = 15 [deprecated = true]; */
         if (message.wfSpecSource.oneofKind === "inlineWfSpec")
             InlineWfSpec.internalBinaryWrite(message.wfSpecSource.inlineWfSpec, writer.tag(15, WireType.LengthDelimited).fork(), options).join();
+        /* littlehorse.InlineWfSpecId inline_wf_spec_id = 16; */
+        if (message.wfSpecSource.oneofKind === "inlineWfSpecId")
+            InlineWfSpecId.internalBinaryWrite(message.wfSpecSource.inlineWfSpecId, writer.tag(16, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

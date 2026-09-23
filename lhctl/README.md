@@ -32,6 +32,35 @@ Verify the installation:
 lhctl
 ```
 
+## Running a task without registering a workflow
+
+With a server supporting inline workflows:
+
+```sh
+lhctl run tasks my-task parameter1 value parameter2 value
+lhctl run tasks my-task parameter1 value --wfRunId my-run-id
+```
+
+The command fetches the registered TaskDef, parses named parameters using its
+input types, and starts an inline workflow containing one task. Parameters may
+be provided in any order; missing inputs without defaults, duplicates, unknown
+names, and invalid values are rejected. Quote JSON objects and arrays as single
+shell arguments. Use `--` before positional arguments containing values that
+start with `-`.
+
+The command prints the server's WfRun JSON immediately, without waiting for task
+completion. A worker must be running to execute the task. The task's output
+becomes the entrypoint thread's output once the workflow completes (void tasks
+have no output). No WfSpec is registered. The task uses the server's default
+timeout and no automatic retries.
+
+The caller needs permission to read the TaskDef (and any referenced StructDefs),
+plus the inline API's workflow `RUN` and `WRITE_METADATA` permissions. Reusing a
+WfRun ID returns `ALREADY_EXISTS`.
+
+Existing `lhctl run <wfSpecName>` usage is unchanged, except that `tasks` is now
+a subcommand. To run a registered workflow named `tasks`, use `lhctl run -- tasks`.
+
 ## Writing `lhctl` commands
 
 To ensure consistency across our CLI commands, we adhere to the following standards, inspired by [Docopt](http://docopt.org) and the [Cobra User Guide](https://github.com/spf13/cobra/blob/main/site/content/user_guide.md). 

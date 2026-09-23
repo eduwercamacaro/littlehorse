@@ -53,6 +53,19 @@ export interface WfSpecId {
     revision: number;
 }
 /**
+ * Identifies the immutable inline definition owned by exactly one WfRun.
+ *
+ * @generated from protobuf message littlehorse.InlineWfSpecId
+ */
+export interface InlineWfSpecId {
+    /**
+     * Determines ownership, partition routing, and lifecycle.
+     *
+     * @generated from protobuf field: littlehorse.WfRunId wf_run_id = 1
+     */
+    wfRunId?: WfRunId;
+}
+/**
  * ID for a TaskDef.
  *
  * @generated from protobuf message littlehorse.TaskDefId
@@ -615,6 +628,52 @@ class WfSpecId$Type extends MessageType<WfSpecId> {
  * @generated MessageType for protobuf message littlehorse.WfSpecId
  */
 export const WfSpecId = new WfSpecId$Type();
+// @generated message type with reflection information, may provide speed optimized methods
+class InlineWfSpecId$Type extends MessageType<InlineWfSpecId> {
+    constructor() {
+        super("littlehorse.InlineWfSpecId", [
+            { no: 1, name: "wf_run_id", kind: "message", T: () => WfRunId }
+        ]);
+    }
+    create(value?: PartialMessage<InlineWfSpecId>): InlineWfSpecId {
+        const message = globalThis.Object.create((this.messagePrototype!));
+        if (value !== undefined)
+            reflectionMergePartial<InlineWfSpecId>(this, message, value);
+        return message;
+    }
+    internalBinaryRead(reader: IBinaryReader, length: number, options: BinaryReadOptions, target?: InlineWfSpecId): InlineWfSpecId {
+        let message = target ?? this.create(), end = reader.pos + length;
+        while (reader.pos < end) {
+            let [fieldNo, wireType] = reader.tag();
+            switch (fieldNo) {
+                case /* littlehorse.WfRunId wf_run_id */ 1:
+                    message.wfRunId = WfRunId.internalBinaryRead(reader, reader.uint32(), options, message.wfRunId);
+                    break;
+                default:
+                    let u = options.readUnknownField;
+                    if (u === "throw")
+                        throw new globalThis.Error(`Unknown field ${fieldNo} (wire type ${wireType}) for ${this.typeName}`);
+                    let d = reader.skip(wireType);
+                    if (u !== false)
+                        (u === true ? UnknownFieldHandler.onRead : u)(this.typeName, message, fieldNo, wireType, d);
+            }
+        }
+        return message;
+    }
+    internalBinaryWrite(message: InlineWfSpecId, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
+        /* littlehorse.WfRunId wf_run_id = 1; */
+        if (message.wfRunId)
+            WfRunId.internalBinaryWrite(message.wfRunId, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+        let u = options.writeUnknownFields;
+        if (u !== false)
+            (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
+        return writer;
+    }
+}
+/**
+ * @generated MessageType for protobuf message littlehorse.InlineWfSpecId
+ */
+export const InlineWfSpecId = new InlineWfSpecId$Type();
 // @generated message type with reflection information, may provide speed optimized methods
 class TaskDefId$Type extends MessageType<TaskDefId> {
     constructor() {

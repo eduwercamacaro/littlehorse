@@ -137,7 +137,7 @@ public class RunWfRequestModel extends CoreSubCommand<RunWfRequest> {
                         "Parent WfRun of type %s with id %s not found."
                                 .formatted(parentSpec.getWfSpecName(), parentWfRunId.toString()));
             }
-            if (parent.getInlineWfSpec() != null) {
+            if (parent.isInline()) {
                 throw new LHApiException(
                         Status.INVALID_ARGUMENT, "Inline WfRuns cannot be parents of registered WfRuns");
             }

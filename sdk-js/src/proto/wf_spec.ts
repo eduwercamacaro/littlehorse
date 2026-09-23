@@ -10,6 +10,7 @@ import { UnknownFieldHandler } from "@protobuf-ts/runtime";
 import type { PartialMessage } from "@protobuf-ts/runtime";
 import { reflectionMergePartial } from "@protobuf-ts/runtime";
 import { MessageType } from "@protobuf-ts/runtime";
+import { InlineWfSpecId } from "./object_id";
 import { VariableMutation } from "./common_wfspec";
 import { Comparator } from "./type_definition";
 import { UTActionTrigger } from "./common_wfspec";
@@ -1143,7 +1144,8 @@ export interface InlineWfSpecDefinition {
     retentionPolicy?: WorkflowRetentionPolicy;
 }
 /**
- * Immutable, server-normalized snapshot stored with the WfRun.
+ * Immutable, server-normalized snapshot stored in the owning WfRun's partition.
+ * Created by RunInlineWf and deleted with its WfRun; not independently writable.
  *
  * @generated from protobuf message littlehorse.InlineWfSpec
  */
@@ -1161,6 +1163,14 @@ export interface InlineWfSpec {
      * @generated from protobuf field: string checksum = 2
      */
     checksum: string;
+    /**
+     * @generated from protobuf field: littlehorse.InlineWfSpecId id = 3
+     */
+    id?: InlineWfSpecId;
+    /**
+     * @generated from protobuf field: google.protobuf.Timestamp created_at = 4
+     */
+    createdAt?: Timestamp;
 }
 /**
  * Determines the Access Level for a Variable in a ThreadSpec/WfSpec.
@@ -3496,7 +3506,9 @@ class InlineWfSpec$Type extends MessageType<InlineWfSpec> {
     constructor() {
         super("littlehorse.InlineWfSpec", [
             { no: 1, name: "definition", kind: "message", T: () => InlineWfSpecDefinition },
-            { no: 2, name: "checksum", kind: "scalar", T: 9 /*ScalarType.STRING*/ }
+            { no: 2, name: "checksum", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
+            { no: 3, name: "id", kind: "message", T: () => InlineWfSpecId },
+            { no: 4, name: "created_at", kind: "message", T: () => Timestamp }
         ]);
     }
     create(value?: PartialMessage<InlineWfSpec>): InlineWfSpec {
@@ -3517,6 +3529,12 @@ class InlineWfSpec$Type extends MessageType<InlineWfSpec> {
                 case /* string checksum */ 2:
                     message.checksum = reader.string();
                     break;
+                case /* littlehorse.InlineWfSpecId id */ 3:
+                    message.id = InlineWfSpecId.internalBinaryRead(reader, reader.uint32(), options, message.id);
+                    break;
+                case /* google.protobuf.Timestamp created_at */ 4:
+                    message.createdAt = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.createdAt);
+                    break;
                 default:
                     let u = options.readUnknownField;
                     if (u === "throw")
@@ -3535,6 +3553,12 @@ class InlineWfSpec$Type extends MessageType<InlineWfSpec> {
         /* string checksum = 2; */
         if (message.checksum !== "")
             writer.tag(2, WireType.LengthDelimited).string(message.checksum);
+        /* littlehorse.InlineWfSpecId id = 3; */
+        if (message.id)
+            InlineWfSpecId.internalBinaryWrite(message.id, writer.tag(3, WireType.LengthDelimited).fork(), options).join();
+        /* google.protobuf.Timestamp created_at = 4; */
+        if (message.createdAt)
+            Timestamp.internalBinaryWrite(message.createdAt, writer.tag(4, WireType.LengthDelimited).fork(), options).join();
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);

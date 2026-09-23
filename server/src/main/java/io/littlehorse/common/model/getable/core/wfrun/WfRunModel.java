@@ -29,11 +29,11 @@ import io.littlehorse.common.model.getable.core.wfrun.failure.PendingFailureHand
 import io.littlehorse.common.model.getable.core.wfrun.haltreason.ManualHaltModel;
 import io.littlehorse.common.model.getable.global.migrations.MigrationVarsModel;
 import io.littlehorse.common.model.getable.global.migrations.WorkflowMigrationPlanModel;
-import io.littlehorse.common.model.getable.global.wfspec.InlineWfSpecModel;
 import io.littlehorse.common.model.getable.global.wfspec.WfSpecModel;
 import io.littlehorse.common.model.getable.global.wfspec.WorkflowRetentionPolicyModel;
 import io.littlehorse.common.model.getable.global.wfspec.thread.ThreadSpecModel;
 import io.littlehorse.common.model.getable.objectId.InactiveThreadRunIdModel;
+import io.littlehorse.common.model.getable.objectId.InlineWfSpecIdModel;
 import io.littlehorse.common.model.getable.objectId.WfRunIdModel;
 import io.littlehorse.common.model.getable.objectId.WfSpecIdModel;
 import io.littlehorse.common.model.getable.objectId.WorkflowMigrationPlanIdModel;
@@ -60,6 +60,7 @@ import io.littlehorse.server.streams.storeinternals.index.IndexedField;
 import io.littlehorse.server.streams.topology.core.CoreProcessorContext;
 import io.littlehorse.server.streams.topology.core.ExecutionContext;
 import io.littlehorse.server.streams.topology.core.GetableUpdates;
+import io.littlehorse.server.streams.topology.core.RequestExecutionContext;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -87,6 +88,7 @@ public class WfRunModel extends CoreGetable<WfRun> implements CoreOutputTopicGet
     private WfRunIdModel id;
     private WfSpecIdModel wfSpecId;
     private InlineWfSpecModel inlineWfSpec;
+    private InlineWfSpecIdModel inlineWfSpecId;
     private List<WfSpecIdModel> oldWfSpecVersions = new ArrayList<>();
 
     // TODO: Iterate over all threadruns, archived included
@@ -123,15 +125,32 @@ public class WfRunModel extends CoreGetable<WfRun> implements CoreOutputTopicGet
     public void setWfSpecId(WfSpecIdModel wfSpecId) {
         if (!Objects.equals(this.wfSpecId, wfSpecId)) this.wfSpec = null;
         this.wfSpecId = wfSpecId;
-        if (wfSpecId != null) this.inlineWfSpec = null;
+        if (wfSpecId != null) {
+            this.inlineWfSpec = null;
+            this.inlineWfSpecId = null;
+        }
     }
 
     public void setInlineWfSpec(InlineWfSpecModel inlineWfSpec) {
         this.inlineWfSpec = inlineWfSpec;
         if (inlineWfSpec != null) {
             this.wfSpecId = null;
+            this.inlineWfSpecId = null;
             this.wfSpec = null;
         }
+    }
+
+    public void setInlineWfSpecId(InlineWfSpecIdModel inlineWfSpecId) {
+        this.inlineWfSpecId = inlineWfSpecId;
+        this.wfSpec = null;
+        if (inlineWfSpecId != null) {
+            this.wfSpecId = null;
+            this.inlineWfSpec = null;
+        }
+    }
+
+    public boolean isInline() {
+        return inlineWfSpecId != null || inlineWfSpec != null;
     }
 
     public Date getCreatedAt() {
@@ -227,9 +246,22 @@ public class WfRunModel extends CoreGetable<WfRun> implements CoreOutputTopicGet
 
     public WfSpecModel getWfSpec() {
         if (wfSpec == null) {
-            wfSpec = inlineWfSpec == null
-                    ? executionContext.service().getWfSpec(wfSpecId)
-                    : inlineWfSpec.asWfSpecModel();
+            if (inlineWfSpecId != null) {
+                ReadOnlyGetableManager manager = executionContext.support(CoreProcessorContext.class)
+                        ? executionContext
+                                .castOnSupport(CoreProcessorContext.class)
+                                .getableManager()
+                        : executionContext
+                                .castOnSupport(RequestExecutionContext.class)
+                                .getableManager();
+                InlineWfSpecModel definition = manager.get(inlineWfSpecId);
+                if (definition == null) throw new IllegalStateException("Missing inline definition for WfRun " + id);
+                wfSpec = definition.asWfSpecModel();
+            } else {
+                wfSpec = inlineWfSpec == null
+                        ? executionContext.service().getWfSpec(wfSpecId)
+                        : inlineWfSpec.asWfSpecModel();
+            }
         }
         return wfSpec;
     }
@@ -276,11 +308,15 @@ public class WfRunModel extends CoreGetable<WfRun> implements CoreOutputTopicGet
         wfSpec = null;
         wfSpecId = null;
         inlineWfSpec = null;
+        inlineWfSpecId = null;
         id = LHSerializable.fromProto(proto.getId(), WfRunIdModel.class, context);
         switch (proto.getWfSpecSourceCase()) {
             case WF_SPEC_ID -> wfSpecId = LHSerializable.fromProto(proto.getWfSpecId(), WfSpecIdModel.class, context);
             case INLINE_WF_SPEC ->
                 inlineWfSpec = LHSerializable.fromProto(proto.getInlineWfSpec(), InlineWfSpecModel.class, context);
+            case INLINE_WF_SPEC_ID ->
+                inlineWfSpecId =
+                        LHSerializable.fromProto(proto.getInlineWfSpecId(), InlineWfSpecIdModel.class, context);
             case WFSPECSOURCE_NOT_SET -> throw new IllegalArgumentException("WfRun has no workflow definition source");
         }
         status = proto.getStatus();
@@ -357,9 +393,11 @@ public class WfRunModel extends CoreGetable<WfRun> implements CoreOutputTopicGet
         WfRun.Builder out =
                 WfRun.newBuilder().setId(id.toProto()).setStatus(status).setStartTime(LHUtil.fromDate(startTime));
 
-        if (wfSpecId != null && inlineWfSpec == null) {
+        if (wfSpecId != null && !isInline()) {
             out.setWfSpecId(wfSpecId.toProto());
-        } else if (inlineWfSpec != null && wfSpecId == null) {
+        } else if (inlineWfSpecId != null && wfSpecId == null && inlineWfSpec == null) {
+            out.setInlineWfSpecId(inlineWfSpecId.toProto());
+        } else if (inlineWfSpec != null && wfSpecId == null && inlineWfSpecId == null) {
             out.setInlineWfSpec(inlineWfSpec.toProto());
         } else {
             throw new IllegalStateException("WfRun must have exactly one workflow definition source");
@@ -970,9 +1008,7 @@ public class WfRunModel extends CoreGetable<WfRun> implements CoreOutputTopicGet
             processorContext.getableUpdates().dispatch(statusChanged);
         }
 
-        WorkflowRetentionPolicyModel retentionPolicy = inlineWfSpec == null
-                ? getWfSpec().getRetentionPolicy()
-                : inlineWfSpec.getDefinition().getRetentionPolicy();
+        WorkflowRetentionPolicyModel retentionPolicy = getWfSpec().getRetentionPolicy();
         if (retentionPolicy != null && isTerminated()) {
             Date terminationTime = retentionPolicy.scheduleTerminationFor(this);
 

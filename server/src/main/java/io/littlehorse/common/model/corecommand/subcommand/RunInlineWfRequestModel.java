@@ -10,10 +10,11 @@ import io.littlehorse.common.exceptions.LHValidationException;
 import io.littlehorse.common.model.corecommand.CoreSubCommand;
 import io.littlehorse.common.model.getable.core.noderun.NodeFailureException;
 import io.littlehorse.common.model.getable.core.variable.VariableValueModel;
+import io.littlehorse.common.model.getable.core.wfrun.InlineWfSpecModel;
 import io.littlehorse.common.model.getable.core.wfrun.WfRunModel;
 import io.littlehorse.common.model.getable.global.wfspec.InlineWfSpecDefinitionModel;
-import io.littlehorse.common.model.getable.global.wfspec.InlineWfSpecModel;
 import io.littlehorse.common.model.getable.global.wfspec.WfSpecModel;
+import io.littlehorse.common.model.getable.objectId.InlineWfSpecIdModel;
 import io.littlehorse.common.model.getable.objectId.WfRunIdModel;
 import io.littlehorse.common.util.LHUtil;
 import io.littlehorse.sdk.common.proto.InlineWfSpecDefinition;
@@ -33,7 +34,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class RunInlineWfRequestModel extends CoreSubCommand<RunInlineWfRequest> {
-    // Prototype limits bound validation work and the definition embedded in every WfRun update.
+    // Prototype limits bound validation work and the stored definition size.
     private static final int MAX_DEFINITION_BYTES = 256 * 1024;
     private static final int MAX_NODES = 256;
     private String id;
@@ -117,10 +118,14 @@ public class RunInlineWfRequestModel extends CoreSubCommand<RunInlineWfRequest> 
             throw new LHApiException(Status.INVALID_ARGUMENT, "Normalized inline definition exceeds 256 KiB");
         }
         inline.setChecksum(checksum(normalized));
+        inline.setId(new InlineWfSpecIdModel(runId));
+        inline.setCreatedAt(context.currentCommand().getTime());
+        // Both records are staged in the same core transaction and partition.
+        context.getableManager().put(inline);
 
         WfRunModel run = new WfRunModel(context);
         run.setId(runId);
-        run.setInlineWfSpec(inline);
+        run.setInlineWfSpecId(inline.getId());
         run.setWfSpec(spec);
         run.setStartTime(context.currentCommand().getTime());
         run.transitionTo(LHStatus.RUNNING);

@@ -66,30 +66,61 @@ public interface WfRunOrBuilder extends
 
   /**
    * <pre>
-   * An immutable workflow definition owned by this WfRun.
+   * Legacy embedded format. New runs store a separate, co-partitioned record.
    * </pre>
    *
-   * <code>.littlehorse.InlineWfSpec inline_wf_spec = 15;</code>
+   * <code>.littlehorse.InlineWfSpec inline_wf_spec = 15 [deprecated = true];</code>
+   * @deprecated littlehorse.WfRun.inline_wf_spec is deprecated.
+   *     See wf_run.proto;l=26
    * @return Whether the inlineWfSpec field is set.
    */
-  boolean hasInlineWfSpec();
+  @java.lang.Deprecated boolean hasInlineWfSpec();
   /**
    * <pre>
-   * An immutable workflow definition owned by this WfRun.
+   * Legacy embedded format. New runs store a separate, co-partitioned record.
    * </pre>
    *
-   * <code>.littlehorse.InlineWfSpec inline_wf_spec = 15;</code>
+   * <code>.littlehorse.InlineWfSpec inline_wf_spec = 15 [deprecated = true];</code>
+   * @deprecated littlehorse.WfRun.inline_wf_spec is deprecated.
+   *     See wf_run.proto;l=26
    * @return The inlineWfSpec.
    */
-  io.littlehorse.sdk.common.proto.InlineWfSpec getInlineWfSpec();
+  @java.lang.Deprecated io.littlehorse.sdk.common.proto.InlineWfSpec getInlineWfSpec();
   /**
    * <pre>
-   * An immutable workflow definition owned by this WfRun.
+   * Legacy embedded format. New runs store a separate, co-partitioned record.
    * </pre>
    *
-   * <code>.littlehorse.InlineWfSpec inline_wf_spec = 15;</code>
+   * <code>.littlehorse.InlineWfSpec inline_wf_spec = 15 [deprecated = true];</code>
    */
-  io.littlehorse.sdk.common.proto.InlineWfSpecOrBuilder getInlineWfSpecOrBuilder();
+  @java.lang.Deprecated io.littlehorse.sdk.common.proto.InlineWfSpecOrBuilder getInlineWfSpecOrBuilder();
+
+  /**
+   * <pre>
+   * The immutable inline definition owned by this WfRun.
+   * </pre>
+   *
+   * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
+   * @return Whether the inlineWfSpecId field is set.
+   */
+  boolean hasInlineWfSpecId();
+  /**
+   * <pre>
+   * The immutable inline definition owned by this WfRun.
+   * </pre>
+   *
+   * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
+   * @return The inlineWfSpecId.
+   */
+  io.littlehorse.sdk.common.proto.InlineWfSpecId getInlineWfSpecId();
+  /**
+   * <pre>
+   * The immutable inline definition owned by this WfRun.
+   * </pre>
+   *
+   * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
+   */
+  io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder getInlineWfSpecIdOrBuilder();
 
   /**
    * <pre>

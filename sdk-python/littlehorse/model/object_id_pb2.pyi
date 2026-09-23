@@ -19,6 +19,12 @@ class WfSpecId(_message.Message):
     revision: int
     def __init__(self, name: _Optional[str] = ..., major_version: _Optional[int] = ..., revision: _Optional[int] = ...) -> None: ...
 
+class InlineWfSpecId(_message.Message):
+    __slots__ = ("wf_run_id",)
+    WF_RUN_ID_FIELD_NUMBER: _ClassVar[int]
+    wf_run_id: WfRunId
+    def __init__(self, wf_run_id: _Optional[_Union[WfRunId, _Mapping]] = ...) -> None: ...
+
 class TaskDefId(_message.Message):
     __slots__ = ("name",)
     NAME_FIELD_NUMBER: _ClassVar[int]

@@ -106,6 +106,9 @@ service LittleHorse {
   // EXPERIMENTAL: Starts a durable run from an unregistered workflow definition.
   rpc RunInlineWf(RunInlineWfRequest) returns (WfRun) {}
 
+  // Fetches the run-owned inline definition. Its lifecycle follows the owning WfRun.
+  rpc GetInlineWfSpec(InlineWfSpecId) returns (InlineWfSpec) {}
+
   // Schedule repeated WfRun based on a cron expression
   rpc ScheduleWf(ScheduleWfRequest) returns (ScheduledWfRun) {}
 

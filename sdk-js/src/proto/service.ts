@@ -37,6 +37,8 @@ import { CompleteUserTaskRunRequest } from "./user_tasks";
 import { Empty } from "./google/protobuf/empty";
 import { AssignUserTaskRunRequest } from "./user_tasks";
 import { ScheduledWfRun } from "./scheduled_wf_run";
+import { InlineWfSpec } from "./wf_spec";
+import { InlineWfSpecId } from "./object_id";
 import { WfRun } from "./wf_run";
 import { UserTaskDef } from "./user_tasks";
 import { StructDef } from "./struct_def";
@@ -9918,6 +9920,7 @@ export const LittleHorse = new ServiceType("littlehorse.LittleHorse", [
     { name: "GetLatestUserTaskDef", options: {}, I: GetLatestUserTaskDefRequest, O: UserTaskDef },
     { name: "RunWf", options: {}, I: RunWfRequest, O: WfRun },
     { name: "RunInlineWf", options: {}, I: RunInlineWfRequest, O: WfRun },
+    { name: "GetInlineWfSpec", options: {}, I: InlineWfSpecId, O: InlineWfSpec },
     { name: "ScheduleWf", options: {}, I: ScheduleWfRequest, O: ScheduledWfRun },
     { name: "SearchScheduledWfRun", options: {}, I: SearchScheduledWfRunRequest, O: ScheduledWfRunIdList },
     { name: "GetScheduledWfRun", options: {}, I: ScheduledWfRunId, O: ScheduledWfRun },

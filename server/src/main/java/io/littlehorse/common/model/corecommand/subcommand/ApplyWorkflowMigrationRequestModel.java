@@ -50,7 +50,7 @@ public class ApplyWorkflowMigrationRequestModel extends CoreSubCommand<ApplyWork
         if (wfRun == null) {
             throw new LHApiException(Status.NOT_FOUND, "Couldn't find WfRun %s".formatted(wfRunId));
         }
-        if (wfRun.getInlineWfSpec() != null) {
+        if (wfRun.isInline()) {
             throw new LHApiException(Status.FAILED_PRECONDITION, "Inline WfRuns cannot be migrated");
         }
 

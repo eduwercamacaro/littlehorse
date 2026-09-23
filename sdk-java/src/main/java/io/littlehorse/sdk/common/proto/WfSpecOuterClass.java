@@ -411,15 +411,18 @@ public final class WfSpecOuterClass extends com.google.protobuf.GeneratedFile {
       ".littlehorse.WorkflowRetentionPolicyH\000\210\001" +
       "\001\032K\n\020ThreadSpecsEntry\022\013\n\003key\030\001 \001(\t\022&\n\005va" +
       "lue\030\002 \001(\0132\027.littlehorse.ThreadSpec:\0028\001B\023" +
-      "\n\021_retention_policy\"Y\n\014InlineWfSpec\0227\n\nd" +
-      "efinition\030\001 \001(\0132#.littlehorse.InlineWfSp" +
-      "ecDefinition\022\020\n\010checksum\030\002 \001(\t*N\n\030WfRunV" +
-      "ariableAccessLevel\022\016\n\nPUBLIC_VAR\020\000\022\017\n\013PR" +
-      "IVATE_VAR\020\001\022\021\n\rINHERITED_VAR\020\002*P\n\026WaitFo" +
-      "rThreadsStrategy\022\020\n\014WAIT_FOR_ALL\020\000\022\022\n\016WA" +
-      "IT_FOR_FIRST\020\001\022\020\n\014WAIT_FOR_ANY\020\002BM\n\037io.l" +
-      "ittlehorse.sdk.common.protoP\001Z\t.;lhproto" +
-      "\252\002\034LittleHorse.Sdk.Common.Protob\006proto3"
+      "\n\021_retention_policy\"\262\001\n\014InlineWfSpec\0227\n\n" +
+      "definition\030\001 \001(\0132#.littlehorse.InlineWfS" +
+      "pecDefinition\022\020\n\010checksum\030\002 \001(\t\022\'\n\002id\030\003 " +
+      "\001(\0132\033.littlehorse.InlineWfSpecId\022.\n\ncrea" +
+      "ted_at\030\004 \001(\0132\032.google.protobuf.Timestamp" +
+      "*N\n\030WfRunVariableAccessLevel\022\016\n\nPUBLIC_V" +
+      "AR\020\000\022\017\n\013PRIVATE_VAR\020\001\022\021\n\rINHERITED_VAR\020\002" +
+      "*P\n\026WaitForThreadsStrategy\022\020\n\014WAIT_FOR_A" +
+      "LL\020\000\022\022\n\016WAIT_FOR_FIRST\020\001\022\020\n\014WAIT_FOR_ANY" +
+      "\020\002BM\n\037io.littlehorse.sdk.common.protoP\001Z" +
+      "\t.;lhproto\252\002\034LittleHorse.Sdk.Common.Prot" +
+      "ob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -675,7 +678,7 @@ public final class WfSpecOuterClass extends com.google.protobuf.GeneratedFile {
     internal_static_littlehorse_InlineWfSpec_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_littlehorse_InlineWfSpec_descriptor,
-        new java.lang.String[] { "Definition", "Checksum", });
+        new java.lang.String[] { "Definition", "Checksum", "Id", "CreatedAt", });
     descriptor.resolveAllFeaturesImmutable();
     com.google.protobuf.TimestampProto.getDescriptor();
     io.littlehorse.sdk.common.proto.CommonEnums.getDescriptor();

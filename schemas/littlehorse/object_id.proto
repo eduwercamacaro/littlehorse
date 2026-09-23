@@ -36,6 +36,12 @@ message WfSpecId {
   int32 revision = 3;
 }
 
+// Identifies the immutable inline definition owned by exactly one WfRun.
+message InlineWfSpecId {
+  // Determines ownership, partition routing, and lifecycle.
+  WfRunId wf_run_id = 1;
+}
+
 // ID for a TaskDef.
 message TaskDefId {
   // TaskDef's are uniquely identified by their name.

@@ -424,9 +424,13 @@ class InlineWfSpecDefinition(_message.Message):
     def __init__(self, thread_specs: _Optional[_Mapping[str, ThreadSpec]] = ..., entrypoint_thread_name: _Optional[str] = ..., retention_policy: _Optional[_Union[WorkflowRetentionPolicy, _Mapping]] = ...) -> None: ...
 
 class InlineWfSpec(_message.Message):
-    __slots__ = ("definition", "checksum")
+    __slots__ = ("definition", "checksum", "id", "created_at")
     DEFINITION_FIELD_NUMBER: _ClassVar[int]
     CHECKSUM_FIELD_NUMBER: _ClassVar[int]
+    ID_FIELD_NUMBER: _ClassVar[int]
+    CREATED_AT_FIELD_NUMBER: _ClassVar[int]
     definition: InlineWfSpecDefinition
     checksum: str
-    def __init__(self, definition: _Optional[_Union[InlineWfSpecDefinition, _Mapping]] = ..., checksum: _Optional[str] = ...) -> None: ...
+    id: _object_id_pb2.InlineWfSpecId
+    created_at: _timestamp_pb2.Timestamp
+    def __init__(self, definition: _Optional[_Union[InlineWfSpecDefinition, _Mapping]] = ..., checksum: _Optional[str] = ..., id: _Optional[_Union[_object_id_pb2.InlineWfSpecId, _Mapping]] = ..., created_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...

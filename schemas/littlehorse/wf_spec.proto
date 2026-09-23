@@ -617,7 +617,8 @@ message InlineWfSpecDefinition {
 
 }
 
-// Immutable, server-normalized snapshot stored with the WfRun.
+// Immutable, server-normalized snapshot stored in the owning WfRun's partition.
+// Created by RunInlineWf and deleted with its WfRun; not independently writable.
 message InlineWfSpec {
   InlineWfSpecDefinition definition = 1;
 
@@ -626,4 +627,7 @@ message InlineWfSpec {
   // Intended for diagnostics, comparison, and integrity validation.
   // It does not make the definition globally addressable.
   string checksum = 2;
+
+  InlineWfSpecId id = 3;
+  google.protobuf.Timestamp created_at = 4;
 }

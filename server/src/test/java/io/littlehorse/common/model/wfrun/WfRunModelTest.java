@@ -7,8 +7,10 @@ import io.littlehorse.common.LHConstants;
 import io.littlehorse.common.model.PartitionMetricWindowModel;
 import io.littlehorse.common.model.corecommand.CommandModel;
 import io.littlehorse.common.model.corecommand.subcommand.StopWfRunRequestModel;
+import io.littlehorse.common.model.getable.core.wfrun.InlineWfSpecModel;
 import io.littlehorse.common.model.getable.core.wfrun.ThreadRunModel;
 import io.littlehorse.common.model.getable.core.wfrun.WfRunModel;
+import io.littlehorse.common.model.getable.objectId.InlineWfSpecIdModel;
 import io.littlehorse.common.model.getable.objectId.TenantIdModel;
 import io.littlehorse.common.model.getable.objectId.WfRunIdModel;
 import io.littlehorse.common.model.getable.objectId.WfSpecIdModel;
@@ -16,6 +18,7 @@ import io.littlehorse.common.proto.Command;
 import io.littlehorse.common.util.LHUtil;
 import io.littlehorse.sdk.common.proto.InlineWfSpec;
 import io.littlehorse.sdk.common.proto.InlineWfSpecDefinition;
+import io.littlehorse.sdk.common.proto.InlineWfSpecId;
 import io.littlehorse.sdk.common.proto.LHStatus;
 import io.littlehorse.sdk.common.proto.MetricWindowType;
 import io.littlehorse.sdk.common.proto.WfRun;
@@ -39,7 +42,7 @@ import org.junit.jupiter.api.Test;
 public class WfRunModelTest {
 
     @Test
-    void preservesInlineWorkflowDefinitionAcrossSerialization() {
+    void preservesLegacyEmbeddedWorkflowDefinitionAcrossSerialization() {
         InlineWfSpec inlineSpec = InlineWfSpec.newBuilder()
                 .setDefinition(InlineWfSpecDefinition.newBuilder().setEntrypointThreadName("main"))
                 .setChecksum("abc123")
@@ -56,8 +59,41 @@ public class WfRunModelTest {
         assertThat(model.getWfSpecId()).isNull();
         assertThat(serialized.getWfSpecSourceCase()).isEqualTo(WfRun.WfSpecSourceCase.INLINE_WF_SPEC);
         assertThat(serialized.getInlineWfSpec()).isEqualTo(inlineSpec);
+        assertThat(model.isInline()).isTrue();
+        assertThat(model.getWfSpec().getEntrypointThreadName()).isEqualTo("main");
         assertThat(model.getIndexConfigurations()).allSatisfy(index -> assertThat(index.getAttributes())
                 .noneMatch(field -> field.getLeft().equals("wfSpecId")));
+    }
+
+    @Test
+    void resolvesSeparateDefinitionWithoutEmbeddingItInSerializedRun() {
+        WfRunId owner = WfRunId.newBuilder().setId("separate-inline-run").build();
+        InlineWfSpecId specId = InlineWfSpecId.newBuilder().setWfRunId(owner).build();
+        InlineWfSpec snapshot = InlineWfSpec.newBuilder()
+                .setId(specId)
+                .setCreatedAt(LHUtil.fromDate(new Date()))
+                .setDefinition(InlineWfSpecDefinition.newBuilder().setEntrypointThreadName("main"))
+                .setChecksum("abc123")
+                .build();
+        InlineWfSpecModel definition = InlineWfSpecModel.fromProto(snapshot, InlineWfSpecModel.class, testContext);
+        testContext.getableManager().put(definition);
+        WfRun proto = WfRun.newBuilder()
+                .setId(owner)
+                .setInlineWfSpecId(specId)
+                .setStatus(LHStatus.RUNNING)
+                .build();
+        WfRunModel run = WfRunModel.fromProto(proto, WfRunModel.class, testContext);
+        assertThat(run.isInline()).isTrue();
+        assertThat(run.getWfSpec().getEntrypointThreadName()).isEqualTo("main");
+        assertThat(run.toProto().hasInlineWfSpec()).isFalse();
+        assertThat(run.toProto().getInlineWfSpecId()).isEqualTo(specId);
+        assertThat(definition.toProto().build()).isEqualTo(snapshot);
+        InlineWfSpecIdModel parsedId = new InlineWfSpecIdModel();
+        parsedId.initFromString(definition.getId().toString());
+        assertThat(parsedId.toProto().build()).isEqualTo(specId);
+        assertThat(parsedId.getPartitionKey()).isEqualTo(run.getId().getPartitionKey());
+        assertThat(parsedId.getGroupingWfRunId()).contains(run.getId());
+        assertThat(parsedId.getStoreableKey()).isNotEqualTo(run.getId().getStoreableKey());
     }
 
     @Test

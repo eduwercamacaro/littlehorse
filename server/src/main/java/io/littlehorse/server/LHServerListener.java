@@ -32,6 +32,7 @@ import io.littlehorse.common.model.getable.core.taskworkergroup.TaskWorkerGroupM
 import io.littlehorse.common.model.getable.core.usertaskrun.UserTaskRunModel;
 import io.littlehorse.common.model.getable.core.variable.VariableModel;
 import io.littlehorse.common.model.getable.core.wfrun.InactiveThreadRunModel;
+import io.littlehorse.common.model.getable.core.wfrun.InlineWfSpecModel;
 import io.littlehorse.common.model.getable.core.wfrun.ScheduledWfRunModel;
 import io.littlehorse.common.model.getable.core.wfrun.WfRunModel;
 import io.littlehorse.common.model.getable.global.acl.PrincipalModel;
@@ -50,6 +51,7 @@ import io.littlehorse.common.model.getable.objectId.CheckpointIdModel;
 import io.littlehorse.common.model.getable.objectId.CorrelatedEventIdModel;
 import io.littlehorse.common.model.getable.objectId.ExternalEventIdModel;
 import io.littlehorse.common.model.getable.objectId.InactiveThreadRunIdModel;
+import io.littlehorse.common.model.getable.objectId.InlineWfSpecIdModel;
 import io.littlehorse.common.model.getable.objectId.MetricWindowIdModel;
 import io.littlehorse.common.model.getable.objectId.NodeRunIdModel;
 import io.littlehorse.common.model.getable.objectId.PrincipalIdModel;
@@ -812,6 +814,18 @@ public class LHServerListener extends LittleHorseImplBase implements Closeable {
         InactiveThreadRunModel checkpoint = internalComms.getObject(id, InactiveThreadRunModel.class, requestContext());
         observer.onNext(checkpoint.toProto().build());
         observer.onCompleted();
+    }
+
+    @Override
+    @Authorize(resources = ACLResource.ACL_WORKFLOW, actions = ACLAction.READ)
+    public void getInlineWfSpec(InlineWfSpecId req, StreamObserver<InlineWfSpec> ctx) {
+        if (!req.hasWfRunId() || req.getWfRunId().getId().isEmpty()) {
+            throw new LHApiException(Status.INVALID_ARGUMENT, "An owning WfRun ID is required");
+        }
+        InlineWfSpecIdModel id = LHSerializable.fromProto(req, InlineWfSpecIdModel.class, requestContext());
+        InlineWfSpecModel spec = internalComms.getObject(id, InlineWfSpecModel.class, requestContext());
+        ctx.onNext(spec.toProto().build());
+        ctx.onCompleted();
     }
 
     @Override

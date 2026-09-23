@@ -50,4 +50,34 @@ public interface InlineWfSpecOrBuilder extends
    */
   com.google.protobuf.ByteString
       getChecksumBytes();
+
+  /**
+   * <code>.littlehorse.InlineWfSpecId id = 3;</code>
+   * @return Whether the id field is set.
+   */
+  boolean hasId();
+  /**
+   * <code>.littlehorse.InlineWfSpecId id = 3;</code>
+   * @return The id.
+   */
+  io.littlehorse.sdk.common.proto.InlineWfSpecId getId();
+  /**
+   * <code>.littlehorse.InlineWfSpecId id = 3;</code>
+   */
+  io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder getIdOrBuilder();
+
+  /**
+   * <code>.google.protobuf.Timestamp created_at = 4;</code>
+   * @return Whether the createdAt field is set.
+   */
+  boolean hasCreatedAt();
+  /**
+   * <code>.google.protobuf.Timestamp created_at = 4;</code>
+   * @return The createdAt.
+   */
+  com.google.protobuf.Timestamp getCreatedAt();
+  /**
+   * <code>.google.protobuf.Timestamp created_at = 4;</code>
+   */
+  com.google.protobuf.TimestampOrBuilder getCreatedAtOrBuilder();
 }

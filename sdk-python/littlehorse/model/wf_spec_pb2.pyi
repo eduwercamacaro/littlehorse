@@ -405,32 +405,3 @@ class NodeMigration(_message.Message):
     NEW_NODE_NAME_FIELD_NUMBER: _ClassVar[int]
     new_node_name: str
     def __init__(self, new_node_name: _Optional[str] = ...) -> None: ...
-
-class InlineWfSpecDefinition(_message.Message):
-    __slots__ = ("thread_specs", "entrypoint_thread_name", "retention_policy")
-    class ThreadSpecsEntry(_message.Message):
-        __slots__ = ("key", "value")
-        KEY_FIELD_NUMBER: _ClassVar[int]
-        VALUE_FIELD_NUMBER: _ClassVar[int]
-        key: str
-        value: ThreadSpec
-        def __init__(self, key: _Optional[str] = ..., value: _Optional[_Union[ThreadSpec, _Mapping]] = ...) -> None: ...
-    THREAD_SPECS_FIELD_NUMBER: _ClassVar[int]
-    ENTRYPOINT_THREAD_NAME_FIELD_NUMBER: _ClassVar[int]
-    RETENTION_POLICY_FIELD_NUMBER: _ClassVar[int]
-    thread_specs: _containers.MessageMap[str, ThreadSpec]
-    entrypoint_thread_name: str
-    retention_policy: WorkflowRetentionPolicy
-    def __init__(self, thread_specs: _Optional[_Mapping[str, ThreadSpec]] = ..., entrypoint_thread_name: _Optional[str] = ..., retention_policy: _Optional[_Union[WorkflowRetentionPolicy, _Mapping]] = ...) -> None: ...
-
-class InlineWfSpec(_message.Message):
-    __slots__ = ("definition", "checksum", "id", "created_at")
-    DEFINITION_FIELD_NUMBER: _ClassVar[int]
-    CHECKSUM_FIELD_NUMBER: _ClassVar[int]
-    ID_FIELD_NUMBER: _ClassVar[int]
-    CREATED_AT_FIELD_NUMBER: _ClassVar[int]
-    definition: InlineWfSpecDefinition
-    checksum: str
-    id: _object_id_pb2.InlineWfSpecId
-    created_at: _timestamp_pb2.Timestamp
-    def __init__(self, definition: _Optional[_Union[InlineWfSpecDefinition, _Mapping]] = ..., checksum: _Optional[str] = ..., id: _Optional[_Union[_object_id_pb2.InlineWfSpecId, _Mapping]] = ..., created_at: _Optional[_Union[datetime.datetime, _timestamp_pb2.Timestamp, _Mapping]] = ...) -> None: ...

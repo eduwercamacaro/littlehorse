@@ -11,19 +11,31 @@ public interface RunInlineWfRequestOrBuilder extends
     com.google.protobuf.MessageOrBuilder {
 
   /**
-   * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+   * <pre>
+   * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+   * </pre>
+   *
+   * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
    * @return Whether the wfSpec field is set.
    */
   boolean hasWfSpec();
   /**
-   * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+   * <pre>
+   * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+   * </pre>
+   *
+   * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
    * @return The wfSpec.
    */
-  io.littlehorse.sdk.common.proto.InlineWfSpecDefinition getWfSpec();
+  io.littlehorse.sdk.common.proto.InlineWfSpec getWfSpec();
   /**
-   * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+   * <pre>
+   * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+   * </pre>
+   *
+   * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
    */
-  io.littlehorse.sdk.common.proto.InlineWfSpecDefinitionOrBuilder getWfSpecOrBuilder();
+  io.littlehorse.sdk.common.proto.InlineWfSpecOrBuilder getWfSpecOrBuilder();
 
   /**
    * <code>map&lt;string, .littlehorse.VariableValue&gt; variables = 2;</code>

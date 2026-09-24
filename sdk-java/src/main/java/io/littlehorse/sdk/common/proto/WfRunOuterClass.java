@@ -121,6 +121,16 @@ public final class WfRunOuterClass extends com.google.protobuf.GeneratedFile {
   static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_littlehorse_ThreadHaltReason_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_littlehorse_InlineWfSpec_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_littlehorse_InlineWfSpec_fieldAccessorTable;
+  static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_littlehorse_InlineWfSpec_ThreadSpecsEntry_descriptor;
+  static final 
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_littlehorse_InlineWfSpec_ThreadSpecsEntry_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -222,11 +232,21 @@ public final class WfRunOuterClass extends com.google.protobuf.GeneratedFile {
       "HandlingFailureHaltReasonH\000\022.\n\013manual_ha" +
       "lt\030\006 \001(\0132\027.littlehorse.ManualHaltH\000\022E\n\020h" +
       "alted_by_parent\030\007 \001(\0132).littlehorse.Halt" +
-      "edByParentNodeHaltReasonH\000B\010\n\006reason*K\n\n" +
-      "ThreadType\022\016\n\nENTRYPOINT\020\000\022\t\n\005CHILD\020\001\022\r\n" +
-      "\tINTERRUPT\020\002\022\023\n\017FAILURE_HANDLER\020\003BM\n\037io." +
-      "littlehorse.sdk.common.protoP\001Z\t.;lhprot" +
-      "o\252\002\034LittleHorse.Sdk.Common.Protob\006proto3"
+      "edByParentNodeHaltReasonH\000B\010\n\006reason\"\360\002\n" +
+      "\014InlineWfSpec\022\'\n\002id\030\001 \001(\0132\033.littlehorse." +
+      "InlineWfSpecId\022.\n\ncreated_at\030\002 \001(\0132\032.goo" +
+      "gle.protobuf.Timestamp\022@\n\014thread_specs\030\003" +
+      " \003(\0132*.littlehorse.InlineWfSpec.ThreadSp" +
+      "ecsEntry\022\036\n\026entrypoint_thread_name\030\004 \001(\t" +
+      "\022C\n\020retention_policy\030\005 \001(\0132$.littlehorse" +
+      ".WorkflowRetentionPolicyH\000\210\001\001\032K\n\020ThreadS" +
+      "pecsEntry\022\013\n\003key\030\001 \001(\t\022&\n\005value\030\002 \001(\0132\027." +
+      "littlehorse.ThreadSpec:\0028\001B\023\n\021_retention" +
+      "_policy*K\n\nThreadType\022\016\n\nENTRYPOINT\020\000\022\t\n" +
+      "\005CHILD\020\001\022\r\n\tINTERRUPT\020\002\022\023\n\017FAILURE_HANDL" +
+      "ER\020\003BM\n\037io.littlehorse.sdk.common.protoP" +
+      "\001Z\t.;lhproto\252\002\034LittleHorse.Sdk.Common.Pr" +
+      "otob\006proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -352,6 +372,18 @@ public final class WfRunOuterClass extends com.google.protobuf.GeneratedFile {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_littlehorse_ThreadHaltReason_descriptor,
         new java.lang.String[] { "ParentHalted", "Interrupted", "PendingInterrupt", "PendingFailure", "HandlingFailure", "ManualHalt", "HaltedByParent", "Reason", });
+    internal_static_littlehorse_InlineWfSpec_descriptor =
+      getDescriptor().getMessageTypes().get(16);
+    internal_static_littlehorse_InlineWfSpec_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_littlehorse_InlineWfSpec_descriptor,
+        new java.lang.String[] { "Id", "CreatedAt", "ThreadSpecs", "EntrypointThreadName", "RetentionPolicy", });
+    internal_static_littlehorse_InlineWfSpec_ThreadSpecsEntry_descriptor =
+      internal_static_littlehorse_InlineWfSpec_descriptor.getNestedTypes().get(0);
+    internal_static_littlehorse_InlineWfSpec_ThreadSpecsEntry_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_littlehorse_InlineWfSpec_ThreadSpecsEntry_descriptor,
+        new java.lang.String[] { "Key", "Value", });
     descriptor.resolveAllFeaturesImmutable();
     com.google.protobuf.TimestampProto.getDescriptor();
     io.littlehorse.sdk.common.proto.CommonEnums.getDescriptor();

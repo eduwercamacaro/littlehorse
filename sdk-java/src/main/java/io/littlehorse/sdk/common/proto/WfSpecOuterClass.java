@@ -216,21 +216,6 @@ public final class WfSpecOuterClass extends com.google.protobuf.GeneratedFile {
   static final 
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_littlehorse_NodeMigration_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_littlehorse_InlineWfSpecDefinition_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_littlehorse_InlineWfSpecDefinition_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_littlehorse_InlineWfSpecDefinition_ThreadSpecsEntry_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_littlehorse_InlineWfSpecDefinition_ThreadSpecsEntry_fieldAccessorTable;
-  static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_littlehorse_InlineWfSpec_descriptor;
-  static final 
-    com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_littlehorse_InlineWfSpec_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -403,26 +388,14 @@ public final class WfSpecOuterClass extends com.google.protobuf.GeneratedFile {
       "dSpecMigration.NodeMigrationsEntry\032Q\n\023No" +
       "deMigrationsEntry\022\013\n\003key\030\001 \001(\t\022)\n\005value\030" +
       "\002 \001(\0132\032.littlehorse.NodeMigration:\0028\001\"&\n" +
-      "\rNodeMigration\022\025\n\rnew_node_name\030\001 \001(\t\"\253\002" +
-      "\n\026InlineWfSpecDefinition\022J\n\014thread_specs" +
-      "\030\001 \003(\01324.littlehorse.InlineWfSpecDefinit" +
-      "ion.ThreadSpecsEntry\022\036\n\026entrypoint_threa" +
-      "d_name\030\002 \001(\t\022C\n\020retention_policy\030\003 \001(\0132$" +
-      ".littlehorse.WorkflowRetentionPolicyH\000\210\001" +
-      "\001\032K\n\020ThreadSpecsEntry\022\013\n\003key\030\001 \001(\t\022&\n\005va" +
-      "lue\030\002 \001(\0132\027.littlehorse.ThreadSpec:\0028\001B\023" +
-      "\n\021_retention_policy\"\262\001\n\014InlineWfSpec\0227\n\n" +
-      "definition\030\001 \001(\0132#.littlehorse.InlineWfS" +
-      "pecDefinition\022\020\n\010checksum\030\002 \001(\t\022\'\n\002id\030\003 " +
-      "\001(\0132\033.littlehorse.InlineWfSpecId\022.\n\ncrea" +
-      "ted_at\030\004 \001(\0132\032.google.protobuf.Timestamp" +
-      "*N\n\030WfRunVariableAccessLevel\022\016\n\nPUBLIC_V" +
-      "AR\020\000\022\017\n\013PRIVATE_VAR\020\001\022\021\n\rINHERITED_VAR\020\002" +
-      "*P\n\026WaitForThreadsStrategy\022\020\n\014WAIT_FOR_A" +
-      "LL\020\000\022\022\n\016WAIT_FOR_FIRST\020\001\022\020\n\014WAIT_FOR_ANY" +
-      "\020\002BM\n\037io.littlehorse.sdk.common.protoP\001Z" +
-      "\t.;lhproto\252\002\034LittleHorse.Sdk.Common.Prot" +
-      "ob\006proto3"
+      "\rNodeMigration\022\025\n\rnew_node_name\030\001 \001(\t*N\n" +
+      "\030WfRunVariableAccessLevel\022\016\n\nPUBLIC_VAR\020" +
+      "\000\022\017\n\013PRIVATE_VAR\020\001\022\021\n\rINHERITED_VAR\020\002*P\n" +
+      "\026WaitForThreadsStrategy\022\020\n\014WAIT_FOR_ALL\020" +
+      "\000\022\022\n\016WAIT_FOR_FIRST\020\001\022\020\n\014WAIT_FOR_ANY\020\002B" +
+      "M\n\037io.littlehorse.sdk.common.protoP\001Z\t.;" +
+      "lhproto\252\002\034LittleHorse.Sdk.Common.Protob\006" +
+      "proto3"
     };
     descriptor = com.google.protobuf.Descriptors.FileDescriptor
       .internalBuildGeneratedFileFrom(descriptorData,
@@ -661,24 +634,6 @@ public final class WfSpecOuterClass extends com.google.protobuf.GeneratedFile {
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_littlehorse_NodeMigration_descriptor,
         new java.lang.String[] { "NewNodeName", });
-    internal_static_littlehorse_InlineWfSpecDefinition_descriptor =
-      getDescriptor().getMessageTypes().get(28);
-    internal_static_littlehorse_InlineWfSpecDefinition_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_littlehorse_InlineWfSpecDefinition_descriptor,
-        new java.lang.String[] { "ThreadSpecs", "EntrypointThreadName", "RetentionPolicy", });
-    internal_static_littlehorse_InlineWfSpecDefinition_ThreadSpecsEntry_descriptor =
-      internal_static_littlehorse_InlineWfSpecDefinition_descriptor.getNestedTypes().get(0);
-    internal_static_littlehorse_InlineWfSpecDefinition_ThreadSpecsEntry_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_littlehorse_InlineWfSpecDefinition_ThreadSpecsEntry_descriptor,
-        new java.lang.String[] { "Key", "Value", });
-    internal_static_littlehorse_InlineWfSpec_descriptor =
-      getDescriptor().getMessageTypes().get(29);
-    internal_static_littlehorse_InlineWfSpec_fieldAccessorTable = new
-      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_littlehorse_InlineWfSpec_descriptor,
-        new java.lang.String[] { "Definition", "Checksum", "Id", "CreatedAt", });
     descriptor.resolveAllFeaturesImmutable();
     com.google.protobuf.TimestampProto.getDescriptor();
     io.littlehorse.sdk.common.proto.CommonEnums.getDescriptor();

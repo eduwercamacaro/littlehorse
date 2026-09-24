@@ -128,7 +128,7 @@ func taskInlineRequest(ctx context.Context, client lhproto.LittleHorseClient, de
 		"done":  {Node: &lhproto.Node_Exit{Exit: exit}},
 	}
 	req := &lhproto.RunInlineWfRequest{
-		WfSpec:    &lhproto.InlineWfSpecDefinition{EntrypointThreadName: "main", ThreadSpecs: map[string]*lhproto.ThreadSpec{"main": thread}},
+		WfSpec:    &lhproto.InlineWfSpec{EntrypointThreadName: "main", ThreadSpecs: map[string]*lhproto.ThreadSpec{"main": thread}},
 		Variables: values,
 	}
 	if id != "" {

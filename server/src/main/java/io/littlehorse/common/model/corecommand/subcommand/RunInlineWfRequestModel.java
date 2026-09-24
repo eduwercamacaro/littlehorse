@@ -1,6 +1,5 @@
 package io.littlehorse.common.model.corecommand.subcommand;
 
-import com.google.protobuf.CodedOutputStream;
 import com.google.protobuf.Message;
 import io.grpc.Status;
 import io.littlehorse.common.LHSerializable;
@@ -12,12 +11,10 @@ import io.littlehorse.common.model.getable.core.noderun.NodeFailureException;
 import io.littlehorse.common.model.getable.core.variable.VariableValueModel;
 import io.littlehorse.common.model.getable.core.wfrun.InlineWfSpecModel;
 import io.littlehorse.common.model.getable.core.wfrun.WfRunModel;
-import io.littlehorse.common.model.getable.global.wfspec.InlineWfSpecDefinitionModel;
 import io.littlehorse.common.model.getable.global.wfspec.WfSpecModel;
 import io.littlehorse.common.model.getable.objectId.InlineWfSpecIdModel;
 import io.littlehorse.common.model.getable.objectId.WfRunIdModel;
 import io.littlehorse.common.util.LHUtil;
-import io.littlehorse.sdk.common.proto.InlineWfSpecDefinition;
 import io.littlehorse.sdk.common.proto.LHStatus;
 import io.littlehorse.sdk.common.proto.Node.NodeCase;
 import io.littlehorse.sdk.common.proto.RunInlineWfRequest;
@@ -25,11 +22,7 @@ import io.littlehorse.sdk.common.proto.ThreadType;
 import io.littlehorse.sdk.common.proto.WfRun;
 import io.littlehorse.server.streams.topology.core.CoreProcessorContext;
 import io.littlehorse.server.streams.topology.core.ExecutionContext;
-import java.io.IOException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
-import java.util.HexFormat;
 import java.util.Map;
 import java.util.Optional;
 
@@ -38,7 +31,7 @@ public class RunInlineWfRequestModel extends CoreSubCommand<RunInlineWfRequest> 
     private static final int MAX_DEFINITION_BYTES = 256 * 1024;
     private static final int MAX_NODES = 256;
     private String id;
-    private InlineWfSpecDefinitionModel definition;
+    private InlineWfSpecModel definition;
     private final Map<String, VariableValueModel> variables = new HashMap<>();
 
     @Override
@@ -72,7 +65,10 @@ public class RunInlineWfRequestModel extends CoreSubCommand<RunInlineWfRequest> 
         if (request.getWfSpec().getSerializedSize() > MAX_DEFINITION_BYTES) {
             throw new LHApiException(Status.INVALID_ARGUMENT, "Inline definition exceeds 256 KiB");
         }
-        definition = LHSerializable.fromProto(request.getWfSpec(), InlineWfSpecDefinitionModel.class, context);
+        if (request.getWfSpec().hasId() || request.getWfSpec().hasCreatedAt()) {
+            throw new LHApiException(Status.INVALID_ARGUMENT, "Inline id and created_at are server-managed");
+        }
+        definition = LHSerializable.fromProto(request.getWfSpec(), InlineWfSpecModel.class, context);
         request.getVariablesMap()
                 .forEach((name, value) -> variables.put(name, VariableValueModel.fromProto(value, context)));
     }
@@ -103,8 +99,9 @@ public class RunInlineWfRequestModel extends CoreSubCommand<RunInlineWfRequest> 
                     }
                 }));
 
-        InlineWfSpecModel inline = new InlineWfSpecModel();
-        inline.setDefinition(definition);
+        // Keep server-generated metadata out of the submitted command payload.
+        InlineWfSpecModel inline =
+                LHSerializable.fromProto(definition.toProto().build(), InlineWfSpecModel.class, context);
         WfSpecModel spec = inline.asWfSpecModel();
         try {
             spec.validateAndMaybeBumpVersion(Optional.empty(), context);
@@ -112,12 +109,10 @@ public class RunInlineWfRequestModel extends CoreSubCommand<RunInlineWfRequest> 
         } catch (LHValidationException ex) {
             throw new LHApiException(Status.INVALID_ARGUMENT, ex.getMessage());
         }
-        // Validation may pin metadata references; persist and fingerprint that normalized definition.
-        InlineWfSpecDefinition normalized = definition.toProto().build();
-        if (normalized.getSerializedSize() > MAX_DEFINITION_BYTES) {
+        // Validation may pin metadata references; bound the normalized definition too.
+        if (inline.toProto().build().getSerializedSize() > MAX_DEFINITION_BYTES) {
             throw new LHApiException(Status.INVALID_ARGUMENT, "Normalized inline definition exceeds 256 KiB");
         }
-        inline.setChecksum(checksum(normalized));
         inline.setId(new InlineWfSpecIdModel(runId));
         inline.setCreatedAt(context.currentCommand().getTime());
         // Both records are staged in the same core transaction and partition.
@@ -137,18 +132,5 @@ public class RunInlineWfRequestModel extends CoreSubCommand<RunInlineWfRequest> 
         }
         run.advance(run.getStartTime());
         return run.toProto().build();
-    }
-
-    private static String checksum(InlineWfSpecDefinition definition) {
-        byte[] bytes = new byte[definition.getSerializedSize()];
-        CodedOutputStream output = CodedOutputStream.newInstance(bytes);
-        output.useDeterministicSerialization();
-        try {
-            definition.writeTo(output);
-            output.checkNoSpaceLeft();
-            return HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(bytes));
-        } catch (IOException | NoSuchAlgorithmException ex) {
-            throw new IllegalStateException("Could not fingerprint inline definition", ex);
-        }
     }
 }

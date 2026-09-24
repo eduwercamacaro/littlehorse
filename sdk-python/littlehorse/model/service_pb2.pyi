@@ -243,10 +243,10 @@ class RunInlineWfRequest(_message.Message):
     WF_SPEC_FIELD_NUMBER: _ClassVar[int]
     VARIABLES_FIELD_NUMBER: _ClassVar[int]
     ID_FIELD_NUMBER: _ClassVar[int]
-    wf_spec: _wf_spec_pb2.InlineWfSpecDefinition
+    wf_spec: _wf_run_pb2.InlineWfSpec
     variables: _containers.MessageMap[str, _type_definition_pb2.VariableValue]
     id: str
-    def __init__(self, wf_spec: _Optional[_Union[_wf_spec_pb2.InlineWfSpecDefinition, _Mapping]] = ..., variables: _Optional[_Mapping[str, _type_definition_pb2.VariableValue]] = ..., id: _Optional[str] = ...) -> None: ...
+    def __init__(self, wf_spec: _Optional[_Union[_wf_run_pb2.InlineWfSpec, _Mapping]] = ..., variables: _Optional[_Mapping[str, _type_definition_pb2.VariableValue]] = ..., id: _Optional[str] = ...) -> None: ...
 
 class RunWfRequest(_message.Message):
     __slots__ = ("wf_spec_name", "major_version", "revision", "variables", "id", "parent_wf_run_id")

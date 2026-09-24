@@ -305,3 +305,17 @@ message ThreadHaltReason {
     HaltedByParentNodeHaltReason halted_by_parent = 7;
   }
 }
+
+// Immutable, server-normalized snapshot stored in the owning WfRun's partition.
+// Created by RunInlineWf and deleted with its WfRun; not independently writable.
+message InlineWfSpec {
+
+  // Output only; must be absent in RunInlineWf requests.
+  InlineWfSpecId id = 1;
+  // Output only; must be absent in RunInlineWf requests.
+  google.protobuf.Timestamp created_at = 2;
+
+  map<string, ThreadSpec> thread_specs = 3;
+  string entrypoint_thread_name = 4;
+  optional WorkflowRetentionPolicy retention_policy = 5;
+}

@@ -4,8 +4,9 @@ import com.google.protobuf.Message;
 import io.littlehorse.common.LHSerializable;
 import io.littlehorse.common.model.AbstractGetable;
 import io.littlehorse.common.model.CoreGetable;
-import io.littlehorse.common.model.getable.global.wfspec.InlineWfSpecDefinitionModel;
 import io.littlehorse.common.model.getable.global.wfspec.WfSpecModel;
+import io.littlehorse.common.model.getable.global.wfspec.WorkflowRetentionPolicyModel;
+import io.littlehorse.common.model.getable.global.wfspec.thread.ThreadSpecModel;
 import io.littlehorse.common.model.getable.objectId.InlineWfSpecIdModel;
 import io.littlehorse.common.proto.TagStorageType;
 import io.littlehorse.common.util.LHUtil;
@@ -14,7 +15,9 @@ import io.littlehorse.server.streams.storeinternals.GetableIndex;
 import io.littlehorse.server.streams.storeinternals.index.IndexedField;
 import io.littlehorse.server.streams.topology.core.ExecutionContext;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,16 +28,17 @@ public class InlineWfSpecModel extends CoreGetable<InlineWfSpec> {
 
     private InlineWfSpecIdModel id;
     private Date createdAt;
-    private InlineWfSpecDefinitionModel definition;
-    private String checksum;
+    private Map<String, ThreadSpecModel> threadSpecs = new HashMap<>();
+    private String entrypointThreadName;
+    private WorkflowRetentionPolicyModel retentionPolicy;
 
     // Runtime view only. Inline definitions have no registered metadata ID.
     public WfSpecModel asWfSpecModel() {
         WfSpecModel spec = new WfSpecModel();
         spec.setId(null);
-        spec.setThreadSpecs(definition.getThreadSpecs());
-        spec.setEntrypointThreadName(definition.getEntrypointThreadName());
-        spec.setRetentionPolicy(definition.getRetentionPolicy());
+        spec.setThreadSpecs(threadSpecs);
+        spec.setEntrypointThreadName(entrypointThreadName);
+        spec.setRetentionPolicy(retentionPolicy);
         spec.getThreadSpecs().forEach((name, thread) -> {
             thread.setName(name);
             thread.setWfSpec(spec);
@@ -52,12 +56,10 @@ public class InlineWfSpecModel extends CoreGetable<InlineWfSpec> {
         InlineWfSpec.Builder out = InlineWfSpec.newBuilder();
         if (id != null) out.setId(id.toProto());
         if (createdAt != null) out.setCreatedAt(LHUtil.fromDate(createdAt));
-        if (definition != null) {
-            out.setDefinition(definition.toProto());
-        }
-        if (checksum != null) {
-            out.setChecksum(checksum);
-        }
+        out.setEntrypointThreadName(entrypointThreadName);
+        threadSpecs.forEach(
+                (name, thread) -> out.putThreadSpecs(name, thread.toProto().build()));
+        if (retentionPolicy != null) out.setRetentionPolicy(retentionPolicy.toProto());
         return out;
     }
 
@@ -66,10 +68,16 @@ public class InlineWfSpecModel extends CoreGetable<InlineWfSpec> {
         InlineWfSpec p = (InlineWfSpec) proto;
         id = p.hasId() ? LHSerializable.fromProto(p.getId(), InlineWfSpecIdModel.class, context) : null;
         createdAt = p.hasCreatedAt() ? LHUtil.fromProtoTs(p.getCreatedAt()) : null;
-        definition = p.hasDefinition()
-                ? LHSerializable.fromProto(p.getDefinition(), InlineWfSpecDefinitionModel.class, context)
+        entrypointThreadName = p.getEntrypointThreadName();
+        threadSpecs.clear();
+        p.getThreadSpecsMap().forEach((name, thread) -> {
+            ThreadSpecModel model = LHSerializable.fromProto(thread, ThreadSpecModel.class, context);
+            model.setName(name);
+            threadSpecs.put(name, model);
+        });
+        retentionPolicy = p.hasRetentionPolicy()
+                ? LHSerializable.fromProto(p.getRetentionPolicy(), WorkflowRetentionPolicyModel.class, context)
                 : null;
-        checksum = p.getChecksum();
     }
 
     @Override

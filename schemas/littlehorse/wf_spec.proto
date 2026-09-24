@@ -599,35 +599,3 @@ message NodeMigration {
   // - allow one-time task executions during migration
   // - allow iniatialization of Variables to special values
 }
-
-
-// A caller-provided workflow definition that is executed by exactly one WfRun.
-//
-// Unlike a WfSpec, this definition is not registered, named, versioned,
-// searchable, updated, or independently addressable.
-message InlineWfSpecDefinition {
-  // ThreadSpecs that comprise the workflow.
-  map<string, ThreadSpec> thread_specs = 1;
-
-  // ThreadSpec used as the workflow entrypoint.
-  string entrypoint_thread_name = 2;
-
-  // Controls cleanup of the owning WfRun after it terminates.
-  optional WorkflowRetentionPolicy retention_policy = 3;
-
-}
-
-// Immutable, server-normalized snapshot stored in the owning WfRun's partition.
-// Created by RunInlineWf and deleted with its WfRun; not independently writable.
-message InlineWfSpec {
-  InlineWfSpecDefinition definition = 1;
-
-  // Server-generated fingerprint of the canonical definition.
-  //
-  // Intended for diagnostics, comparison, and integrity validation.
-  // It does not make the definition globally addressable.
-  string checksum = 2;
-
-  InlineWfSpecId id = 3;
-  google.protobuf.Timestamp created_at = 4;
-}

@@ -1406,6 +1406,89 @@ func (*ThreadHaltReason_ManualHalt) isThreadHaltReason_Reason() {}
 
 func (*ThreadHaltReason_HaltedByParent) isThreadHaltReason_Reason() {}
 
+// Immutable, server-normalized snapshot stored in the owning WfRun's partition.
+// Created by RunInlineWf and deleted with its WfRun; not independently writable.
+type InlineWfSpec struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	// Output only; must be absent in RunInlineWf requests.
+	Id *InlineWfSpecId `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	// Output only; must be absent in RunInlineWf requests.
+	CreatedAt            *timestamppb.Timestamp   `protobuf:"bytes,2,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	ThreadSpecs          map[string]*ThreadSpec   `protobuf:"bytes,3,rep,name=thread_specs,json=threadSpecs,proto3" json:"thread_specs,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+	EntrypointThreadName string                   `protobuf:"bytes,4,opt,name=entrypoint_thread_name,json=entrypointThreadName,proto3" json:"entrypoint_thread_name,omitempty"`
+	RetentionPolicy      *WorkflowRetentionPolicy `protobuf:"bytes,5,opt,name=retention_policy,json=retentionPolicy,proto3,oneof" json:"retention_policy,omitempty"`
+}
+
+func (x *InlineWfSpec) Reset() {
+	*x = InlineWfSpec{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_wf_run_proto_msgTypes[16]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *InlineWfSpec) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InlineWfSpec) ProtoMessage() {}
+
+func (x *InlineWfSpec) ProtoReflect() protoreflect.Message {
+	mi := &file_wf_run_proto_msgTypes[16]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InlineWfSpec.ProtoReflect.Descriptor instead.
+func (*InlineWfSpec) Descriptor() ([]byte, []int) {
+	return file_wf_run_proto_rawDescGZIP(), []int{16}
+}
+
+func (x *InlineWfSpec) GetId() *InlineWfSpecId {
+	if x != nil {
+		return x.Id
+	}
+	return nil
+}
+
+func (x *InlineWfSpec) GetCreatedAt() *timestamppb.Timestamp {
+	if x != nil {
+		return x.CreatedAt
+	}
+	return nil
+}
+
+func (x *InlineWfSpec) GetThreadSpecs() map[string]*ThreadSpec {
+	if x != nil {
+		return x.ThreadSpecs
+	}
+	return nil
+}
+
+func (x *InlineWfSpec) GetEntrypointThreadName() string {
+	if x != nil {
+		return x.EntrypointThreadName
+	}
+	return ""
+}
+
+func (x *InlineWfSpec) GetRetentionPolicy() *WorkflowRetentionPolicy {
+	if x != nil {
+		return x.RetentionPolicy
+	}
+	return nil
+}
+
 // Information about a parent `WfRun` which triggers a child.
 type WfRun_ParentTriggerReference struct {
 	state         protoimpl.MessageState
@@ -1422,7 +1505,7 @@ type WfRun_ParentTriggerReference struct {
 func (x *WfRun_ParentTriggerReference) Reset() {
 	*x = WfRun_ParentTriggerReference{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wf_run_proto_msgTypes[16]
+		mi := &file_wf_run_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1435,7 +1518,7 @@ func (x *WfRun_ParentTriggerReference) String() string {
 func (*WfRun_ParentTriggerReference) ProtoMessage() {}
 
 func (x *WfRun_ParentTriggerReference) ProtoReflect() protoreflect.Message {
-	mi := &file_wf_run_proto_msgTypes[16]
+	mi := &file_wf_run_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1760,17 +1843,45 @@ var file_wf_run_proto_rawDesc = []byte{
 	0x79, 0x50, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x4e, 0x6f, 0x64, 0x65, 0x48, 0x61, 0x6c, 0x74, 0x52,
 	0x65, 0x61, 0x73, 0x6f, 0x6e, 0x48, 0x00, 0x52, 0x0e, 0x68, 0x61, 0x6c, 0x74, 0x65, 0x64, 0x42,
 	0x79, 0x50, 0x61, 0x72, 0x65, 0x6e, 0x74, 0x42, 0x08, 0x0a, 0x06, 0x72, 0x65, 0x61, 0x73, 0x6f,
-	0x6e, 0x2a, 0x4b, 0x0a, 0x0a, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x54, 0x79, 0x70, 0x65, 0x12,
-	0x0e, 0x0a, 0x0a, 0x45, 0x4e, 0x54, 0x52, 0x59, 0x50, 0x4f, 0x49, 0x4e, 0x54, 0x10, 0x00, 0x12,
-	0x09, 0x0a, 0x05, 0x43, 0x48, 0x49, 0x4c, 0x44, 0x10, 0x01, 0x12, 0x0d, 0x0a, 0x09, 0x49, 0x4e,
-	0x54, 0x45, 0x52, 0x52, 0x55, 0x50, 0x54, 0x10, 0x02, 0x12, 0x13, 0x0a, 0x0f, 0x46, 0x41, 0x49,
-	0x4c, 0x55, 0x52, 0x45, 0x5f, 0x48, 0x41, 0x4e, 0x44, 0x4c, 0x45, 0x52, 0x10, 0x03, 0x42, 0x4d,
-	0x0a, 0x1f, 0x69, 0x6f, 0x2e, 0x6c, 0x69, 0x74, 0x74, 0x6c, 0x65, 0x68, 0x6f, 0x72, 0x73, 0x65,
-	0x2e, 0x73, 0x64, 0x6b, 0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74,
-	0x6f, 0x50, 0x01, 0x5a, 0x09, 0x2e, 0x3b, 0x6c, 0x68, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0xaa, 0x02,
-	0x1c, 0x4c, 0x69, 0x74, 0x74, 0x6c, 0x65, 0x48, 0x6f, 0x72, 0x73, 0x65, 0x2e, 0x53, 0x64, 0x6b,
-	0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6e, 0x22, 0xbf, 0x03, 0x0a, 0x0c, 0x49, 0x6e, 0x6c, 0x69, 0x6e, 0x65, 0x57, 0x66, 0x53, 0x70,
+	0x65, 0x63, 0x12, 0x2b, 0x0a, 0x02, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b,
+	0x2e, 0x6c, 0x69, 0x74, 0x74, 0x6c, 0x65, 0x68, 0x6f, 0x72, 0x73, 0x65, 0x2e, 0x49, 0x6e, 0x6c,
+	0x69, 0x6e, 0x65, 0x57, 0x66, 0x53, 0x70, 0x65, 0x63, 0x49, 0x64, 0x52, 0x02, 0x69, 0x64, 0x12,
+	0x39, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x02, 0x20,
+	0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69, 0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52,
+	0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64, 0x41, 0x74, 0x12, 0x4d, 0x0a, 0x0c, 0x74, 0x68,
+	0x72, 0x65, 0x61, 0x64, 0x5f, 0x73, 0x70, 0x65, 0x63, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x0b,
+	0x32, 0x2a, 0x2e, 0x6c, 0x69, 0x74, 0x74, 0x6c, 0x65, 0x68, 0x6f, 0x72, 0x73, 0x65, 0x2e, 0x49,
+	0x6e, 0x6c, 0x69, 0x6e, 0x65, 0x57, 0x66, 0x53, 0x70, 0x65, 0x63, 0x2e, 0x54, 0x68, 0x72, 0x65,
+	0x61, 0x64, 0x53, 0x70, 0x65, 0x63, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x0b, 0x74, 0x68,
+	0x72, 0x65, 0x61, 0x64, 0x53, 0x70, 0x65, 0x63, 0x73, 0x12, 0x34, 0x0a, 0x16, 0x65, 0x6e, 0x74,
+	0x72, 0x79, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x5f, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x5f, 0x6e,
+	0x61, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x09, 0x52, 0x14, 0x65, 0x6e, 0x74, 0x72, 0x79,
+	0x70, 0x6f, 0x69, 0x6e, 0x74, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x4e, 0x61, 0x6d, 0x65, 0x12,
+	0x54, 0x0a, 0x10, 0x72, 0x65, 0x74, 0x65, 0x6e, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x70, 0x6f, 0x6c,
+	0x69, 0x63, 0x79, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x24, 0x2e, 0x6c, 0x69, 0x74, 0x74,
+	0x6c, 0x65, 0x68, 0x6f, 0x72, 0x73, 0x65, 0x2e, 0x57, 0x6f, 0x72, 0x6b, 0x66, 0x6c, 0x6f, 0x77,
+	0x52, 0x65, 0x74, 0x65, 0x6e, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x48,
+	0x00, 0x52, 0x0f, 0x72, 0x65, 0x74, 0x65, 0x6e, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x6f, 0x6c, 0x69,
+	0x63, 0x79, 0x88, 0x01, 0x01, 0x1a, 0x57, 0x0a, 0x10, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x53,
+	0x70, 0x65, 0x63, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x2d, 0x0a, 0x05, 0x76,
+	0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x17, 0x2e, 0x6c, 0x69, 0x74,
+	0x74, 0x6c, 0x65, 0x68, 0x6f, 0x72, 0x73, 0x65, 0x2e, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x53,
+	0x70, 0x65, 0x63, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a, 0x02, 0x38, 0x01, 0x42, 0x13,
+	0x0a, 0x11, 0x5f, 0x72, 0x65, 0x74, 0x65, 0x6e, 0x74, 0x69, 0x6f, 0x6e, 0x5f, 0x70, 0x6f, 0x6c,
+	0x69, 0x63, 0x79, 0x2a, 0x4b, 0x0a, 0x0a, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x54, 0x79, 0x70,
+	0x65, 0x12, 0x0e, 0x0a, 0x0a, 0x45, 0x4e, 0x54, 0x52, 0x59, 0x50, 0x4f, 0x49, 0x4e, 0x54, 0x10,
+	0x00, 0x12, 0x09, 0x0a, 0x05, 0x43, 0x48, 0x49, 0x4c, 0x44, 0x10, 0x01, 0x12, 0x0d, 0x0a, 0x09,
+	0x49, 0x4e, 0x54, 0x45, 0x52, 0x52, 0x55, 0x50, 0x54, 0x10, 0x02, 0x12, 0x13, 0x0a, 0x0f, 0x46,
+	0x41, 0x49, 0x4c, 0x55, 0x52, 0x45, 0x5f, 0x48, 0x41, 0x4e, 0x44, 0x4c, 0x45, 0x52, 0x10, 0x03,
+	0x42, 0x4d, 0x0a, 0x1f, 0x69, 0x6f, 0x2e, 0x6c, 0x69, 0x74, 0x74, 0x6c, 0x65, 0x68, 0x6f, 0x72,
+	0x73, 0x65, 0x2e, 0x73, 0x64, 0x6b, 0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x70, 0x72,
+	0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x09, 0x2e, 0x3b, 0x6c, 0x68, 0x70, 0x72, 0x6f, 0x74, 0x6f,
+	0xaa, 0x02, 0x1c, 0x4c, 0x69, 0x74, 0x74, 0x6c, 0x65, 0x48, 0x6f, 0x72, 0x73, 0x65, 0x2e, 0x53,
+	0x64, 0x6b, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x62,
+	0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1786,7 +1897,7 @@ func file_wf_run_proto_rawDescGZIP() []byte {
 }
 
 var file_wf_run_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_wf_run_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
+var file_wf_run_proto_msgTypes = make([]protoimpl.MessageInfo, 21)
 var file_wf_run_proto_goTypes = []interface{}{
 	(ThreadType)(0),                         // 0: littlehorse.ThreadType
 	(*WfRun)(nil),                           // 1: littlehorse.WfRun
@@ -1805,53 +1916,56 @@ var file_wf_run_proto_goTypes = []interface{}{
 	(*Interrupted)(nil),                     // 14: littlehorse.Interrupted
 	(*ManualHalt)(nil),                      // 15: littlehorse.ManualHalt
 	(*ThreadHaltReason)(nil),                // 16: littlehorse.ThreadHaltReason
-	(*WfRun_ParentTriggerReference)(nil),    // 17: littlehorse.WfRun.ParentTriggerReference
-	nil,                                     // 18: littlehorse.WfRun.MigrationVariablesEntry
-	nil,                                     // 19: littlehorse.QueuedThreadRunInfo.InputVarsEntry
-	(*WfRunId)(nil),                         // 20: littlehorse.WfRunId
-	(*WfSpecId)(nil),                        // 21: littlehorse.WfSpecId
-	(*InlineWfSpec)(nil),                    // 22: littlehorse.InlineWfSpec
-	(*InlineWfSpecId)(nil),                  // 23: littlehorse.InlineWfSpecId
-	(LHStatus)(0),                           // 24: littlehorse.LHStatus
-	(*timestamppb.Timestamp)(nil),           // 25: google.protobuf.Timestamp
-	(*WorkflowMigrationPlanId)(nil),         // 26: littlehorse.WorkflowMigrationPlanId
-	(*ExternalEventId)(nil),                 // 27: littlehorse.ExternalEventId
-	(*VariableValue)(nil),                   // 28: littlehorse.VariableValue
-	(*InactiveThreadRunId)(nil),             // 29: littlehorse.InactiveThreadRunId
-	(*NodeRunId)(nil),                       // 30: littlehorse.NodeRunId
-	(*MigrationVars)(nil),                   // 31: littlehorse.MigrationVars
+	(*InlineWfSpec)(nil),                    // 17: littlehorse.InlineWfSpec
+	(*WfRun_ParentTriggerReference)(nil),    // 18: littlehorse.WfRun.ParentTriggerReference
+	nil,                                     // 19: littlehorse.WfRun.MigrationVariablesEntry
+	nil,                                     // 20: littlehorse.QueuedThreadRunInfo.InputVarsEntry
+	nil,                                     // 21: littlehorse.InlineWfSpec.ThreadSpecsEntry
+	(*WfRunId)(nil),                         // 22: littlehorse.WfRunId
+	(*WfSpecId)(nil),                        // 23: littlehorse.WfSpecId
+	(*InlineWfSpecId)(nil),                  // 24: littlehorse.InlineWfSpecId
+	(LHStatus)(0),                           // 25: littlehorse.LHStatus
+	(*timestamppb.Timestamp)(nil),           // 26: google.protobuf.Timestamp
+	(*WorkflowMigrationPlanId)(nil),         // 27: littlehorse.WorkflowMigrationPlanId
+	(*ExternalEventId)(nil),                 // 28: littlehorse.ExternalEventId
+	(*VariableValue)(nil),                   // 29: littlehorse.VariableValue
+	(*InactiveThreadRunId)(nil),             // 30: littlehorse.InactiveThreadRunId
+	(*WorkflowRetentionPolicy)(nil),         // 31: littlehorse.WorkflowRetentionPolicy
+	(*NodeRunId)(nil),                       // 32: littlehorse.NodeRunId
+	(*MigrationVars)(nil),                   // 33: littlehorse.MigrationVars
+	(*ThreadSpec)(nil),                      // 34: littlehorse.ThreadSpec
 }
 var file_wf_run_proto_depIdxs = []int32{
-	20, // 0: littlehorse.WfRun.id:type_name -> littlehorse.WfRunId
-	21, // 1: littlehorse.WfRun.wf_spec_id:type_name -> littlehorse.WfSpecId
-	22, // 2: littlehorse.WfRun.inline_wf_spec:type_name -> littlehorse.InlineWfSpec
-	23, // 3: littlehorse.WfRun.inline_wf_spec_id:type_name -> littlehorse.InlineWfSpecId
-	21, // 4: littlehorse.WfRun.old_wf_spec_versions:type_name -> littlehorse.WfSpecId
-	24, // 5: littlehorse.WfRun.status:type_name -> littlehorse.LHStatus
-	25, // 6: littlehorse.WfRun.start_time:type_name -> google.protobuf.Timestamp
-	25, // 7: littlehorse.WfRun.end_time:type_name -> google.protobuf.Timestamp
+	22, // 0: littlehorse.WfRun.id:type_name -> littlehorse.WfRunId
+	23, // 1: littlehorse.WfRun.wf_spec_id:type_name -> littlehorse.WfSpecId
+	17, // 2: littlehorse.WfRun.inline_wf_spec:type_name -> littlehorse.InlineWfSpec
+	24, // 3: littlehorse.WfRun.inline_wf_spec_id:type_name -> littlehorse.InlineWfSpecId
+	23, // 4: littlehorse.WfRun.old_wf_spec_versions:type_name -> littlehorse.WfSpecId
+	25, // 5: littlehorse.WfRun.status:type_name -> littlehorse.LHStatus
+	26, // 6: littlehorse.WfRun.start_time:type_name -> google.protobuf.Timestamp
+	26, // 7: littlehorse.WfRun.end_time:type_name -> google.protobuf.Timestamp
 	2,  // 8: littlehorse.WfRun.thread_runs:type_name -> littlehorse.ThreadRun
 	7,  // 9: littlehorse.WfRun.pending_interrupts:type_name -> littlehorse.PendingInterrupt
 	8,  // 10: littlehorse.WfRun.pending_failures:type_name -> littlehorse.PendingFailureHandler
-	17, // 11: littlehorse.WfRun.parent_trigger:type_name -> littlehorse.WfRun.ParentTriggerReference
-	26, // 12: littlehorse.WfRun.workflow_migration_plan_id:type_name -> littlehorse.WorkflowMigrationPlanId
-	18, // 13: littlehorse.WfRun.migration_variables:type_name -> littlehorse.WfRun.MigrationVariablesEntry
-	21, // 14: littlehorse.ThreadRun.wf_spec_id:type_name -> littlehorse.WfSpecId
-	24, // 15: littlehorse.ThreadRun.status:type_name -> littlehorse.LHStatus
-	25, // 16: littlehorse.ThreadRun.start_time:type_name -> google.protobuf.Timestamp
-	25, // 17: littlehorse.ThreadRun.end_time:type_name -> google.protobuf.Timestamp
+	18, // 11: littlehorse.WfRun.parent_trigger:type_name -> littlehorse.WfRun.ParentTriggerReference
+	27, // 12: littlehorse.WfRun.workflow_migration_plan_id:type_name -> littlehorse.WorkflowMigrationPlanId
+	19, // 13: littlehorse.WfRun.migration_variables:type_name -> littlehorse.WfRun.MigrationVariablesEntry
+	23, // 14: littlehorse.ThreadRun.wf_spec_id:type_name -> littlehorse.WfSpecId
+	25, // 15: littlehorse.ThreadRun.status:type_name -> littlehorse.LHStatus
+	26, // 16: littlehorse.ThreadRun.start_time:type_name -> google.protobuf.Timestamp
+	26, // 17: littlehorse.ThreadRun.end_time:type_name -> google.protobuf.Timestamp
 	16, // 18: littlehorse.ThreadRun.halt_reasons:type_name -> littlehorse.ThreadHaltReason
-	27, // 19: littlehorse.ThreadRun.interrupt_trigger_id:type_name -> littlehorse.ExternalEventId
+	28, // 19: littlehorse.ThreadRun.interrupt_trigger_id:type_name -> littlehorse.ExternalEventId
 	6,  // 20: littlehorse.ThreadRun.failure_being_handled:type_name -> littlehorse.FailureBeingHandled
 	0,  // 21: littlehorse.ThreadRun.type:type_name -> littlehorse.ThreadType
-	28, // 22: littlehorse.ThreadRun.output:type_name -> littlehorse.VariableValue
+	29, // 22: littlehorse.ThreadRun.output:type_name -> littlehorse.VariableValue
 	2,  // 23: littlehorse.InactiveThreadRun.thread_run:type_name -> littlehorse.ThreadRun
 	4,  // 24: littlehorse.InactiveThreadRun.archived:type_name -> littlehorse.ArchivedThreadRunInfo
 	5,  // 25: littlehorse.InactiveThreadRun.queued:type_name -> littlehorse.QueuedThreadRunInfo
-	29, // 26: littlehorse.InactiveThreadRun.id:type_name -> littlehorse.InactiveThreadRunId
-	19, // 27: littlehorse.QueuedThreadRunInfo.input_vars:type_name -> littlehorse.QueuedThreadRunInfo.InputVarsEntry
-	27, // 28: littlehorse.PendingInterrupt.external_event_id:type_name -> littlehorse.ExternalEventId
-	27, // 29: littlehorse.PendingInterruptHaltReason.external_event_id:type_name -> littlehorse.ExternalEventId
+	30, // 26: littlehorse.InactiveThreadRun.id:type_name -> littlehorse.InactiveThreadRunId
+	20, // 27: littlehorse.QueuedThreadRunInfo.input_vars:type_name -> littlehorse.QueuedThreadRunInfo.InputVarsEntry
+	28, // 28: littlehorse.PendingInterrupt.external_event_id:type_name -> littlehorse.ExternalEventId
+	28, // 29: littlehorse.PendingInterruptHaltReason.external_event_id:type_name -> littlehorse.ExternalEventId
 	13, // 30: littlehorse.ThreadHaltReason.parent_halted:type_name -> littlehorse.ParentHalted
 	14, // 31: littlehorse.ThreadHaltReason.interrupted:type_name -> littlehorse.Interrupted
 	9,  // 32: littlehorse.ThreadHaltReason.pending_interrupt:type_name -> littlehorse.PendingInterruptHaltReason
@@ -1859,15 +1973,20 @@ var file_wf_run_proto_depIdxs = []int32{
 	11, // 34: littlehorse.ThreadHaltReason.handling_failure:type_name -> littlehorse.HandlingFailureHaltReason
 	15, // 35: littlehorse.ThreadHaltReason.manual_halt:type_name -> littlehorse.ManualHalt
 	12, // 36: littlehorse.ThreadHaltReason.halted_by_parent:type_name -> littlehorse.HaltedByParentNodeHaltReason
-	30, // 37: littlehorse.WfRun.ParentTriggerReference.triggering_node_run:type_name -> littlehorse.NodeRunId
-	30, // 38: littlehorse.WfRun.ParentTriggerReference.waiting_node_run:type_name -> littlehorse.NodeRunId
-	31, // 39: littlehorse.WfRun.MigrationVariablesEntry.value:type_name -> littlehorse.MigrationVars
-	28, // 40: littlehorse.QueuedThreadRunInfo.InputVarsEntry.value:type_name -> littlehorse.VariableValue
-	41, // [41:41] is the sub-list for method output_type
-	41, // [41:41] is the sub-list for method input_type
-	41, // [41:41] is the sub-list for extension type_name
-	41, // [41:41] is the sub-list for extension extendee
-	0,  // [0:41] is the sub-list for field type_name
+	24, // 37: littlehorse.InlineWfSpec.id:type_name -> littlehorse.InlineWfSpecId
+	26, // 38: littlehorse.InlineWfSpec.created_at:type_name -> google.protobuf.Timestamp
+	21, // 39: littlehorse.InlineWfSpec.thread_specs:type_name -> littlehorse.InlineWfSpec.ThreadSpecsEntry
+	31, // 40: littlehorse.InlineWfSpec.retention_policy:type_name -> littlehorse.WorkflowRetentionPolicy
+	32, // 41: littlehorse.WfRun.ParentTriggerReference.triggering_node_run:type_name -> littlehorse.NodeRunId
+	32, // 42: littlehorse.WfRun.ParentTriggerReference.waiting_node_run:type_name -> littlehorse.NodeRunId
+	33, // 43: littlehorse.WfRun.MigrationVariablesEntry.value:type_name -> littlehorse.MigrationVars
+	29, // 44: littlehorse.QueuedThreadRunInfo.InputVarsEntry.value:type_name -> littlehorse.VariableValue
+	34, // 45: littlehorse.InlineWfSpec.ThreadSpecsEntry.value:type_name -> littlehorse.ThreadSpec
+	46, // [46:46] is the sub-list for method output_type
+	46, // [46:46] is the sub-list for method input_type
+	46, // [46:46] is the sub-list for extension type_name
+	46, // [46:46] is the sub-list for extension extendee
+	0,  // [0:46] is the sub-list for field type_name
 }
 
 func init() { file_wf_run_proto_init() }
@@ -2074,6 +2193,18 @@ func file_wf_run_proto_init() {
 			}
 		}
 		file_wf_run_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*InlineWfSpec); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_wf_run_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*WfRun_ParentTriggerReference); i {
 			case 0:
 				return &v.state
@@ -2106,13 +2237,14 @@ func file_wf_run_proto_init() {
 		(*ThreadHaltReason_HaltedByParent)(nil),
 	}
 	file_wf_run_proto_msgTypes[16].OneofWrappers = []interface{}{}
+	file_wf_run_proto_msgTypes[17].OneofWrappers = []interface{}{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_wf_run_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   19,
+			NumMessages:   21,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

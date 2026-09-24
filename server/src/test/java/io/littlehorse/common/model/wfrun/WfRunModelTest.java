@@ -17,7 +17,6 @@ import io.littlehorse.common.model.getable.objectId.WfSpecIdModel;
 import io.littlehorse.common.proto.Command;
 import io.littlehorse.common.util.LHUtil;
 import io.littlehorse.sdk.common.proto.InlineWfSpec;
-import io.littlehorse.sdk.common.proto.InlineWfSpecDefinition;
 import io.littlehorse.sdk.common.proto.InlineWfSpecId;
 import io.littlehorse.sdk.common.proto.LHStatus;
 import io.littlehorse.sdk.common.proto.MetricWindowType;
@@ -43,10 +42,8 @@ public class WfRunModelTest {
 
     @Test
     void preservesLegacyEmbeddedWorkflowDefinitionAcrossSerialization() {
-        InlineWfSpec inlineSpec = InlineWfSpec.newBuilder()
-                .setDefinition(InlineWfSpecDefinition.newBuilder().setEntrypointThreadName("main"))
-                .setChecksum("abc123")
-                .build();
+        InlineWfSpec inlineSpec =
+                InlineWfSpec.newBuilder().setEntrypointThreadName("main").build();
         WfRun proto = WfRun.newBuilder()
                 .setId(WfRunId.newBuilder().setId("inline-run"))
                 .setInlineWfSpec(inlineSpec)
@@ -72,8 +69,7 @@ public class WfRunModelTest {
         InlineWfSpec snapshot = InlineWfSpec.newBuilder()
                 .setId(specId)
                 .setCreatedAt(LHUtil.fromDate(new Date()))
-                .setDefinition(InlineWfSpecDefinition.newBuilder().setEntrypointThreadName("main"))
-                .setChecksum("abc123")
+                .setEntrypointThreadName("main")
                 .build();
         InlineWfSpecModel definition = InlineWfSpecModel.fromProto(snapshot, InlineWfSpecModel.class, testContext);
         testContext.getableManager().put(definition);

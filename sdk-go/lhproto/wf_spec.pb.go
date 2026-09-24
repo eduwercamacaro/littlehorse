@@ -2605,153 +2605,6 @@ func (x *NodeMigration) GetNewNodeName() string {
 	return ""
 }
 
-// A caller-provided workflow definition that is executed by exactly one WfRun.
-//
-// Unlike a WfSpec, this definition is not registered, named, versioned,
-// searchable, updated, or independently addressable.
-type InlineWfSpecDefinition struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	// ThreadSpecs that comprise the workflow.
-	ThreadSpecs map[string]*ThreadSpec `protobuf:"bytes,1,rep,name=thread_specs,json=threadSpecs,proto3" json:"thread_specs,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
-	// ThreadSpec used as the workflow entrypoint.
-	EntrypointThreadName string `protobuf:"bytes,2,opt,name=entrypoint_thread_name,json=entrypointThreadName,proto3" json:"entrypoint_thread_name,omitempty"`
-	// Controls cleanup of the owning WfRun after it terminates.
-	RetentionPolicy *WorkflowRetentionPolicy `protobuf:"bytes,3,opt,name=retention_policy,json=retentionPolicy,proto3,oneof" json:"retention_policy,omitempty"`
-}
-
-func (x *InlineWfSpecDefinition) Reset() {
-	*x = InlineWfSpecDefinition{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_wf_spec_proto_msgTypes[28]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *InlineWfSpecDefinition) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*InlineWfSpecDefinition) ProtoMessage() {}
-
-func (x *InlineWfSpecDefinition) ProtoReflect() protoreflect.Message {
-	mi := &file_wf_spec_proto_msgTypes[28]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use InlineWfSpecDefinition.ProtoReflect.Descriptor instead.
-func (*InlineWfSpecDefinition) Descriptor() ([]byte, []int) {
-	return file_wf_spec_proto_rawDescGZIP(), []int{28}
-}
-
-func (x *InlineWfSpecDefinition) GetThreadSpecs() map[string]*ThreadSpec {
-	if x != nil {
-		return x.ThreadSpecs
-	}
-	return nil
-}
-
-func (x *InlineWfSpecDefinition) GetEntrypointThreadName() string {
-	if x != nil {
-		return x.EntrypointThreadName
-	}
-	return ""
-}
-
-func (x *InlineWfSpecDefinition) GetRetentionPolicy() *WorkflowRetentionPolicy {
-	if x != nil {
-		return x.RetentionPolicy
-	}
-	return nil
-}
-
-// Immutable, server-normalized snapshot stored in the owning WfRun's partition.
-// Created by RunInlineWf and deleted with its WfRun; not independently writable.
-type InlineWfSpec struct {
-	state         protoimpl.MessageState
-	sizeCache     protoimpl.SizeCache
-	unknownFields protoimpl.UnknownFields
-
-	Definition *InlineWfSpecDefinition `protobuf:"bytes,1,opt,name=definition,proto3" json:"definition,omitempty"`
-	// Server-generated fingerprint of the canonical definition.
-	//
-	// Intended for diagnostics, comparison, and integrity validation.
-	// It does not make the definition globally addressable.
-	Checksum  string                 `protobuf:"bytes,2,opt,name=checksum,proto3" json:"checksum,omitempty"`
-	Id        *InlineWfSpecId        `protobuf:"bytes,3,opt,name=id,proto3" json:"id,omitempty"`
-	CreatedAt *timestamppb.Timestamp `protobuf:"bytes,4,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
-}
-
-func (x *InlineWfSpec) Reset() {
-	*x = InlineWfSpec{}
-	if protoimpl.UnsafeEnabled {
-		mi := &file_wf_spec_proto_msgTypes[29]
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		ms.StoreMessageInfo(mi)
-	}
-}
-
-func (x *InlineWfSpec) String() string {
-	return protoimpl.X.MessageStringOf(x)
-}
-
-func (*InlineWfSpec) ProtoMessage() {}
-
-func (x *InlineWfSpec) ProtoReflect() protoreflect.Message {
-	mi := &file_wf_spec_proto_msgTypes[29]
-	if protoimpl.UnsafeEnabled && x != nil {
-		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
-		if ms.LoadMessageInfo() == nil {
-			ms.StoreMessageInfo(mi)
-		}
-		return ms
-	}
-	return mi.MessageOf(x)
-}
-
-// Deprecated: Use InlineWfSpec.ProtoReflect.Descriptor instead.
-func (*InlineWfSpec) Descriptor() ([]byte, []int) {
-	return file_wf_spec_proto_rawDescGZIP(), []int{29}
-}
-
-func (x *InlineWfSpec) GetDefinition() *InlineWfSpecDefinition {
-	if x != nil {
-		return x.Definition
-	}
-	return nil
-}
-
-func (x *InlineWfSpec) GetChecksum() string {
-	if x != nil {
-		return x.Checksum
-	}
-	return ""
-}
-
-func (x *InlineWfSpec) GetId() *InlineWfSpecId {
-	if x != nil {
-		return x.Id
-	}
-	return nil
-}
-
-func (x *InlineWfSpec) GetCreatedAt() *timestamppb.Timestamp {
-	if x != nil {
-		return x.CreatedAt
-	}
-	return nil
-}
-
 // Reference to another WfSpec. If a WfSpec has a ParentWfSpecReference, then all
 // WfRun's for that WfSpec *MUST* be the child of a WfRun of the provided WfSpec; meaning
 // that the RunWf RPC must provide a `parent_wf_run_id` that belongs to the specified
@@ -2771,7 +2624,7 @@ type WfSpec_ParentWfSpecReference struct {
 func (x *WfSpec_ParentWfSpecReference) Reset() {
 	*x = WfSpec_ParentWfSpecReference{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wf_spec_proto_msgTypes[31]
+		mi := &file_wf_spec_proto_msgTypes[29]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2784,7 +2637,7 @@ func (x *WfSpec_ParentWfSpecReference) String() string {
 func (*WfSpec_ParentWfSpecReference) ProtoMessage() {}
 
 func (x *WfSpec_ParentWfSpecReference) ProtoReflect() protoreflect.Message {
-	mi := &file_wf_spec_proto_msgTypes[31]
+	mi := &file_wf_spec_proto_msgTypes[29]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2827,7 +2680,7 @@ type WaitForThreadsNode_ThreadToWaitFor struct {
 func (x *WaitForThreadsNode_ThreadToWaitFor) Reset() {
 	*x = WaitForThreadsNode_ThreadToWaitFor{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wf_spec_proto_msgTypes[36]
+		mi := &file_wf_spec_proto_msgTypes[34]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2840,7 +2693,7 @@ func (x *WaitForThreadsNode_ThreadToWaitFor) String() string {
 func (*WaitForThreadsNode_ThreadToWaitFor) ProtoMessage() {}
 
 func (x *WaitForThreadsNode_ThreadToWaitFor) ProtoReflect() protoreflect.Message {
-	mi := &file_wf_spec_proto_msgTypes[36]
+	mi := &file_wf_spec_proto_msgTypes[34]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2876,7 +2729,7 @@ type WaitForThreadsNode_ThreadsToWaitFor struct {
 func (x *WaitForThreadsNode_ThreadsToWaitFor) Reset() {
 	*x = WaitForThreadsNode_ThreadsToWaitFor{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_wf_spec_proto_msgTypes[37]
+		mi := &file_wf_spec_proto_msgTypes[35]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -2889,7 +2742,7 @@ func (x *WaitForThreadsNode_ThreadsToWaitFor) String() string {
 func (*WaitForThreadsNode_ThreadsToWaitFor) ProtoMessage() {}
 
 func (x *WaitForThreadsNode_ThreadsToWaitFor) ProtoReflect() protoreflect.Message {
-	mi := &file_wf_spec_proto_msgTypes[37]
+	mi := &file_wf_spec_proto_msgTypes[35]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -3415,59 +3268,23 @@ var file_wf_spec_proto_rawDesc = []byte{
 	0x65, 0x3a, 0x02, 0x38, 0x01, 0x22, 0x33, 0x0a, 0x0d, 0x4e, 0x6f, 0x64, 0x65, 0x4d, 0x69, 0x67,
 	0x72, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x22, 0x0a, 0x0d, 0x6e, 0x65, 0x77, 0x5f, 0x6e, 0x6f,
 	0x64, 0x65, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b, 0x6e,
-	0x65, 0x77, 0x4e, 0x6f, 0x64, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x22, 0xeb, 0x02, 0x0a, 0x16, 0x49,
-	0x6e, 0x6c, 0x69, 0x6e, 0x65, 0x57, 0x66, 0x53, 0x70, 0x65, 0x63, 0x44, 0x65, 0x66, 0x69, 0x6e,
-	0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x57, 0x0a, 0x0c, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x5f,
-	0x73, 0x70, 0x65, 0x63, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x34, 0x2e, 0x6c, 0x69,
-	0x74, 0x74, 0x6c, 0x65, 0x68, 0x6f, 0x72, 0x73, 0x65, 0x2e, 0x49, 0x6e, 0x6c, 0x69, 0x6e, 0x65,
-	0x57, 0x66, 0x53, 0x70, 0x65, 0x63, 0x44, 0x65, 0x66, 0x69, 0x6e, 0x69, 0x74, 0x69, 0x6f, 0x6e,
-	0x2e, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x53, 0x70, 0x65, 0x63, 0x73, 0x45, 0x6e, 0x74, 0x72,
-	0x79, 0x52, 0x0b, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x53, 0x70, 0x65, 0x63, 0x73, 0x12, 0x34,
-	0x0a, 0x16, 0x65, 0x6e, 0x74, 0x72, 0x79, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x5f, 0x74, 0x68, 0x72,
-	0x65, 0x61, 0x64, 0x5f, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x14,
-	0x65, 0x6e, 0x74, 0x72, 0x79, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64,
-	0x4e, 0x61, 0x6d, 0x65, 0x12, 0x54, 0x0a, 0x10, 0x72, 0x65, 0x74, 0x65, 0x6e, 0x74, 0x69, 0x6f,
-	0x6e, 0x5f, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x24,
-	0x2e, 0x6c, 0x69, 0x74, 0x74, 0x6c, 0x65, 0x68, 0x6f, 0x72, 0x73, 0x65, 0x2e, 0x57, 0x6f, 0x72,
-	0x6b, 0x66, 0x6c, 0x6f, 0x77, 0x52, 0x65, 0x74, 0x65, 0x6e, 0x74, 0x69, 0x6f, 0x6e, 0x50, 0x6f,
-	0x6c, 0x69, 0x63, 0x79, 0x48, 0x00, 0x52, 0x0f, 0x72, 0x65, 0x74, 0x65, 0x6e, 0x74, 0x69, 0x6f,
-	0x6e, 0x50, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x88, 0x01, 0x01, 0x1a, 0x57, 0x0a, 0x10, 0x54, 0x68,
-	0x72, 0x65, 0x61, 0x64, 0x53, 0x70, 0x65, 0x63, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10,
-	0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79,
-	0x12, 0x2d, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32,
-	0x17, 0x2e, 0x6c, 0x69, 0x74, 0x74, 0x6c, 0x65, 0x68, 0x6f, 0x72, 0x73, 0x65, 0x2e, 0x54, 0x68,
-	0x72, 0x65, 0x61, 0x64, 0x53, 0x70, 0x65, 0x63, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a,
-	0x02, 0x38, 0x01, 0x42, 0x13, 0x0a, 0x11, 0x5f, 0x72, 0x65, 0x74, 0x65, 0x6e, 0x74, 0x69, 0x6f,
-	0x6e, 0x5f, 0x70, 0x6f, 0x6c, 0x69, 0x63, 0x79, 0x22, 0xd7, 0x01, 0x0a, 0x0c, 0x49, 0x6e, 0x6c,
-	0x69, 0x6e, 0x65, 0x57, 0x66, 0x53, 0x70, 0x65, 0x63, 0x12, 0x43, 0x0a, 0x0a, 0x64, 0x65, 0x66,
-	0x69, 0x6e, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x23, 0x2e,
-	0x6c, 0x69, 0x74, 0x74, 0x6c, 0x65, 0x68, 0x6f, 0x72, 0x73, 0x65, 0x2e, 0x49, 0x6e, 0x6c, 0x69,
-	0x6e, 0x65, 0x57, 0x66, 0x53, 0x70, 0x65, 0x63, 0x44, 0x65, 0x66, 0x69, 0x6e, 0x69, 0x74, 0x69,
-	0x6f, 0x6e, 0x52, 0x0a, 0x64, 0x65, 0x66, 0x69, 0x6e, 0x69, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x1a,
-	0x0a, 0x08, 0x63, 0x68, 0x65, 0x63, 0x6b, 0x73, 0x75, 0x6d, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09,
-	0x52, 0x08, 0x63, 0x68, 0x65, 0x63, 0x6b, 0x73, 0x75, 0x6d, 0x12, 0x2b, 0x0a, 0x02, 0x69, 0x64,
-	0x18, 0x03, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1b, 0x2e, 0x6c, 0x69, 0x74, 0x74, 0x6c, 0x65, 0x68,
-	0x6f, 0x72, 0x73, 0x65, 0x2e, 0x49, 0x6e, 0x6c, 0x69, 0x6e, 0x65, 0x57, 0x66, 0x53, 0x70, 0x65,
-	0x63, 0x49, 0x64, 0x52, 0x02, 0x69, 0x64, 0x12, 0x39, 0x0a, 0x0a, 0x63, 0x72, 0x65, 0x61, 0x74,
-	0x65, 0x64, 0x5f, 0x61, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1a, 0x2e, 0x67, 0x6f,
-	0x6f, 0x67, 0x6c, 0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x54, 0x69,
-	0x6d, 0x65, 0x73, 0x74, 0x61, 0x6d, 0x70, 0x52, 0x09, 0x63, 0x72, 0x65, 0x61, 0x74, 0x65, 0x64,
-	0x41, 0x74, 0x2a, 0x4e, 0x0a, 0x18, 0x57, 0x66, 0x52, 0x75, 0x6e, 0x56, 0x61, 0x72, 0x69, 0x61,
-	0x62, 0x6c, 0x65, 0x41, 0x63, 0x63, 0x65, 0x73, 0x73, 0x4c, 0x65, 0x76, 0x65, 0x6c, 0x12, 0x0e,
-	0x0a, 0x0a, 0x50, 0x55, 0x42, 0x4c, 0x49, 0x43, 0x5f, 0x56, 0x41, 0x52, 0x10, 0x00, 0x12, 0x0f,
-	0x0a, 0x0b, 0x50, 0x52, 0x49, 0x56, 0x41, 0x54, 0x45, 0x5f, 0x56, 0x41, 0x52, 0x10, 0x01, 0x12,
-	0x11, 0x0a, 0x0d, 0x49, 0x4e, 0x48, 0x45, 0x52, 0x49, 0x54, 0x45, 0x44, 0x5f, 0x56, 0x41, 0x52,
-	0x10, 0x02, 0x2a, 0x50, 0x0a, 0x16, 0x57, 0x61, 0x69, 0x74, 0x46, 0x6f, 0x72, 0x54, 0x68, 0x72,
-	0x65, 0x61, 0x64, 0x73, 0x53, 0x74, 0x72, 0x61, 0x74, 0x65, 0x67, 0x79, 0x12, 0x10, 0x0a, 0x0c,
-	0x57, 0x41, 0x49, 0x54, 0x5f, 0x46, 0x4f, 0x52, 0x5f, 0x41, 0x4c, 0x4c, 0x10, 0x00, 0x12, 0x12,
-	0x0a, 0x0e, 0x57, 0x41, 0x49, 0x54, 0x5f, 0x46, 0x4f, 0x52, 0x5f, 0x46, 0x49, 0x52, 0x53, 0x54,
-	0x10, 0x01, 0x12, 0x10, 0x0a, 0x0c, 0x57, 0x41, 0x49, 0x54, 0x5f, 0x46, 0x4f, 0x52, 0x5f, 0x41,
-	0x4e, 0x59, 0x10, 0x02, 0x42, 0x4d, 0x0a, 0x1f, 0x69, 0x6f, 0x2e, 0x6c, 0x69, 0x74, 0x74, 0x6c,
-	0x65, 0x68, 0x6f, 0x72, 0x73, 0x65, 0x2e, 0x73, 0x64, 0x6b, 0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f,
-	0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x09, 0x2e, 0x3b, 0x6c, 0x68, 0x70,
-	0x72, 0x6f, 0x74, 0x6f, 0xaa, 0x02, 0x1c, 0x4c, 0x69, 0x74, 0x74, 0x6c, 0x65, 0x48, 0x6f, 0x72,
-	0x73, 0x65, 0x2e, 0x53, 0x64, 0x6b, 0x2e, 0x43, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x50, 0x72,
-	0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x77, 0x4e, 0x6f, 0x64, 0x65, 0x4e, 0x61, 0x6d, 0x65, 0x2a, 0x4e, 0x0a, 0x18, 0x57, 0x66,
+	0x52, 0x75, 0x6e, 0x56, 0x61, 0x72, 0x69, 0x61, 0x62, 0x6c, 0x65, 0x41, 0x63, 0x63, 0x65, 0x73,
+	0x73, 0x4c, 0x65, 0x76, 0x65, 0x6c, 0x12, 0x0e, 0x0a, 0x0a, 0x50, 0x55, 0x42, 0x4c, 0x49, 0x43,
+	0x5f, 0x56, 0x41, 0x52, 0x10, 0x00, 0x12, 0x0f, 0x0a, 0x0b, 0x50, 0x52, 0x49, 0x56, 0x41, 0x54,
+	0x45, 0x5f, 0x56, 0x41, 0x52, 0x10, 0x01, 0x12, 0x11, 0x0a, 0x0d, 0x49, 0x4e, 0x48, 0x45, 0x52,
+	0x49, 0x54, 0x45, 0x44, 0x5f, 0x56, 0x41, 0x52, 0x10, 0x02, 0x2a, 0x50, 0x0a, 0x16, 0x57, 0x61,
+	0x69, 0x74, 0x46, 0x6f, 0x72, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x73, 0x53, 0x74, 0x72, 0x61,
+	0x74, 0x65, 0x67, 0x79, 0x12, 0x10, 0x0a, 0x0c, 0x57, 0x41, 0x49, 0x54, 0x5f, 0x46, 0x4f, 0x52,
+	0x5f, 0x41, 0x4c, 0x4c, 0x10, 0x00, 0x12, 0x12, 0x0a, 0x0e, 0x57, 0x41, 0x49, 0x54, 0x5f, 0x46,
+	0x4f, 0x52, 0x5f, 0x46, 0x49, 0x52, 0x53, 0x54, 0x10, 0x01, 0x12, 0x10, 0x0a, 0x0c, 0x57, 0x41,
+	0x49, 0x54, 0x5f, 0x46, 0x4f, 0x52, 0x5f, 0x41, 0x4e, 0x59, 0x10, 0x02, 0x42, 0x4d, 0x0a, 0x1f,
+	0x69, 0x6f, 0x2e, 0x6c, 0x69, 0x74, 0x74, 0x6c, 0x65, 0x68, 0x6f, 0x72, 0x73, 0x65, 0x2e, 0x73,
+	0x64, 0x6b, 0x2e, 0x63, 0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x50,
+	0x01, 0x5a, 0x09, 0x2e, 0x3b, 0x6c, 0x68, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0xaa, 0x02, 0x1c, 0x4c,
+	0x69, 0x74, 0x74, 0x6c, 0x65, 0x48, 0x6f, 0x72, 0x73, 0x65, 0x2e, 0x53, 0x64, 0x6b, 0x2e, 0x43,
+	0x6f, 0x6d, 0x6d, 0x6f, 0x6e, 0x2e, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -3483,7 +3300,7 @@ func file_wf_spec_proto_rawDescGZIP() []byte {
 }
 
 var file_wf_spec_proto_enumTypes = make([]protoimpl.EnumInfo, 3)
-var file_wf_spec_proto_msgTypes = make([]protoimpl.MessageInfo, 41)
+var file_wf_spec_proto_msgTypes = make([]protoimpl.MessageInfo, 38)
 var file_wf_spec_proto_goTypes = []interface{}{
 	(WfRunVariableAccessLevel)(0),               // 0: littlehorse.WfRunVariableAccessLevel
 	(WaitForThreadsStrategy)(0),                 // 1: littlehorse.WaitForThreadsStrategy
@@ -3516,74 +3333,70 @@ var file_wf_spec_proto_goTypes = []interface{}{
 	(*WfSpecVersionMigration)(nil),              // 28: littlehorse.WfSpecVersionMigration
 	(*ThreadSpecMigration)(nil),                 // 29: littlehorse.ThreadSpecMigration
 	(*NodeMigration)(nil),                       // 30: littlehorse.NodeMigration
-	(*InlineWfSpecDefinition)(nil),              // 31: littlehorse.InlineWfSpecDefinition
-	(*InlineWfSpec)(nil),                        // 32: littlehorse.InlineWfSpec
-	nil,                                         // 33: littlehorse.WfSpec.ThreadSpecsEntry
-	(*WfSpec_ParentWfSpecReference)(nil),        // 34: littlehorse.WfSpec.ParentWfSpecReference
-	nil,                                         // 35: littlehorse.ThreadSpec.NodesEntry
-	nil,                                         // 36: littlehorse.StartThreadNode.VariablesEntry
-	nil,                                         // 37: littlehorse.StartMultipleThreadsNode.VariablesEntry
-	nil,                                         // 38: littlehorse.RunChildWfNode.InputsEntry
-	(*WaitForThreadsNode_ThreadToWaitFor)(nil),  // 39: littlehorse.WaitForThreadsNode.ThreadToWaitFor
-	(*WaitForThreadsNode_ThreadsToWaitFor)(nil), // 40: littlehorse.WaitForThreadsNode.ThreadsToWaitFor
-	nil,                           // 41: littlehorse.WfSpecVersionMigration.ThreadSpecMigrationsEntry
-	nil,                           // 42: littlehorse.ThreadSpecMigration.NodeMigrationsEntry
-	nil,                           // 43: littlehorse.InlineWfSpecDefinition.ThreadSpecsEntry
-	(*WfSpecId)(nil),              // 44: littlehorse.WfSpecId
-	(*timestamppb.Timestamp)(nil), // 45: google.protobuf.Timestamp
-	(MetadataStatus)(0),           // 46: littlehorse.MetadataStatus
-	(VariableType)(0),             // 47: littlehorse.VariableType
-	(*VariableDef)(nil),           // 48: littlehorse.VariableDef
-	(*ExternalEventDefId)(nil),    // 49: littlehorse.ExternalEventDefId
-	(*VariableAssignment)(nil),    // 50: littlehorse.VariableAssignment
-	(*TaskNode)(nil),              // 51: littlehorse.TaskNode
-	(*WorkflowEventDefId)(nil),    // 52: littlehorse.WorkflowEventDefId
-	(*UTActionTrigger)(nil),       // 53: littlehorse.UTActionTrigger
-	(Comparator)(0),               // 54: littlehorse.Comparator
-	(*VariableMutation)(nil),      // 55: littlehorse.VariableMutation
-	(*InlineWfSpecId)(nil),        // 56: littlehorse.InlineWfSpecId
+	nil,                                         // 31: littlehorse.WfSpec.ThreadSpecsEntry
+	(*WfSpec_ParentWfSpecReference)(nil),        // 32: littlehorse.WfSpec.ParentWfSpecReference
+	nil,                                         // 33: littlehorse.ThreadSpec.NodesEntry
+	nil,                                         // 34: littlehorse.StartThreadNode.VariablesEntry
+	nil,                                         // 35: littlehorse.StartMultipleThreadsNode.VariablesEntry
+	nil,                                         // 36: littlehorse.RunChildWfNode.InputsEntry
+	(*WaitForThreadsNode_ThreadToWaitFor)(nil),  // 37: littlehorse.WaitForThreadsNode.ThreadToWaitFor
+	(*WaitForThreadsNode_ThreadsToWaitFor)(nil), // 38: littlehorse.WaitForThreadsNode.ThreadsToWaitFor
+	nil,                           // 39: littlehorse.WfSpecVersionMigration.ThreadSpecMigrationsEntry
+	nil,                           // 40: littlehorse.ThreadSpecMigration.NodeMigrationsEntry
+	(*WfSpecId)(nil),              // 41: littlehorse.WfSpecId
+	(*timestamppb.Timestamp)(nil), // 42: google.protobuf.Timestamp
+	(MetadataStatus)(0),           // 43: littlehorse.MetadataStatus
+	(VariableType)(0),             // 44: littlehorse.VariableType
+	(*VariableDef)(nil),           // 45: littlehorse.VariableDef
+	(*ExternalEventDefId)(nil),    // 46: littlehorse.ExternalEventDefId
+	(*VariableAssignment)(nil),    // 47: littlehorse.VariableAssignment
+	(*TaskNode)(nil),              // 48: littlehorse.TaskNode
+	(*WorkflowEventDefId)(nil),    // 49: littlehorse.WorkflowEventDefId
+	(*UTActionTrigger)(nil),       // 50: littlehorse.UTActionTrigger
+	(Comparator)(0),               // 51: littlehorse.Comparator
+	(*VariableMutation)(nil),      // 52: littlehorse.VariableMutation
 }
 var file_wf_spec_proto_depIdxs = []int32{
-	44, // 0: littlehorse.WfSpec.id:type_name -> littlehorse.WfSpecId
-	45, // 1: littlehorse.WfSpec.created_at:type_name -> google.protobuf.Timestamp
+	41, // 0: littlehorse.WfSpec.id:type_name -> littlehorse.WfSpecId
+	42, // 1: littlehorse.WfSpec.created_at:type_name -> google.protobuf.Timestamp
 	6,  // 2: littlehorse.WfSpec.frozen_variables:type_name -> littlehorse.ThreadVarDef
-	46, // 3: littlehorse.WfSpec.status:type_name -> littlehorse.MetadataStatus
-	33, // 4: littlehorse.WfSpec.thread_specs:type_name -> littlehorse.WfSpec.ThreadSpecsEntry
+	43, // 3: littlehorse.WfSpec.status:type_name -> littlehorse.MetadataStatus
+	31, // 4: littlehorse.WfSpec.thread_specs:type_name -> littlehorse.WfSpec.ThreadSpecsEntry
 	4,  // 5: littlehorse.WfSpec.retention_policy:type_name -> littlehorse.WorkflowRetentionPolicy
 	28, // 6: littlehorse.WfSpec.migration:type_name -> littlehorse.WfSpecVersionMigration
-	34, // 7: littlehorse.WfSpec.parent_wf_spec:type_name -> littlehorse.WfSpec.ParentWfSpecReference
-	47, // 8: littlehorse.JsonIndex.field_type:type_name -> littlehorse.VariableType
-	48, // 9: littlehorse.ThreadVarDef.var_def:type_name -> littlehorse.VariableDef
+	32, // 7: littlehorse.WfSpec.parent_wf_spec:type_name -> littlehorse.WfSpec.ParentWfSpecReference
+	44, // 8: littlehorse.JsonIndex.field_type:type_name -> littlehorse.VariableType
+	45, // 9: littlehorse.ThreadVarDef.var_def:type_name -> littlehorse.VariableDef
 	5,  // 10: littlehorse.ThreadVarDef.json_indexes:type_name -> littlehorse.JsonIndex
 	0,  // 11: littlehorse.ThreadVarDef.access_level:type_name -> littlehorse.WfRunVariableAccessLevel
-	35, // 12: littlehorse.ThreadSpec.nodes:type_name -> littlehorse.ThreadSpec.NodesEntry
+	33, // 12: littlehorse.ThreadSpec.nodes:type_name -> littlehorse.ThreadSpec.NodesEntry
 	6,  // 13: littlehorse.ThreadSpec.variable_defs:type_name -> littlehorse.ThreadVarDef
 	9,  // 14: littlehorse.ThreadSpec.interrupt_defs:type_name -> littlehorse.InterruptDef
 	8,  // 15: littlehorse.ThreadSpec.retention_policy:type_name -> littlehorse.ThreadRetentionPolicy
-	49, // 16: littlehorse.InterruptDef.external_event_def_id:type_name -> littlehorse.ExternalEventDefId
-	36, // 17: littlehorse.StartThreadNode.variables:type_name -> littlehorse.StartThreadNode.VariablesEntry
-	37, // 18: littlehorse.StartMultipleThreadsNode.variables:type_name -> littlehorse.StartMultipleThreadsNode.VariablesEntry
-	50, // 19: littlehorse.StartMultipleThreadsNode.iterable:type_name -> littlehorse.VariableAssignment
-	50, // 20: littlehorse.RunChildWfNode.wf_spec_var:type_name -> littlehorse.VariableAssignment
-	38, // 21: littlehorse.RunChildWfNode.inputs:type_name -> littlehorse.RunChildWfNode.InputsEntry
-	50, // 22: littlehorse.RunChildWfNode.child_id:type_name -> littlehorse.VariableAssignment
-	50, // 23: littlehorse.WaitForChildWfNode.child_wf_run_id:type_name -> littlehorse.VariableAssignment
+	46, // 16: littlehorse.InterruptDef.external_event_def_id:type_name -> littlehorse.ExternalEventDefId
+	34, // 17: littlehorse.StartThreadNode.variables:type_name -> littlehorse.StartThreadNode.VariablesEntry
+	35, // 18: littlehorse.StartMultipleThreadsNode.variables:type_name -> littlehorse.StartMultipleThreadsNode.VariablesEntry
+	47, // 19: littlehorse.StartMultipleThreadsNode.iterable:type_name -> littlehorse.VariableAssignment
+	47, // 20: littlehorse.RunChildWfNode.wf_spec_var:type_name -> littlehorse.VariableAssignment
+	36, // 21: littlehorse.RunChildWfNode.inputs:type_name -> littlehorse.RunChildWfNode.InputsEntry
+	47, // 22: littlehorse.RunChildWfNode.child_id:type_name -> littlehorse.VariableAssignment
+	47, // 23: littlehorse.WaitForChildWfNode.child_wf_run_id:type_name -> littlehorse.VariableAssignment
 	2,  // 24: littlehorse.FailureHandlerDef.any_failure_of_type:type_name -> littlehorse.FailureHandlerDef.LHFailureType
-	40, // 25: littlehorse.WaitForThreadsNode.threads:type_name -> littlehorse.WaitForThreadsNode.ThreadsToWaitFor
-	50, // 26: littlehorse.WaitForThreadsNode.thread_list:type_name -> littlehorse.VariableAssignment
+	38, // 25: littlehorse.WaitForThreadsNode.threads:type_name -> littlehorse.WaitForThreadsNode.ThreadsToWaitFor
+	47, // 26: littlehorse.WaitForThreadsNode.thread_list:type_name -> littlehorse.VariableAssignment
 	14, // 27: littlehorse.WaitForThreadsNode.per_thread_failure_handlers:type_name -> littlehorse.FailureHandlerDef
 	1,  // 28: littlehorse.WaitForThreadsNode.strategy:type_name -> littlehorse.WaitForThreadsStrategy
-	49, // 29: littlehorse.ExternalEventNode.external_event_def_id:type_name -> littlehorse.ExternalEventDefId
-	50, // 30: littlehorse.ExternalEventNode.timeout_seconds:type_name -> littlehorse.VariableAssignment
-	50, // 31: littlehorse.ExternalEventNode.correlation_key:type_name -> littlehorse.VariableAssignment
+	46, // 29: littlehorse.ExternalEventNode.external_event_def_id:type_name -> littlehorse.ExternalEventDefId
+	47, // 30: littlehorse.ExternalEventNode.timeout_seconds:type_name -> littlehorse.VariableAssignment
+	47, // 31: littlehorse.ExternalEventNode.correlation_key:type_name -> littlehorse.VariableAssignment
 	19, // 32: littlehorse.ExitNode.failure_def:type_name -> littlehorse.FailureDef
-	50, // 33: littlehorse.ExitNode.return_content:type_name -> littlehorse.VariableAssignment
-	50, // 34: littlehorse.FailureDef.content:type_name -> littlehorse.VariableAssignment
+	47, // 33: littlehorse.ExitNode.return_content:type_name -> littlehorse.VariableAssignment
+	47, // 34: littlehorse.FailureDef.content:type_name -> littlehorse.VariableAssignment
 	25, // 35: littlehorse.Node.outgoing_edges:type_name -> littlehorse.Edge
 	14, // 36: littlehorse.Node.failure_handlers:type_name -> littlehorse.FailureHandlerDef
 	17, // 37: littlehorse.Node.entrypoint:type_name -> littlehorse.EntrypointNode
 	18, // 38: littlehorse.Node.exit:type_name -> littlehorse.ExitNode
-	51, // 39: littlehorse.Node.task:type_name -> littlehorse.TaskNode
+	48, // 39: littlehorse.Node.task:type_name -> littlehorse.TaskNode
 	16, // 40: littlehorse.Node.external_event:type_name -> littlehorse.ExternalEventNode
 	10, // 41: littlehorse.Node.start_thread:type_name -> littlehorse.StartThreadNode
 	15, // 42: littlehorse.Node.wait_for_threads:type_name -> littlehorse.WaitForThreadsNode
@@ -3596,45 +3409,39 @@ var file_wf_spec_proto_depIdxs = []int32{
 	12, // 49: littlehorse.Node.run_child_wf:type_name -> littlehorse.RunChildWfNode
 	13, // 50: littlehorse.Node.wait_for_child_wf:type_name -> littlehorse.WaitForChildWfNode
 	24, // 51: littlehorse.WaitForConditionNode.legacy_condition:type_name -> littlehorse.LegacyEdgeCondition
-	50, // 52: littlehorse.WaitForConditionNode.condition:type_name -> littlehorse.VariableAssignment
-	52, // 53: littlehorse.ThrowEventNode.event_def_id:type_name -> littlehorse.WorkflowEventDefId
-	50, // 54: littlehorse.ThrowEventNode.content:type_name -> littlehorse.VariableAssignment
-	50, // 55: littlehorse.UserTaskNode.user_group:type_name -> littlehorse.VariableAssignment
-	50, // 56: littlehorse.UserTaskNode.user_id:type_name -> littlehorse.VariableAssignment
-	53, // 57: littlehorse.UserTaskNode.actions:type_name -> littlehorse.UTActionTrigger
-	50, // 58: littlehorse.UserTaskNode.notes:type_name -> littlehorse.VariableAssignment
-	50, // 59: littlehorse.UserTaskNode.on_cancellation_exception_name:type_name -> littlehorse.VariableAssignment
-	54, // 60: littlehorse.LegacyEdgeCondition.comparator:type_name -> littlehorse.Comparator
-	50, // 61: littlehorse.LegacyEdgeCondition.left:type_name -> littlehorse.VariableAssignment
-	50, // 62: littlehorse.LegacyEdgeCondition.right:type_name -> littlehorse.VariableAssignment
+	47, // 52: littlehorse.WaitForConditionNode.condition:type_name -> littlehorse.VariableAssignment
+	49, // 53: littlehorse.ThrowEventNode.event_def_id:type_name -> littlehorse.WorkflowEventDefId
+	47, // 54: littlehorse.ThrowEventNode.content:type_name -> littlehorse.VariableAssignment
+	47, // 55: littlehorse.UserTaskNode.user_group:type_name -> littlehorse.VariableAssignment
+	47, // 56: littlehorse.UserTaskNode.user_id:type_name -> littlehorse.VariableAssignment
+	50, // 57: littlehorse.UserTaskNode.actions:type_name -> littlehorse.UTActionTrigger
+	47, // 58: littlehorse.UserTaskNode.notes:type_name -> littlehorse.VariableAssignment
+	47, // 59: littlehorse.UserTaskNode.on_cancellation_exception_name:type_name -> littlehorse.VariableAssignment
+	51, // 60: littlehorse.LegacyEdgeCondition.comparator:type_name -> littlehorse.Comparator
+	47, // 61: littlehorse.LegacyEdgeCondition.left:type_name -> littlehorse.VariableAssignment
+	47, // 62: littlehorse.LegacyEdgeCondition.right:type_name -> littlehorse.VariableAssignment
 	24, // 63: littlehorse.Edge.legacy_condition:type_name -> littlehorse.LegacyEdgeCondition
-	50, // 64: littlehorse.Edge.condition:type_name -> littlehorse.VariableAssignment
-	55, // 65: littlehorse.Edge.variable_mutations:type_name -> littlehorse.VariableMutation
-	50, // 66: littlehorse.SleepNode.raw_seconds:type_name -> littlehorse.VariableAssignment
-	50, // 67: littlehorse.SleepNode.timestamp:type_name -> littlehorse.VariableAssignment
-	50, // 68: littlehorse.SleepNode.iso_date:type_name -> littlehorse.VariableAssignment
-	41, // 69: littlehorse.WfSpecVersionMigration.thread_spec_migrations:type_name -> littlehorse.WfSpecVersionMigration.ThreadSpecMigrationsEntry
-	42, // 70: littlehorse.ThreadSpecMigration.node_migrations:type_name -> littlehorse.ThreadSpecMigration.NodeMigrationsEntry
-	43, // 71: littlehorse.InlineWfSpecDefinition.thread_specs:type_name -> littlehorse.InlineWfSpecDefinition.ThreadSpecsEntry
-	4,  // 72: littlehorse.InlineWfSpecDefinition.retention_policy:type_name -> littlehorse.WorkflowRetentionPolicy
-	31, // 73: littlehorse.InlineWfSpec.definition:type_name -> littlehorse.InlineWfSpecDefinition
-	56, // 74: littlehorse.InlineWfSpec.id:type_name -> littlehorse.InlineWfSpecId
-	45, // 75: littlehorse.InlineWfSpec.created_at:type_name -> google.protobuf.Timestamp
-	7,  // 76: littlehorse.WfSpec.ThreadSpecsEntry.value:type_name -> littlehorse.ThreadSpec
-	20, // 77: littlehorse.ThreadSpec.NodesEntry.value:type_name -> littlehorse.Node
-	50, // 78: littlehorse.StartThreadNode.VariablesEntry.value:type_name -> littlehorse.VariableAssignment
-	50, // 79: littlehorse.StartMultipleThreadsNode.VariablesEntry.value:type_name -> littlehorse.VariableAssignment
-	50, // 80: littlehorse.RunChildWfNode.InputsEntry.value:type_name -> littlehorse.VariableAssignment
-	50, // 81: littlehorse.WaitForThreadsNode.ThreadToWaitFor.thread_run_number:type_name -> littlehorse.VariableAssignment
-	39, // 82: littlehorse.WaitForThreadsNode.ThreadsToWaitFor.threads:type_name -> littlehorse.WaitForThreadsNode.ThreadToWaitFor
-	29, // 83: littlehorse.WfSpecVersionMigration.ThreadSpecMigrationsEntry.value:type_name -> littlehorse.ThreadSpecMigration
-	30, // 84: littlehorse.ThreadSpecMigration.NodeMigrationsEntry.value:type_name -> littlehorse.NodeMigration
-	7,  // 85: littlehorse.InlineWfSpecDefinition.ThreadSpecsEntry.value:type_name -> littlehorse.ThreadSpec
-	86, // [86:86] is the sub-list for method output_type
-	86, // [86:86] is the sub-list for method input_type
-	86, // [86:86] is the sub-list for extension type_name
-	86, // [86:86] is the sub-list for extension extendee
-	0,  // [0:86] is the sub-list for field type_name
+	47, // 64: littlehorse.Edge.condition:type_name -> littlehorse.VariableAssignment
+	52, // 65: littlehorse.Edge.variable_mutations:type_name -> littlehorse.VariableMutation
+	47, // 66: littlehorse.SleepNode.raw_seconds:type_name -> littlehorse.VariableAssignment
+	47, // 67: littlehorse.SleepNode.timestamp:type_name -> littlehorse.VariableAssignment
+	47, // 68: littlehorse.SleepNode.iso_date:type_name -> littlehorse.VariableAssignment
+	39, // 69: littlehorse.WfSpecVersionMigration.thread_spec_migrations:type_name -> littlehorse.WfSpecVersionMigration.ThreadSpecMigrationsEntry
+	40, // 70: littlehorse.ThreadSpecMigration.node_migrations:type_name -> littlehorse.ThreadSpecMigration.NodeMigrationsEntry
+	7,  // 71: littlehorse.WfSpec.ThreadSpecsEntry.value:type_name -> littlehorse.ThreadSpec
+	20, // 72: littlehorse.ThreadSpec.NodesEntry.value:type_name -> littlehorse.Node
+	47, // 73: littlehorse.StartThreadNode.VariablesEntry.value:type_name -> littlehorse.VariableAssignment
+	47, // 74: littlehorse.StartMultipleThreadsNode.VariablesEntry.value:type_name -> littlehorse.VariableAssignment
+	47, // 75: littlehorse.RunChildWfNode.InputsEntry.value:type_name -> littlehorse.VariableAssignment
+	47, // 76: littlehorse.WaitForThreadsNode.ThreadToWaitFor.thread_run_number:type_name -> littlehorse.VariableAssignment
+	37, // 77: littlehorse.WaitForThreadsNode.ThreadsToWaitFor.threads:type_name -> littlehorse.WaitForThreadsNode.ThreadToWaitFor
+	29, // 78: littlehorse.WfSpecVersionMigration.ThreadSpecMigrationsEntry.value:type_name -> littlehorse.ThreadSpecMigration
+	30, // 79: littlehorse.ThreadSpecMigration.NodeMigrationsEntry.value:type_name -> littlehorse.NodeMigration
+	80, // [80:80] is the sub-list for method output_type
+	80, // [80:80] is the sub-list for method input_type
+	80, // [80:80] is the sub-list for extension type_name
+	80, // [80:80] is the sub-list for extension extendee
+	0,  // [0:80] is the sub-list for field type_name
 }
 
 func init() { file_wf_spec_proto_init() }
@@ -3983,31 +3790,7 @@ func file_wf_spec_proto_init() {
 				return nil
 			}
 		}
-		file_wf_spec_proto_msgTypes[28].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*InlineWfSpecDefinition); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
 		file_wf_spec_proto_msgTypes[29].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*InlineWfSpec); i {
-			case 0:
-				return &v.state
-			case 1:
-				return &v.sizeCache
-			case 2:
-				return &v.unknownFields
-			default:
-				return nil
-			}
-		}
-		file_wf_spec_proto_msgTypes[31].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*WfSpec_ParentWfSpecReference); i {
 			case 0:
 				return &v.state
@@ -4019,7 +3802,7 @@ func file_wf_spec_proto_init() {
 				return nil
 			}
 		}
-		file_wf_spec_proto_msgTypes[36].Exporter = func(v interface{}, i int) interface{} {
+		file_wf_spec_proto_msgTypes[34].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*WaitForThreadsNode_ThreadToWaitFor); i {
 			case 0:
 				return &v.state
@@ -4031,7 +3814,7 @@ func file_wf_spec_proto_init() {
 				return nil
 			}
 		}
-		file_wf_spec_proto_msgTypes[37].Exporter = func(v interface{}, i int) interface{} {
+		file_wf_spec_proto_msgTypes[35].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*WaitForThreadsNode_ThreadsToWaitFor); i {
 			case 0:
 				return &v.state
@@ -4100,14 +3883,13 @@ func file_wf_spec_proto_init() {
 		(*SleepNode_Timestamp)(nil),
 		(*SleepNode_IsoDate)(nil),
 	}
-	file_wf_spec_proto_msgTypes[28].OneofWrappers = []interface{}{}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_wf_spec_proto_rawDesc,
 			NumEnums:      3,
-			NumMessages:   41,
+			NumMessages:   38,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

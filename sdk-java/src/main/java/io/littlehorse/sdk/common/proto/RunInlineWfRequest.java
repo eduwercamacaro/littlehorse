@@ -62,9 +62,13 @@ private static final long serialVersionUID = 0L;
 
   private int bitField0_;
   public static final int WF_SPEC_FIELD_NUMBER = 1;
-  private io.littlehorse.sdk.common.proto.InlineWfSpecDefinition wfSpec_;
+  private io.littlehorse.sdk.common.proto.InlineWfSpec wfSpec_;
   /**
-   * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+   * <pre>
+   * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+   * </pre>
+   *
+   * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
    * @return Whether the wfSpec field is set.
    */
   @java.lang.Override
@@ -72,19 +76,27 @@ private static final long serialVersionUID = 0L;
     return ((bitField0_ & 0x00000001) != 0);
   }
   /**
-   * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+   * <pre>
+   * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+   * </pre>
+   *
+   * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
    * @return The wfSpec.
    */
   @java.lang.Override
-  public io.littlehorse.sdk.common.proto.InlineWfSpecDefinition getWfSpec() {
-    return wfSpec_ == null ? io.littlehorse.sdk.common.proto.InlineWfSpecDefinition.getDefaultInstance() : wfSpec_;
+  public io.littlehorse.sdk.common.proto.InlineWfSpec getWfSpec() {
+    return wfSpec_ == null ? io.littlehorse.sdk.common.proto.InlineWfSpec.getDefaultInstance() : wfSpec_;
   }
   /**
-   * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+   * <pre>
+   * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+   * </pre>
+   *
+   * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
    */
   @java.lang.Override
-  public io.littlehorse.sdk.common.proto.InlineWfSpecDefinitionOrBuilder getWfSpecOrBuilder() {
-    return wfSpec_ == null ? io.littlehorse.sdk.common.proto.InlineWfSpecDefinition.getDefaultInstance() : wfSpec_;
+  public io.littlehorse.sdk.common.proto.InlineWfSpecOrBuilder getWfSpecOrBuilder() {
+    return wfSpec_ == null ? io.littlehorse.sdk.common.proto.InlineWfSpec.getDefaultInstance() : wfSpec_;
   }
 
   public static final int VARIABLES_FIELD_NUMBER = 2;
@@ -634,31 +646,43 @@ io.littlehorse.sdk.common.proto.VariableValue defaultValue) {
     }
     private int bitField0_;
 
-    private io.littlehorse.sdk.common.proto.InlineWfSpecDefinition wfSpec_;
+    private io.littlehorse.sdk.common.proto.InlineWfSpec wfSpec_;
     private com.google.protobuf.SingleFieldBuilder<
-        io.littlehorse.sdk.common.proto.InlineWfSpecDefinition, io.littlehorse.sdk.common.proto.InlineWfSpecDefinition.Builder, io.littlehorse.sdk.common.proto.InlineWfSpecDefinitionOrBuilder> wfSpecBuilder_;
+        io.littlehorse.sdk.common.proto.InlineWfSpec, io.littlehorse.sdk.common.proto.InlineWfSpec.Builder, io.littlehorse.sdk.common.proto.InlineWfSpecOrBuilder> wfSpecBuilder_;
     /**
-     * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+     * <pre>
+     * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+     * </pre>
+     *
+     * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
      * @return Whether the wfSpec field is set.
      */
     public boolean hasWfSpec() {
       return ((bitField0_ & 0x00000001) != 0);
     }
     /**
-     * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+     * <pre>
+     * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+     * </pre>
+     *
+     * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
      * @return The wfSpec.
      */
-    public io.littlehorse.sdk.common.proto.InlineWfSpecDefinition getWfSpec() {
+    public io.littlehorse.sdk.common.proto.InlineWfSpec getWfSpec() {
       if (wfSpecBuilder_ == null) {
-        return wfSpec_ == null ? io.littlehorse.sdk.common.proto.InlineWfSpecDefinition.getDefaultInstance() : wfSpec_;
+        return wfSpec_ == null ? io.littlehorse.sdk.common.proto.InlineWfSpec.getDefaultInstance() : wfSpec_;
       } else {
         return wfSpecBuilder_.getMessage();
       }
     }
     /**
-     * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+     * <pre>
+     * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+     * </pre>
+     *
+     * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
      */
-    public Builder setWfSpec(io.littlehorse.sdk.common.proto.InlineWfSpecDefinition value) {
+    public Builder setWfSpec(io.littlehorse.sdk.common.proto.InlineWfSpec value) {
       if (wfSpecBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -672,10 +696,14 @@ io.littlehorse.sdk.common.proto.VariableValue defaultValue) {
       return this;
     }
     /**
-     * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+     * <pre>
+     * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+     * </pre>
+     *
+     * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
      */
     public Builder setWfSpec(
-        io.littlehorse.sdk.common.proto.InlineWfSpecDefinition.Builder builderForValue) {
+        io.littlehorse.sdk.common.proto.InlineWfSpec.Builder builderForValue) {
       if (wfSpecBuilder_ == null) {
         wfSpec_ = builderForValue.build();
       } else {
@@ -686,13 +714,17 @@ io.littlehorse.sdk.common.proto.VariableValue defaultValue) {
       return this;
     }
     /**
-     * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+     * <pre>
+     * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+     * </pre>
+     *
+     * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
      */
-    public Builder mergeWfSpec(io.littlehorse.sdk.common.proto.InlineWfSpecDefinition value) {
+    public Builder mergeWfSpec(io.littlehorse.sdk.common.proto.InlineWfSpec value) {
       if (wfSpecBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0) &&
           wfSpec_ != null &&
-          wfSpec_ != io.littlehorse.sdk.common.proto.InlineWfSpecDefinition.getDefaultInstance()) {
+          wfSpec_ != io.littlehorse.sdk.common.proto.InlineWfSpec.getDefaultInstance()) {
           getWfSpecBuilder().mergeFrom(value);
         } else {
           wfSpec_ = value;
@@ -707,7 +739,11 @@ io.littlehorse.sdk.common.proto.VariableValue defaultValue) {
       return this;
     }
     /**
-     * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+     * <pre>
+     * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+     * </pre>
+     *
+     * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
      */
     public Builder clearWfSpec() {
       bitField0_ = (bitField0_ & ~0x00000001);
@@ -720,33 +756,45 @@ io.littlehorse.sdk.common.proto.VariableValue defaultValue) {
       return this;
     }
     /**
-     * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+     * <pre>
+     * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+     * </pre>
+     *
+     * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
      */
-    public io.littlehorse.sdk.common.proto.InlineWfSpecDefinition.Builder getWfSpecBuilder() {
+    public io.littlehorse.sdk.common.proto.InlineWfSpec.Builder getWfSpecBuilder() {
       bitField0_ |= 0x00000001;
       onChanged();
       return internalGetWfSpecFieldBuilder().getBuilder();
     }
     /**
-     * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+     * <pre>
+     * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+     * </pre>
+     *
+     * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
      */
-    public io.littlehorse.sdk.common.proto.InlineWfSpecDefinitionOrBuilder getWfSpecOrBuilder() {
+    public io.littlehorse.sdk.common.proto.InlineWfSpecOrBuilder getWfSpecOrBuilder() {
       if (wfSpecBuilder_ != null) {
         return wfSpecBuilder_.getMessageOrBuilder();
       } else {
         return wfSpec_ == null ?
-            io.littlehorse.sdk.common.proto.InlineWfSpecDefinition.getDefaultInstance() : wfSpec_;
+            io.littlehorse.sdk.common.proto.InlineWfSpec.getDefaultInstance() : wfSpec_;
       }
     }
     /**
-     * <code>.littlehorse.InlineWfSpecDefinition wf_spec = 1;</code>
+     * <pre>
+     * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+     * </pre>
+     *
+     * <code>.littlehorse.InlineWfSpec wf_spec = 1;</code>
      */
     private com.google.protobuf.SingleFieldBuilder<
-        io.littlehorse.sdk.common.proto.InlineWfSpecDefinition, io.littlehorse.sdk.common.proto.InlineWfSpecDefinition.Builder, io.littlehorse.sdk.common.proto.InlineWfSpecDefinitionOrBuilder> 
+        io.littlehorse.sdk.common.proto.InlineWfSpec, io.littlehorse.sdk.common.proto.InlineWfSpec.Builder, io.littlehorse.sdk.common.proto.InlineWfSpecOrBuilder> 
         internalGetWfSpecFieldBuilder() {
       if (wfSpecBuilder_ == null) {
         wfSpecBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-            io.littlehorse.sdk.common.proto.InlineWfSpecDefinition, io.littlehorse.sdk.common.proto.InlineWfSpecDefinition.Builder, io.littlehorse.sdk.common.proto.InlineWfSpecDefinitionOrBuilder>(
+            io.littlehorse.sdk.common.proto.InlineWfSpec, io.littlehorse.sdk.common.proto.InlineWfSpec.Builder, io.littlehorse.sdk.common.proto.InlineWfSpecOrBuilder>(
                 getWfSpec(),
                 getParentForChildren(),
                 isClean());

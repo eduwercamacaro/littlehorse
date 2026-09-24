@@ -8,16 +8,21 @@ workflow. There are no dedicated inline SDK builders or dashboard features.
 
 ## API
 
-`RunInlineWfRequest` contains `wf_spec` (`InlineWfSpecDefinition`), `variables`, and
+`RunInlineWfRequest` contains `wf_spec` (`InlineWfSpec`), `variables`, and
 an optional `id`. A definition contains `thread_specs`, `entrypoint_thread_name`,
 and an optional `retention_policy`. Existing TaskDefs and other referenced metadata
 must already be registered. The caller needs both workflow `RUN` and
 `WRITE_METADATA` permissions.
 
+`InlineWfSpec` is used for both submission and retrieval. Its `thread_specs`,
+`entrypoint_thread_name`, and `retention_policy` fields are directly on the message.
+The server rejects caller-supplied `id` and `created_at`; it generates them after
+validation. There is no checksum or definition-level comparison.
+
 The returned `WfRun` has `inline_wf_spec_id` instead of `wf_spec_id`. The ID contains
 the owning `wf_run_id`, which determines routing and lifecycle. Fetch the snapshot
 with `GetInlineWfSpec(InlineWfSpecId)` (workflow `READ` permission). It contains the
-validated definition, a server-computed SHA-256 checksum, its ID, and creation time.
+validated definition, its ID, and creation time.
 There is no independent create/update/delete API for inline definitions.
 Reusing a run ID returns `ALREADY_EXISTS`, matching `RunWf`; it does not compare
 definitions or return an earlier response.
@@ -34,7 +39,7 @@ grpcurl -plaintext -import-path schemas/littlehorse -proto service.proto \
 
 - Validation runs on the core command path using the existing WfSpec validators
   and read-only metadata access. Validation can normalize metadata references;
-  the resulting definition is what is persisted and fingerprinted.
+  the resulting definition is what is persisted.
 - The definition is a separate core-store record in the same partition as its
   WfRun, staged in the same core transaction when the run is created. A transient
   `WfSpecModel` view lets the existing execution engine use it without inventing
@@ -48,9 +53,7 @@ grpcurl -plaintext -import-path schemas/littlehorse -proto service.proto \
   Retention deletes the definition with the run. Resumable deletion keeps the
   definition until node, variable, and event cleanup finishes, then deletes both
   the definition and WfRun in the final cleanup command.
-- The checksum uses deterministic protobuf serialization. It is a prototype
-  fingerprint, not a cross-version canonical-format guarantee or a deduplication
-  key. Task execution retains its existing delivery semantics.
+- Task execution retains its existing delivery semantics.
 
 ## Deliberate prototype boundaries
 
@@ -63,18 +66,21 @@ grpcurl -plaintext -import-path schemas/littlehorse -proto service.proto \
 - Inline runs do not participate in WfSpec-name/version indexes, WfSpec metrics,
   or variable search indexes. Direct run/variable lookup, node listing, and
   external-event processing remain available.
-- Each run owns its own definition record; identical checksums do not imply a
-  shared record. Every invocation repeats validation. WfRun output events contain
+- Each run owns its own definition record; records are not compared or shared.
+  Every invocation repeats validation. WfRun output events contain
   only the reference, not a self-contained definition; consumers must fetch it
   before retention removes it. The definition does not emit a separate output event.
 
 ## Compatibility
 
-Field 15 (`inline_wf_spec`) remains as a deprecated legacy source. Existing embedded
-prototype runs remain readable, executable, and deletable without a store reset;
-they are not automatically migrated. New runs use field 16 (`inline_wf_spec_id`).
-`GetInlineWfSpec` reads separate records only; legacy runs still carry their own
-definition. Clients must regenerate bindings to understand the new source.
+The current prototype assigns fields 1–5 to `id`, `created_at`, `thread_specs`,
+`entrypoint_thread_name`, and `retention_policy`. This renumbering is incompatible
+with earlier nested and flattened formats. Previously persisted inline definitions
+and old binary requests require migration before use; no automatic migration or
+data reset is performed. Field numbers must remain stable before production use.
+Clients must regenerate bindings. Embedded WfRun field 15 is still understood for
+the unified message shape, while newly created runs use the ID in field 16.
+`GetInlineWfSpec` reads separate records only.
 
 `InlineWfRunTest` exercises execution without registered workflow metadata,
 definition persistence across commands, task retries, events, variables, child

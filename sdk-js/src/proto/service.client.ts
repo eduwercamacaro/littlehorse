@@ -146,7 +146,7 @@ import type { ScheduledWfRunIdList } from "./service";
 import type { SearchScheduledWfRunRequest } from "./service";
 import type { ScheduledWfRun } from "./scheduled_wf_run";
 import type { ScheduleWfRequest } from "./service";
-import type { InlineWfSpec } from "./wf_spec";
+import type { InlineWfSpec } from "./wf_run";
 import type { InlineWfSpecId } from "./object_id";
 import type { RunInlineWfRequest } from "./service";
 import type { WfRun } from "./wf_run";

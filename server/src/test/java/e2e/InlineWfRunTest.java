@@ -21,19 +21,23 @@ import org.junit.jupiter.api.Test;
 public class InlineWfRunTest {
     private LittleHorseBlockingStub client;
 
-    private InlineWfSpecDefinition definition() {
+    private InlineWfSpec definition(String taskName, String[] names) {
         PutWfSpecRequest compiled = Workflow.newWorkflow("unregistered-inline-prototype", thread -> {
-                    var input = thread.declareStr("input").required();
-                    thread.waitForEvent("inline-prototype-release");
-                    thread.complete(
-                            thread.execute("inline-prototype-task", input).withRetries(1));
+                    thread.execute("greet");
                 })
                 .compileWorkflow();
+        for (int i = 0; i < 1000; i++) {
+            client.runWf(Workflow.inlineWorkflow(thread ->{
+                thread.execute(taskName, i);
+            }).compile());
+        }
+
+
         return inlineDefinition(compiled);
     }
 
-    private InlineWfSpecDefinition inlineDefinition(PutWfSpecRequest compiled) {
-        return InlineWfSpecDefinition.newBuilder()
+    private InlineWfSpec inlineDefinition(PutWfSpecRequest compiled) {
+        return InlineWfSpec.newBuilder()
                 .putAllThreadSpecs(compiled.getThreadSpecsMap())
                 .setEntrypointThreadName(compiled.getEntrypointThreadName())
                 .build();
@@ -55,9 +59,10 @@ public class InlineWfRunTest {
         assertThat(run.hasInlineWfSpecId()).isTrue();
         assertThat(run.hasWfSpecId()).isFalse();
         InlineWfSpec snapshot = client.getInlineWfSpec(run.getInlineWfSpecId());
-        assertThat(snapshot.getChecksum()).hasSize(64);
         assertThat(snapshot.getId().getWfRunId()).isEqualTo(run.getId());
         assertThat(snapshot.hasCreatedAt()).isTrue();
+        assertThat(snapshot.getThreadSpecsCount()).isGreaterThan(0);
+        assertThat(snapshot.getEntrypointThreadName()).isEqualTo(definition().getEntrypointThreadName());
         assertThatThrownBy(() -> client.getLatestWfSpec(GetLatestWfSpecRequest.newBuilder()
                         .setName("unregistered-inline-prototype")
                         .build()))
@@ -124,7 +129,6 @@ public class InlineWfRunTest {
         WfRun second = client.runInlineWf(
                 request.toBuilder().setId(UUID.randomUUID().toString()).build());
         InlineWfSpec secondSnapshot = client.getInlineWfSpec(second.getInlineWfSpecId());
-        assertThat(secondSnapshot.getChecksum()).isEqualTo(snapshot.getChecksum());
         assertThat(secondSnapshot.getId()).isNotEqualTo(snapshot.getId());
         client.deleteWfRun(DeleteWfRunRequest.newBuilder().setId(run.getId()).build());
         assertDefinitionDeleted(run.getInlineWfSpecId());
@@ -212,6 +216,27 @@ public class InlineWfRunTest {
                 .isInstanceOfSatisfying(
                         StatusRuntimeException.class,
                         ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.NOT_FOUND));
+    }
+
+    @Test
+    void rejectsServerManagedFieldsInSubmittedSpec() {
+        String id = UUID.randomUUID().toString();
+        for (InlineWfSpec supplied : java.util.List.of(
+                definition().toBuilder()
+                        .setId(InlineWfSpecId.getDefaultInstance())
+                        .build(),
+                definition().toBuilder()
+                        .setCreatedAt(com.google.protobuf.Timestamp.getDefaultInstance())
+                        .build())) {
+            assertThatThrownBy(() -> client.runInlineWf(
+                            request(id).toBuilder().setWfSpec(supplied).build()))
+                    .isInstanceOfSatisfying(
+                            StatusRuntimeException.class,
+                            ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.INVALID_ARGUMENT));
+        }
+        assertDefinitionDeleted(InlineWfSpecId.newBuilder()
+                .setWfRunId(WfRunId.newBuilder().setId(id))
+                .build());
     }
 
     @Test

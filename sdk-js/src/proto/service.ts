@@ -37,7 +37,6 @@ import { CompleteUserTaskRunRequest } from "./user_tasks";
 import { Empty } from "./google/protobuf/empty";
 import { AssignUserTaskRunRequest } from "./user_tasks";
 import { ScheduledWfRun } from "./scheduled_wf_run";
-import { InlineWfSpec } from "./wf_spec";
 import { InlineWfSpecId } from "./object_id";
 import { WfRun } from "./wf_run";
 import { UserTaskDef } from "./user_tasks";
@@ -85,7 +84,7 @@ import { WorkflowEventId } from "./object_id";
 import { MigrationVars } from "./workflow_migration";
 import { WorkflowMigrationPlanId } from "./object_id";
 import { ThreadMigrationPlanRequest } from "./workflow_migration";
-import { InlineWfSpecDefinition } from "./wf_spec";
+import { InlineWfSpec } from "./wf_run";
 import { WorkflowEventDefId } from "./object_id";
 import { WfSpecId } from "./object_id";
 import { UserTaskDefId } from "./object_id";
@@ -577,9 +576,11 @@ export interface DeleteWorkflowEventDefRequest {
  */
 export interface RunInlineWfRequest {
     /**
-     * @generated from protobuf field: littlehorse.InlineWfSpecDefinition wf_spec = 1
+     * Supply only thread_specs, entrypoint_thread_name, and retention_policy.
+     *
+     * @generated from protobuf field: littlehorse.InlineWfSpec wf_spec = 1
      */
-    wfSpec?: InlineWfSpecDefinition;
+    wfSpec?: InlineWfSpec;
     /**
      * @generated from protobuf field: map<string, littlehorse.VariableValue> variables = 2
      */
@@ -4334,7 +4335,7 @@ export const DeleteWorkflowEventDefRequest = new DeleteWorkflowEventDefRequest$T
 class RunInlineWfRequest$Type extends MessageType<RunInlineWfRequest> {
     constructor() {
         super("littlehorse.RunInlineWfRequest", [
-            { no: 1, name: "wf_spec", kind: "message", T: () => InlineWfSpecDefinition },
+            { no: 1, name: "wf_spec", kind: "message", T: () => InlineWfSpec },
             { no: 2, name: "variables", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "message", T: () => VariableValue } },
             { no: 3, name: "id", kind: "scalar", opt: true, T: 9 /*ScalarType.STRING*/ }
         ]);
@@ -4351,8 +4352,8 @@ class RunInlineWfRequest$Type extends MessageType<RunInlineWfRequest> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* littlehorse.InlineWfSpecDefinition wf_spec */ 1:
-                    message.wfSpec = InlineWfSpecDefinition.internalBinaryRead(reader, reader.uint32(), options, message.wfSpec);
+                case /* littlehorse.InlineWfSpec wf_spec */ 1:
+                    message.wfSpec = InlineWfSpec.internalBinaryRead(reader, reader.uint32(), options, message.wfSpec);
                     break;
                 case /* map<string, littlehorse.VariableValue> variables */ 2:
                     this.binaryReadMap2(message.variables, reader, options);
@@ -4388,9 +4389,9 @@ class RunInlineWfRequest$Type extends MessageType<RunInlineWfRequest> {
         map[key ?? ""] = val ?? VariableValue.create();
     }
     internalBinaryWrite(message: RunInlineWfRequest, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* littlehorse.InlineWfSpecDefinition wf_spec = 1; */
+        /* littlehorse.InlineWfSpec wf_spec = 1; */
         if (message.wfSpec)
-            InlineWfSpecDefinition.internalBinaryWrite(message.wfSpec, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+            InlineWfSpec.internalBinaryWrite(message.wfSpec, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         /* map<string, littlehorse.VariableValue> variables = 2; */
         for (let k of globalThis.Object.keys(message.variables)) {
             writer.tag(2, WireType.LengthDelimited).fork().tag(1, WireType.LengthDelimited).string(k);

@@ -66,6 +66,7 @@ message InlineWfSpecId {
 ### `rpc RunInlineWf`
 
 Creates a new `WfRun` from an InlineWfSpec. Clients could also provide an ID for the run similar to the `rpc RunWf`.
+The InlineWfSpec will inherent the same validations as a `WfSpec`.
 
 ```protobuf
 message RunInlineWfRequest {
@@ -96,3 +97,52 @@ service LittleHorse {
   rpc GetInlineWfSpec(InlineWfSpecId) returns (InlineWfSpec) {}
 }
 ```
+
+## SDK Changes and Developer Experience
+
+Developers can define an inline workflow using the SDK's workflow-building API, compile it into a `RunInlineWfRequest`, and invoke the `rpc runInlineWf` directly to the server.
+
+In the Java SDK, the proposed API is:
+
+```java
+RunInlineWfRequest runInline = Workflow.inlineWorkflow(thread -> thread.execute("hello"))
+        .compileWorkflow();
+client.runInlineWf(runInline);
+```
+Equivalent functionality will be provided in the non-Java SDKs, following each language's conventions.
+
+## `lhctl`
+
+`lhctl` piggy backs on this feature to provide a CLI command for executing task methods without registering a WfSpec.
+`lhctl` transforms the `lhctl run tasks` command into a `RunInlineWf` request.
+
+```sh
+lhctl run tasks hello name Alice
+```
+
+For multiple tasks, each `--task` starts a task invocation followed by its input name/value pairs. Tasks execute sequentially in the supplied order by default:
+
+```sh
+lhctl run tasks \
+  --task hello name Alice \
+  --task send-email recipient alice@example.com subject Welcome
+```
+
+Adding `--parallel` executes the tasks concurrently:
+
+```sh
+lhctl run tasks --parallel \
+  --task hello name Alice \
+  --task send-email recipient alice@example.com subject Welcome
+```
+
+The single-task positional form is shorthand for `lhctl run tasks --task hello name Alice`. Both forms support `--wfRunId` to specify the run ID.
+
+It prints the returned WfRun immediately, without waiting for WfRun completion. TaskDefs must already be registered.
+
+- **Sequential:** the workflow executes each task in order within one thread. A task failure fails the workflow.
+- **Parallel:** the workflow starts one child thread per task and waits for all children.
+
+Passing one task's output into another task is outside the initial CLI API; clients can use the SDK to express those dependencies.
+
+

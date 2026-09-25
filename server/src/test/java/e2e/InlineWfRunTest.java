@@ -26,12 +26,6 @@ public class InlineWfRunTest {
                     thread.execute("greet");
                 })
                 .compileWorkflow();
-        for (int i = 0; i < 1000; i++) {
-            client.runWf(Workflow.inlineWorkflow(thread ->{
-                thread.execute(taskName, i);
-            }).compile());
-        }
-
 
         return inlineDefinition(compiled);
     }

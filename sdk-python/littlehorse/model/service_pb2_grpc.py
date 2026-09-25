@@ -226,6 +226,11 @@ class LittleHorseStub(object):
                 request_serializer=object__id__pb2.VariableId.SerializeToString,
                 response_deserializer=variable__pb2.Variable.FromString,
                 _registered_method=True)
+        self.PutVariable = channel.unary_unary(
+                '/littlehorse.LittleHorse/PutVariable',
+                request_serializer=service__pb2.PutVariableRequest.SerializeToString,
+                response_deserializer=google_dot_protobuf_dot_empty__pb2.Empty.FromString,
+                _registered_method=True)
         self.ListVariables = channel.unary_unary(
                 '/littlehorse.LittleHorse/ListVariables',
                 request_serializer=service__pb2.ListVariablesRequest.SerializeToString,
@@ -872,6 +877,13 @@ class LittleHorseServicer(object):
         """Get the value of a specific Variable. When using a WfRun to model an entity, this
         RPC is useful for retrieving information. It is equivalent to looking up the value of a
         column for a specific row in a SQL table.
+        """
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def PutVariable(self, request, context):
+        """Replaces the value of an existing Variable and attempts to advance its workflow.
         """
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -1604,6 +1616,11 @@ def add_LittleHorseServicer_to_server(servicer, server):
                     servicer.GetVariable,
                     request_deserializer=object__id__pb2.VariableId.FromString,
                     response_serializer=variable__pb2.Variable.SerializeToString,
+            ),
+            'PutVariable': grpc.unary_unary_rpc_method_handler(
+                    servicer.PutVariable,
+                    request_deserializer=service__pb2.PutVariableRequest.FromString,
+                    response_serializer=google_dot_protobuf_dot_empty__pb2.Empty.SerializeToString,
             ),
             'ListVariables': grpc.unary_unary_rpc_method_handler(
                     servicer.ListVariables,
@@ -2916,6 +2933,33 @@ class LittleHorse(object):
             '/littlehorse.LittleHorse/GetVariable',
             object__id__pb2.VariableId.SerializeToString,
             variable__pb2.Variable.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def PutVariable(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/littlehorse.LittleHorse/PutVariable',
+            service__pb2.PutVariableRequest.SerializeToString,
+            google_dot_protobuf_dot_empty__pb2.Empty.FromString,
             options,
             channel_credentials,
             insecure,

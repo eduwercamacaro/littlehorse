@@ -32,6 +32,26 @@ Verify the installation:
 lhctl
 ```
 
+## Replacing a workflow variable
+
+Use `PutVariable` to replace an existing variable's value:
+
+```bash
+lhctl put variable <wfRunId> <threadRunNumber> <varName> INT 42
+lhctl put variable <wfRunId> 0 message STR "hello"
+lhctl put variable <wfRunId> 0 data JSON_OBJ '{"enabled":true}'
+```
+
+Omit both the type and payload to set the value to null:
+
+```bash
+lhctl put variable <wfRunId> 0 value
+```
+
+This prototype requires a server supporting `PutVariable`. It replaces only the
+value and attempts to advance the workflow, without validating against the declared type.
+See `lhctl put variable --help` for supported payload types.
+
 ## Writing `lhctl` commands
 
 To ensure consistency across our CLI commands, we adhere to the following standards, inspired by [Docopt](http://docopt.org) and the [Cobra User Guide](https://github.com/spf13/cobra/blob/main/site/content/user_guide.md). 

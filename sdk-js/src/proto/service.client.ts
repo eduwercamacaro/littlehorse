@@ -118,6 +118,7 @@ import type { ExternalEvent } from "./external_event";
 import type { PutExternalEventRequest } from "./service";
 import type { VariableList } from "./service";
 import type { ListVariablesRequest } from "./service";
+import type { VariableValue } from "./type_definition";
 import type { PutVariableRequest } from "./service";
 import type { Variable } from "./variable";
 import type { VariableId } from "./object_id";
@@ -427,10 +428,11 @@ export interface ILittleHorseClient {
     getVariable(input: VariableId, options?: RpcOptions): UnaryCall<VariableId, Variable>;
     /**
      * Replaces the value of an existing Variable and attempts to advance its workflow.
+     * Returns the previous value, respecting the variable's masking configuration.
      *
      * @generated from protobuf rpc: PutVariable
      */
-    putVariable(input: PutVariableRequest, options?: RpcOptions): UnaryCall<PutVariableRequest, Empty>;
+    putVariable(input: PutVariableRequest, options?: RpcOptions): UnaryCall<PutVariableRequest, VariableValue>;
     /**
      * List all Variables from a WfRun.
      *
@@ -1271,12 +1273,13 @@ export class LittleHorseClient implements ILittleHorseClient, ServiceInfo {
     }
     /**
      * Replaces the value of an existing Variable and attempts to advance its workflow.
+     * Returns the previous value, respecting the variable's masking configuration.
      *
      * @generated from protobuf rpc: PutVariable
      */
-    putVariable(input: PutVariableRequest, options?: RpcOptions): UnaryCall<PutVariableRequest, Empty> {
+    putVariable(input: PutVariableRequest, options?: RpcOptions): UnaryCall<PutVariableRequest, VariableValue> {
         const method = this.methods[35], opt = this._transport.mergeOptions(options);
-        return stackIntercept<PutVariableRequest, Empty>("unary", this._transport, method, opt, input);
+        return stackIntercept<PutVariableRequest, VariableValue>("unary", this._transport, method, opt, input);
     }
     /**
      * List all Variables from a WfRun.

@@ -9904,7 +9904,7 @@ export const LittleHorse = new ServiceType("littlehorse.LittleHorse", [
     { name: "GetTaskRun", options: {}, I: TaskRunId, O: TaskRun },
     { name: "ListTaskRuns", options: {}, I: ListTaskRunsRequest, O: TaskRunList },
     { name: "GetVariable", options: {}, I: VariableId, O: Variable },
-    { name: "PutVariable", options: {}, I: PutVariableRequest, O: Empty },
+    { name: "PutVariable", options: {}, I: PutVariableRequest, O: VariableValue },
     { name: "ListVariables", options: {}, I: ListVariablesRequest, O: VariableList },
     { name: "PutExternalEvent", options: {}, I: PutExternalEventRequest, O: ExternalEvent },
     { name: "PutCorrelatedEvent", options: {}, I: PutCorrelatedEventRequest, O: CorrelatedEvent },

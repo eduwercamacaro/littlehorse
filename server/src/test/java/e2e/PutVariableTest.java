@@ -5,16 +5,20 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
+import io.littlehorse.common.LHConstants;
+import io.littlehorse.sdk.common.LHLibUtil;
 import io.littlehorse.sdk.common.proto.LHStatus;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
 import io.littlehorse.sdk.common.proto.PutVariableRequest;
 import io.littlehorse.sdk.common.proto.Variable;
 import io.littlehorse.sdk.common.proto.VariableId;
 import io.littlehorse.sdk.common.proto.VariableValue;
+import io.littlehorse.sdk.common.util.Arg;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.test.LHTest;
 import io.littlehorse.test.LHWorkflow;
 import io.littlehorse.test.WorkflowVerifier;
+import java.time.Duration;
 import org.junit.jupiter.api.Test;
 
 @LHTest
@@ -31,8 +35,8 @@ public class PutVariableTest {
     @LHWorkflow("put-variable-sleep")
     public Workflow buildSleepWorkflow() {
         return Workflow.newWorkflow("put-variable-sleep", thread -> {
-            var deadline = thread.declareInt("deadline").withDefault(4102444800000L);
-            thread.sleepUntil(deadline);
+            var duration = thread.declareInt("duration").withDefault(3600);
+            thread.sleepSeconds(duration);
         });
     }
 
@@ -44,10 +48,31 @@ public class PutVariableTest {
                         .setId(VariableId.newBuilder()
                                 .setWfRunId(wfRun.getId())
                                 .setThreadRunNumber(0)
-                                .setName("deadline"))
+                                .setName("duration"))
                         .setValue(VariableValue.newBuilder().setInt(0))
                         .build()))
                 .waitForStatus(LHStatus.COMPLETED)
+                .start();
+    }
+
+    @Test
+    void shouldExtendRelativeSleepFromNodeArrivalTime() {
+        verifier.prepareRun(sleepWorkflow, Arg.of("duration", 1))
+                .waitForNodeRunStatus(0, 1, LHStatus.RUNNING)
+                .thenVerifyWfRun(wfRun -> client.putVariable(PutVariableRequest.newBuilder()
+                        .setId(VariableId.newBuilder()
+                                .setWfRunId(wfRun.getId())
+                                .setThreadRunNumber(0)
+                                .setName("duration"))
+                        .setValue(VariableValue.newBuilder().setInt(3))
+                        .build()))
+                .waitForStatus(LHStatus.COMPLETED, Duration.ofSeconds(5))
+                .thenVerifyNodeRun(0, 1, nodeRun -> {
+                    long arrivalTime =
+                            LHLibUtil.fromProtoTs(nodeRun.getArrivalTime()).getTime();
+                    long endTime = LHLibUtil.fromProtoTs(nodeRun.getEndTime()).getTime();
+                    assertThat(endTime - arrivalTime).isGreaterThanOrEqualTo(3000);
+                })
                 .start();
     }
 
@@ -56,6 +81,7 @@ public class PutVariableTest {
         return Workflow.newWorkflow("put-variable", thread -> {
             var value = thread.declareStr("value").withDefault("original");
             var observed = thread.declareStr("observed");
+            thread.declareStr("secret").withDefault("sensitive").masked();
             thread.waitForEvent("put-variable-continue").registeredAs(String.class);
             observed.assign(value);
         });
@@ -74,10 +100,16 @@ public class PutVariableTest {
                     Variable before = client.getVariable(id);
                     VariableValue replacement =
                             VariableValue.newBuilder().setStr("replacement").build();
-                    client.putVariable(PutVariableRequest.newBuilder()
+                    VariableValue previousValue = client.putVariable(PutVariableRequest.newBuilder()
                             .setId(id)
                             .setValue(replacement)
                             .build());
+                    assertThat(previousValue).isEqualTo(before.getValue());
+                    VariableValue maskedPreviousValue = client.putVariable(PutVariableRequest.newBuilder()
+                            .setId(id.toBuilder().setName("secret"))
+                            .setValue(replacement)
+                            .build());
+                    assertThat(maskedPreviousValue.getStr()).isEqualTo(LHConstants.STRING_MASK);
                     assertThat(client.getVariable(id))
                             .isEqualTo(before.toBuilder().setValue(replacement).build());
                     assertThat(client.getWfRun(wfRun.getId()).getStatus()).isEqualTo(LHStatus.RUNNING);
@@ -112,11 +144,17 @@ public class PutVariableTest {
                             .setThreadRunNumber(0)
                             .setName("value")
                             .build();
-                    client.putVariable(PutVariableRequest.newBuilder()
+                    VariableValue previousValue = client.putVariable(PutVariableRequest.newBuilder()
                             .setId(id)
                             .setValue(VariableValue.getDefaultInstance())
                             .build());
+                    assertThat(previousValue.getStr()).isEqualTo("original");
                     assertThat(client.getVariable(id).getValue()).isEqualTo(VariableValue.getDefaultInstance());
+                    assertThat(client.putVariable(PutVariableRequest.newBuilder()
+                                    .setId(id)
+                                    .setValue(VariableValue.newBuilder().setStr("restored"))
+                                    .build()))
+                            .isEqualTo(VariableValue.getDefaultInstance());
                 })
                 .thenSendExternalEventWithContent("put-variable-continue", "continue")
                 .waitForStatus(LHStatus.COMPLETED)

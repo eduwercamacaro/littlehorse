@@ -7,7 +7,6 @@ import (
 	"github.com/littlehorse-enterprises/littlehorse/sdk-go/lhproto"
 	"github.com/littlehorse-enterprises/littlehorse/sdk-go/littlehorse"
 	"google.golang.org/grpc"
-	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type putVariableClient struct {
@@ -15,9 +14,9 @@ type putVariableClient struct {
 	request *lhproto.PutVariableRequest
 }
 
-func (c *putVariableClient) PutVariable(_ context.Context, req *lhproto.PutVariableRequest, _ ...grpc.CallOption) (*emptypb.Empty, error) {
+func (c *putVariableClient) PutVariable(_ context.Context, req *lhproto.PutVariableRequest, _ ...grpc.CallOption) (*lhproto.VariableValue, error) {
 	c.request = req
-	return &emptypb.Empty{}, nil
+	return &lhproto.VariableValue{Value: &lhproto.VariableValue_Int{Int: 7}}, nil
 }
 
 func TestPutVariableCommand(t *testing.T) {

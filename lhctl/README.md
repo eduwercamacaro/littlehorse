@@ -50,6 +50,7 @@ lhctl put variable <wfRunId> 0 value
 
 This prototype requires a server supporting `PutVariable`. It replaces only the
 value and attempts to advance the workflow, without validating against the declared type.
+The response contains the previous value, with masked variables remaining masked.
 See `lhctl put variable --help` for supported payload types.
 
 ## Writing `lhctl` commands

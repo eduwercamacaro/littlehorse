@@ -13,6 +13,7 @@ var putVariableCmd = &cobra.Command{
 	Use:   "variable <wfRunId> <threadRunNumber> <varName> [(<varType> <payload>)]",
 	Short: "Replace an existing variable's value.",
 	Long: `Replace the value of an existing variable and attempt to advance its workflow.
+Prints the previous value, respecting the variable's masking configuration.
 Supported types: INT, STR, BYTES, BOOL, JSON_OBJ, JSON_ARR, DOUBLE, WF_RUN_ID, TIMESTAMP.
 Quote JSON payloads; BYTES uses unpadded base64. TIMESTAMP accepts epoch milliseconds
 or RFC 3339. Omit both varType and payload to explicitly set the variable to null.

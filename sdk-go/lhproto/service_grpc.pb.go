@@ -241,7 +241,8 @@ type LittleHorseClient interface {
 	// column for a specific row in a SQL table.
 	GetVariable(ctx context.Context, in *VariableId, opts ...grpc.CallOption) (*Variable, error)
 	// Replaces the value of an existing Variable and attempts to advance its workflow.
-	PutVariable(ctx context.Context, in *PutVariableRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
+	// Returns the previous value, respecting the variable's masking configuration.
+	PutVariable(ctx context.Context, in *PutVariableRequest, opts ...grpc.CallOption) (*VariableValue, error)
 	// List all Variables from a WfRun.
 	ListVariables(ctx context.Context, in *ListVariablesRequest, opts ...grpc.CallOption) (*VariableList, error)
 	// Post an ExternalEvent.
@@ -752,8 +753,8 @@ func (c *littleHorseClient) GetVariable(ctx context.Context, in *VariableId, opt
 	return out, nil
 }
 
-func (c *littleHorseClient) PutVariable(ctx context.Context, in *PutVariableRequest, opts ...grpc.CallOption) (*emptypb.Empty, error) {
-	out := new(emptypb.Empty)
+func (c *littleHorseClient) PutVariable(ctx context.Context, in *PutVariableRequest, opts ...grpc.CallOption) (*VariableValue, error) {
+	out := new(VariableValue)
 	err := c.cc.Invoke(ctx, LittleHorse_PutVariable_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -1550,7 +1551,8 @@ type LittleHorseServer interface {
 	// column for a specific row in a SQL table.
 	GetVariable(context.Context, *VariableId) (*Variable, error)
 	// Replaces the value of an existing Variable and attempts to advance its workflow.
-	PutVariable(context.Context, *PutVariableRequest) (*emptypb.Empty, error)
+	// Returns the previous value, respecting the variable's masking configuration.
+	PutVariable(context.Context, *PutVariableRequest) (*VariableValue, error)
 	// List all Variables from a WfRun.
 	ListVariables(context.Context, *ListVariablesRequest) (*VariableList, error)
 	// Post an ExternalEvent.
@@ -1848,7 +1850,7 @@ func (UnimplementedLittleHorseServer) ListTaskRuns(context.Context, *ListTaskRun
 func (UnimplementedLittleHorseServer) GetVariable(context.Context, *VariableId) (*Variable, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVariable not implemented")
 }
-func (UnimplementedLittleHorseServer) PutVariable(context.Context, *PutVariableRequest) (*emptypb.Empty, error) {
+func (UnimplementedLittleHorseServer) PutVariable(context.Context, *PutVariableRequest) (*VariableValue, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PutVariable not implemented")
 }
 func (UnimplementedLittleHorseServer) ListVariables(context.Context, *ListVariablesRequest) (*VariableList, error) {

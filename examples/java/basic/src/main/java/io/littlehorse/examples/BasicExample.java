@@ -20,8 +20,9 @@ public class BasicExample {
 
     public static Workflow getWorkflow() {
         return new WorkflowImpl("example-basic", wf -> {
-            WfRunVariable theName = wf.declareStr("input-name").searchable();
-            wf.execute("greet", theName);
+            WfRunVariable sleepSeconds = wf.declareInt("sleep-seconds").required();
+            wf.sleepSeconds(sleepSeconds);
+            wf.execute("greet", "eduwer");
         });
     }
 

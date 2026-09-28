@@ -1098,28 +1098,28 @@ public final class LittleHorseGrpc {
   }
 
   private static volatile io.grpc.MethodDescriptor<io.littlehorse.sdk.common.proto.PutVariableRequest,
-      com.google.protobuf.Empty> getPutVariableMethod;
+      io.littlehorse.sdk.common.proto.VariableValue> getPutVariableMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "PutVariable",
       requestType = io.littlehorse.sdk.common.proto.PutVariableRequest.class,
-      responseType = com.google.protobuf.Empty.class,
+      responseType = io.littlehorse.sdk.common.proto.VariableValue.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
   public static io.grpc.MethodDescriptor<io.littlehorse.sdk.common.proto.PutVariableRequest,
-      com.google.protobuf.Empty> getPutVariableMethod() {
-    io.grpc.MethodDescriptor<io.littlehorse.sdk.common.proto.PutVariableRequest, com.google.protobuf.Empty> getPutVariableMethod;
+      io.littlehorse.sdk.common.proto.VariableValue> getPutVariableMethod() {
+    io.grpc.MethodDescriptor<io.littlehorse.sdk.common.proto.PutVariableRequest, io.littlehorse.sdk.common.proto.VariableValue> getPutVariableMethod;
     if ((getPutVariableMethod = LittleHorseGrpc.getPutVariableMethod) == null) {
       synchronized (LittleHorseGrpc.class) {
         if ((getPutVariableMethod = LittleHorseGrpc.getPutVariableMethod) == null) {
           LittleHorseGrpc.getPutVariableMethod = getPutVariableMethod =
-              io.grpc.MethodDescriptor.<io.littlehorse.sdk.common.proto.PutVariableRequest, com.google.protobuf.Empty>newBuilder()
+              io.grpc.MethodDescriptor.<io.littlehorse.sdk.common.proto.PutVariableRequest, io.littlehorse.sdk.common.proto.VariableValue>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "PutVariable"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   io.littlehorse.sdk.common.proto.PutVariableRequest.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  com.google.protobuf.Empty.getDefaultInstance()))
+                  io.littlehorse.sdk.common.proto.VariableValue.getDefaultInstance()))
               .setSchemaDescriptor(new LittleHorseMethodDescriptorSupplier("PutVariable"))
               .build();
         }
@@ -3836,10 +3836,11 @@ public final class LittleHorseGrpc {
     /**
      * <pre>
      * Replaces the value of an existing Variable and attempts to advance its workflow.
+     * Returns the previous value, respecting the variable's masking configuration.
      * </pre>
      */
     default void putVariable(io.littlehorse.sdk.common.proto.PutVariableRequest request,
-        io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        io.grpc.stub.StreamObserver<io.littlehorse.sdk.common.proto.VariableValue> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getPutVariableMethod(), responseObserver);
     }
 
@@ -5053,10 +5054,11 @@ public final class LittleHorseGrpc {
     /**
      * <pre>
      * Replaces the value of an existing Variable and attempts to advance its workflow.
+     * Returns the previous value, respecting the variable's masking configuration.
      * </pre>
      */
     public void putVariable(io.littlehorse.sdk.common.proto.PutVariableRequest request,
-        io.grpc.stub.StreamObserver<com.google.protobuf.Empty> responseObserver) {
+        io.grpc.stub.StreamObserver<io.littlehorse.sdk.common.proto.VariableValue> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getPutVariableMethod(), getCallOptions()), request, responseObserver);
     }
@@ -6298,9 +6300,10 @@ public final class LittleHorseGrpc {
     /**
      * <pre>
      * Replaces the value of an existing Variable and attempts to advance its workflow.
+     * Returns the previous value, respecting the variable's masking configuration.
      * </pre>
      */
-    public com.google.protobuf.Empty putVariable(io.littlehorse.sdk.common.proto.PutVariableRequest request) throws io.grpc.StatusException {
+    public io.littlehorse.sdk.common.proto.VariableValue putVariable(io.littlehorse.sdk.common.proto.PutVariableRequest request) throws io.grpc.StatusException {
       return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
           getChannel(), getPutVariableMethod(), getCallOptions(), request);
     }
@@ -7471,9 +7474,10 @@ public final class LittleHorseGrpc {
     /**
      * <pre>
      * Replaces the value of an existing Variable and attempts to advance its workflow.
+     * Returns the previous value, respecting the variable's masking configuration.
      * </pre>
      */
-    public com.google.protobuf.Empty putVariable(io.littlehorse.sdk.common.proto.PutVariableRequest request) {
+    public io.littlehorse.sdk.common.proto.VariableValue putVariable(io.littlehorse.sdk.common.proto.PutVariableRequest request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getPutVariableMethod(), getCallOptions(), request);
     }
@@ -8666,9 +8670,10 @@ public final class LittleHorseGrpc {
     /**
      * <pre>
      * Replaces the value of an existing Variable and attempts to advance its workflow.
+     * Returns the previous value, respecting the variable's masking configuration.
      * </pre>
      */
-    public com.google.common.util.concurrent.ListenableFuture<com.google.protobuf.Empty> putVariable(
+    public com.google.common.util.concurrent.ListenableFuture<io.littlehorse.sdk.common.proto.VariableValue> putVariable(
         io.littlehorse.sdk.common.proto.PutVariableRequest request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getPutVariableMethod(), getCallOptions()), request);
@@ -9770,7 +9775,7 @@ public final class LittleHorseGrpc {
           break;
         case METHODID_PUT_VARIABLE:
           serviceImpl.putVariable((io.littlehorse.sdk.common.proto.PutVariableRequest) request,
-              (io.grpc.stub.StreamObserver<com.google.protobuf.Empty>) responseObserver);
+              (io.grpc.stub.StreamObserver<io.littlehorse.sdk.common.proto.VariableValue>) responseObserver);
           break;
         case METHODID_LIST_VARIABLES:
           serviceImpl.listVariables((io.littlehorse.sdk.common.proto.ListVariablesRequest) request,
@@ -10331,7 +10336,7 @@ public final class LittleHorseGrpc {
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
               io.littlehorse.sdk.common.proto.PutVariableRequest,
-              com.google.protobuf.Empty>(
+              io.littlehorse.sdk.common.proto.VariableValue>(
                 service, METHODID_PUT_VARIABLE)))
         .addMethod(
           getListVariablesMethod(),

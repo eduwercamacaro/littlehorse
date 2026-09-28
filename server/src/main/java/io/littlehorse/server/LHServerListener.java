@@ -1172,10 +1172,10 @@ public class LHServerListener extends LittleHorseImplBase implements Closeable {
 
     @Override
     @Authorize(resources = ACLResource.ACL_WORKFLOW, actions = ACLAction.RUN)
-    public void putVariable(PutVariableRequest req, StreamObserver<Empty> ctx) {
+    public void putVariable(PutVariableRequest req, StreamObserver<VariableValue> ctx) {
         PutVariableRequestModel reqModel =
                 LHSerializable.fromProto(req, PutVariableRequestModel.class, requestContext());
-        processCommand(new CommandModel(reqModel), ctx, Empty.class);
+        processCommand(new CommandModel(reqModel), ctx, VariableValue.class);
     }
 
     @Override

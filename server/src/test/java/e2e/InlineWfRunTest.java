@@ -7,6 +7,7 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.littlehorse.sdk.common.proto.*;
 import io.littlehorse.sdk.common.proto.LittleHorseGrpc.LittleHorseBlockingStub;
+import io.littlehorse.sdk.wfsdk.InlineWorkflow;
 import io.littlehorse.sdk.wfsdk.SpawnedThreads;
 import io.littlehorse.sdk.wfsdk.Workflow;
 import io.littlehorse.sdk.worker.LHTaskMethod;
@@ -21,28 +22,22 @@ import org.junit.jupiter.api.Test;
 public class InlineWfRunTest {
     private LittleHorseBlockingStub client;
 
-    private InlineWfSpec definition(String taskName, String[] names) {
-        PutWfSpecRequest compiled = Workflow.newWorkflow("unregistered-inline-prototype", thread -> {
-                    thread.execute("greet");
-                })
-                .compileWorkflow();
-
-        return inlineDefinition(compiled);
+    private InlineWorkflow inlineWorkflow() {
+        return Workflow.inlineWorkflow(thread -> {
+            var input = thread.declareStr("input").withDefault("hello");
+            thread.waitForEvent("inline-prototype-release");
+        });
     }
 
-    private InlineWfSpec inlineDefinition(PutWfSpecRequest compiled) {
-        return InlineWfSpec.newBuilder()
-                .putAllThreadSpecs(compiled.getThreadSpecsMap())
-                .setEntrypointThreadName(compiled.getEntrypointThreadName())
-                .build();
+    private InlineWfSpec definition() {
+        return inlineWorkflow().compileWorkflow().getWfSpec();
     }
 
     private RunInlineWfRequest request(String id) {
-        return RunInlineWfRequest.newBuilder()
-                .setId(id)
-                .setWfSpec(definition())
-                .putVariables(
-                        "input", VariableValue.newBuilder().setStr("hello").build())
+        return inlineWorkflow()
+                .withWfRunId(id)
+                .compileWorkflow()
+                .toBuilder()
                 .build();
     }
 
@@ -132,7 +127,7 @@ public class InlineWfRunTest {
 
     @Test
     void resolvesInlineDefinitionForChildThreadsSleepAndFailureHandlers() {
-        var compiled = Workflow.newWorkflow("unregistered-inline-threads", thread -> {
+        RunInlineWfRequest request = Workflow.inlineWorkflow(thread -> {
                     var result = thread.declareStr("result");
                     var child = thread.spawnThread(
                             childThread -> {
@@ -153,9 +148,7 @@ public class InlineWfRunTest {
                     thread.complete(result);
                 })
                 .compileWorkflow();
-        WfRun run = client.runInlineWf(RunInlineWfRequest.newBuilder()
-                .setWfSpec(inlineDefinition(compiled))
-                .build());
+        WfRun run = client.runInlineWf(request);
         Awaitility.await().atMost(Duration.ofSeconds(15)).untilAsserted(() -> assertThat(
                         client.getWfRun(run.getId()).getStatus())
                 .isEqualTo(LHStatus.COMPLETED));
@@ -167,12 +160,12 @@ public class InlineWfRunTest {
 
     @Test
     void deletesInlineRunWithItsRetentionPolicy() {
-        var compiled = Workflow.newWorkflow("unregistered-inline-retention", thread -> {})
+        RunInlineWfRequest request = Workflow.inlineWorkflow(thread -> {})
+                .withRetentionPolicy(WorkflowRetentionPolicy.newBuilder()
+                        .setSecondsAfterWfTermination(0)
+                        .build())
                 .compileWorkflow();
-        WfRun run = client.runInlineWf(RunInlineWfRequest.newBuilder()
-                .setWfSpec(inlineDefinition(compiled).toBuilder()
-                        .setRetentionPolicy(WorkflowRetentionPolicy.newBuilder().setSecondsAfterWfTermination(0)))
-                .build());
+        WfRun run = client.runInlineWf(request);
         assertThat(run.getStatus()).isEqualTo(LHStatus.COMPLETED);
         Awaitility.await().atMost(Duration.ofSeconds(10)).untilAsserted(() -> assertThatThrownBy(
                         () -> client.getWfRun(run.getId()))
@@ -191,8 +184,9 @@ public class InlineWfRunTest {
                 .isInstanceOfSatisfying(
                         StatusRuntimeException.class,
                         ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.INVALID_ARGUMENT));
-        assertThatThrownBy(() -> client.runInlineWf(
-                        request(id).toBuilder().clearVariables().build()))
+        assertThatThrownBy(() -> client.runInlineWf(request(id).toBuilder()
+                        .putVariables("unknown", VariableValue.newBuilder().setStr("hello").build())
+                        .build()))
                 .isInstanceOfSatisfying(
                         StatusRuntimeException.class,
                         ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.INVALID_ARGUMENT));

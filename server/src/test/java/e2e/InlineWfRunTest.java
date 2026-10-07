@@ -45,6 +45,9 @@ public class InlineWfRunTest {
                     thread.complete(input);
                 })
                 .withWfRunId(id)
+                .withRetentionPolicy(WorkflowRetentionPolicy.newBuilder()
+                        .setSecondsAfterWfTermination(3600)
+                        .build())
                 .compileWorkflow()
                 .toBuilder()
                 .putVariables(
@@ -61,8 +64,11 @@ public class InlineWfRunTest {
         assertThat(run.getThreadRuns(0).getOutput().getStr()).isEqualTo("provided");
         assertThat(client.getWfRun(run.getId())).isEqualTo(run);
         InlineWfSpec definition = client.getInlineWfSpec(run.getId());
-        assertThat(definition.getId()).isEqualTo(run.getId());
-        assertThat(definition.getCreatedAt()).isEqualTo(run.getStartTime());
+        assertThat(definition)
+                .isEqualTo(request.getWfSpec().toBuilder()
+                        .setId(run.getId())
+                        .setCreatedAt(run.getStartTime())
+                        .build());
         Variable variable = client.getVariable(VariableId.newBuilder()
                 .setWfRunId(run.getId())
                 .setThreadRunNumber(0)
@@ -255,6 +261,29 @@ public class InlineWfRunTest {
                             ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.INVALID_ARGUMENT));
         }
         assertDefinitionDeleted(WfRunId.newBuilder().setId(id).build());
+    }
+
+    @Test
+    void rejectsInlineDefinitionLookupForRegisteredRun() {
+        WfSpec spec = client.putWfSpec(Workflow.newWorkflow("registered-" + UUID.randomUUID(), thread -> {})
+                .compileWorkflow());
+        RunWfRequest request = RunWfRequest.newBuilder()
+                .setId(UUID.randomUUID().toString())
+                .setWfSpecName(spec.getId().getName())
+                .setMajorVersion(spec.getId().getMajorVersion())
+                .setRevision(spec.getId().getRevision())
+                .build();
+        WfRun run = Awaitility.await()
+                .ignoreExceptionsMatching(error -> error instanceof StatusRuntimeException grpcError
+                        && grpcError.getStatus().getCode() == Status.Code.NOT_FOUND)
+                .until(() -> client.runWf(request), result -> result != null);
+
+        assertThat(run.getIsInline()).isFalse();
+        assertDefinitionDeleted(run.getId());
+        assertThat(client.getWfRun(run.getId())).isEqualTo(run);
+
+        client.deleteWfRun(DeleteWfRunRequest.newBuilder().setId(run.getId()).build());
+        client.deleteWfSpec(DeleteWfSpecRequest.newBuilder().setId(spec.getId()).build());
     }
 
     @Test

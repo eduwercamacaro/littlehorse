@@ -818,8 +818,8 @@ public class LHServerListener extends LittleHorseImplBase implements Closeable {
 
     @Override
     @Authorize(resources = ACLResource.ACL_WORKFLOW, actions = ACLAction.READ)
-    public void getInlineWfSpec(InlineWfSpecId req, StreamObserver<InlineWfSpec> ctx) {
-        if (!req.hasWfRunId() || req.getWfRunId().getId().isEmpty()) {
+    public void getInlineWfSpec(WfRunId req, StreamObserver<InlineWfSpec> ctx) {
+        if (req.getId().isEmpty()) {
             throw new LHApiException(Status.INVALID_ARGUMENT, "An owning WfRun ID is required");
         }
         InlineWfSpecIdModel id = LHSerializable.fromProto(req, InlineWfSpecIdModel.class, requestContext());

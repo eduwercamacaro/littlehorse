@@ -140,14 +140,13 @@ import type { Empty } from "./google/protobuf/empty";
 import type { AssignUserTaskRunRequest } from "./user_tasks";
 import type { UserTaskRun } from "./user_tasks";
 import type { UserTaskRunId } from "./object_id";
-import type { WfRunId } from "./object_id";
 import type { ScheduledWfRunId } from "./object_id";
 import type { ScheduledWfRunIdList } from "./service";
 import type { SearchScheduledWfRunRequest } from "./service";
 import type { ScheduledWfRun } from "./scheduled_wf_run";
 import type { ScheduleWfRequest } from "./service";
 import type { InlineWfSpec } from "./wf_run";
-import type { InlineWfSpecId } from "./object_id";
+import type { WfRunId } from "./object_id";
 import type { RunInlineWfRequest } from "./service";
 import type { WfRun } from "./wf_run";
 import type { RunWfRequest } from "./service";
@@ -313,7 +312,7 @@ export interface ILittleHorseClient {
      *
      * @generated from protobuf rpc: GetInlineWfSpec
      */
-    getInlineWfSpec(input: InlineWfSpecId, options?: RpcOptions): UnaryCall<InlineWfSpecId, InlineWfSpec>;
+    getInlineWfSpec(input: WfRunId, options?: RpcOptions): UnaryCall<WfRunId, InlineWfSpec>;
     /**
      * Schedule repeated WfRun based on a cron expression
      *
@@ -1112,9 +1111,9 @@ export class LittleHorseClient implements ILittleHorseClient, ServiceInfo {
      *
      * @generated from protobuf rpc: GetInlineWfSpec
      */
-    getInlineWfSpec(input: InlineWfSpecId, options?: RpcOptions): UnaryCall<InlineWfSpecId, InlineWfSpec> {
+    getInlineWfSpec(input: WfRunId, options?: RpcOptions): UnaryCall<WfRunId, InlineWfSpec> {
         const method = this.methods[18], opt = this._transport.mergeOptions(options);
-        return stackIntercept<InlineWfSpecId, InlineWfSpec>("unary", this._transport, method, opt, input);
+        return stackIntercept<WfRunId, InlineWfSpec>("unary", this._transport, method, opt, input);
     }
     /**
      * Schedule repeated WfRun based on a cron expression

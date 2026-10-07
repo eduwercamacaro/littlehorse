@@ -987,7 +987,7 @@ private static final long serialVersionUID = 0L;
           com.google.protobuf.AbstractMessage.InternalOneOfEnum {
     WF_SPEC_ID(2),
     @java.lang.Deprecated INLINE_WF_SPEC(15),
-    INLINE_WF_SPEC_ID(16),
+    IS_INLINE(16),
     WFSPECSOURCE_NOT_SET(0);
     private final int value;
     private WfSpecSourceCase(int value) {
@@ -1007,7 +1007,7 @@ private static final long serialVersionUID = 0L;
       switch (value) {
         case 2: return WF_SPEC_ID;
         case 15: return INLINE_WF_SPEC;
-        case 16: return INLINE_WF_SPEC_ID;
+        case 16: return IS_INLINE;
         case 0: return WFSPECSOURCE_NOT_SET;
         default: return null;
       }
@@ -1151,47 +1151,33 @@ private static final long serialVersionUID = 0L;
     return io.littlehorse.sdk.common.proto.InlineWfSpec.getDefaultInstance();
   }
 
-  public static final int INLINE_WF_SPEC_ID_FIELD_NUMBER = 16;
+  public static final int IS_INLINE_FIELD_NUMBER = 16;
   /**
    * <pre>
-   * The immutable inline definition owned by this WfRun.
+   * Must be true when selected. Fetch the inline definition using this WfRun's id.
    * </pre>
    *
-   * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-   * @return Whether the inlineWfSpecId field is set.
+   * <code>bool is_inline = 16;</code>
+   * @return Whether the isInline field is set.
    */
   @java.lang.Override
-  public boolean hasInlineWfSpecId() {
+  public boolean hasIsInline() {
     return wfSpecSourceCase_ == 16;
   }
   /**
    * <pre>
-   * The immutable inline definition owned by this WfRun.
+   * Must be true when selected. Fetch the inline definition using this WfRun's id.
    * </pre>
    *
-   * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-   * @return The inlineWfSpecId.
+   * <code>bool is_inline = 16;</code>
+   * @return The isInline.
    */
   @java.lang.Override
-  public io.littlehorse.sdk.common.proto.InlineWfSpecId getInlineWfSpecId() {
+  public boolean getIsInline() {
     if (wfSpecSourceCase_ == 16) {
-       return (io.littlehorse.sdk.common.proto.InlineWfSpecId) wfSpecSource_;
+      return (java.lang.Boolean) wfSpecSource_;
     }
-    return io.littlehorse.sdk.common.proto.InlineWfSpecId.getDefaultInstance();
-  }
-  /**
-   * <pre>
-   * The immutable inline definition owned by this WfRun.
-   * </pre>
-   *
-   * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-   */
-  @java.lang.Override
-  public io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder getInlineWfSpecIdOrBuilder() {
-    if (wfSpecSourceCase_ == 16) {
-       return (io.littlehorse.sdk.common.proto.InlineWfSpecId) wfSpecSource_;
-    }
-    return io.littlehorse.sdk.common.proto.InlineWfSpecId.getDefaultInstance();
+    return false;
   }
 
   public static final int OLD_WF_SPEC_VERSIONS_FIELD_NUMBER = 3;
@@ -1865,7 +1851,8 @@ io.littlehorse.sdk.common.proto.MigrationVars defaultValue) {
       output.writeMessage(15, (io.littlehorse.sdk.common.proto.InlineWfSpec) wfSpecSource_);
     }
     if (wfSpecSourceCase_ == 16) {
-      output.writeMessage(16, (io.littlehorse.sdk.common.proto.InlineWfSpecId) wfSpecSource_);
+      output.writeBool(
+          16, (boolean)((java.lang.Boolean) wfSpecSource_));
     }
     getUnknownFields().writeTo(output);
   }
@@ -1954,7 +1941,8 @@ io.littlehorse.sdk.common.proto.MigrationVars defaultValue) {
     }
     if (wfSpecSourceCase_ == 16) {
       size += com.google.protobuf.CodedOutputStream
-        .computeMessageSize(16, (io.littlehorse.sdk.common.proto.InlineWfSpecId) wfSpecSource_);
+        .computeBoolSize(
+            16, (boolean)((java.lang.Boolean) wfSpecSource_));
     }
     size += getUnknownFields().getSerializedSize();
     memoizedSize = size;
@@ -2022,8 +2010,8 @@ io.littlehorse.sdk.common.proto.MigrationVars defaultValue) {
             .equals(other.getInlineWfSpec())) return false;
         break;
       case 16:
-        if (!getInlineWfSpecId()
-            .equals(other.getInlineWfSpecId())) return false;
+        if (getIsInline()
+            != other.getIsInline()) return false;
         break;
       case 0:
       default:
@@ -2097,8 +2085,9 @@ io.littlehorse.sdk.common.proto.MigrationVars defaultValue) {
         hash = (53 * hash) + getInlineWfSpec().hashCode();
         break;
       case 16:
-        hash = (37 * hash) + INLINE_WF_SPEC_ID_FIELD_NUMBER;
-        hash = (53 * hash) + getInlineWfSpecId().hashCode();
+        hash = (37 * hash) + IS_INLINE_FIELD_NUMBER;
+        hash = (53 * hash) + com.google.protobuf.Internal.hashBoolean(
+            getIsInline());
         break;
       case 0:
       default:
@@ -2284,9 +2273,6 @@ io.littlehorse.sdk.common.proto.MigrationVars defaultValue) {
       }
       if (inlineWfSpecBuilder_ != null) {
         inlineWfSpecBuilder_.clear();
-      }
-      if (inlineWfSpecIdBuilder_ != null) {
-        inlineWfSpecIdBuilder_.clear();
       }
       if (oldWfSpecVersionsBuilder_ == null) {
         oldWfSpecVersions_ = java.util.Collections.emptyList();
@@ -2474,10 +2460,6 @@ io.littlehorse.sdk.common.proto.MigrationVars defaultValue) {
           inlineWfSpecBuilder_ != null) {
         result.wfSpecSource_ = inlineWfSpecBuilder_.build();
       }
-      if (wfSpecSourceCase_ == 16 &&
-          inlineWfSpecIdBuilder_ != null) {
-        result.wfSpecSource_ = inlineWfSpecIdBuilder_.build();
-      }
     }
 
     @java.lang.Override
@@ -2640,8 +2622,8 @@ io.littlehorse.sdk.common.proto.MigrationVars defaultValue) {
           mergeInlineWfSpec(other.getInlineWfSpec());
           break;
         }
-        case INLINE_WF_SPEC_ID: {
-          mergeInlineWfSpecId(other.getInlineWfSpecId());
+        case IS_INLINE: {
+          setIsInline(other.getIsInline());
           break;
         }
         case WFSPECSOURCE_NOT_SET: {
@@ -2810,13 +2792,11 @@ io.littlehorse.sdk.common.proto.MigrationVars defaultValue) {
               wfSpecSourceCase_ = 15;
               break;
             } // case 122
-            case 130: {
-              input.readMessage(
-                  internalGetInlineWfSpecIdFieldBuilder().getBuilder(),
-                  extensionRegistry);
+            case 128: {
+              wfSpecSource_ = input.readBool();
               wfSpecSourceCase_ = 16;
               break;
-            } // case 130
+            } // case 128
             default: {
               if (!super.parseUnknownField(input, extensionRegistry, tag)) {
                 done = true; // was an endgroup tag
@@ -3366,182 +3346,62 @@ io.littlehorse.sdk.common.proto.MigrationVars defaultValue) {
       return inlineWfSpecBuilder_;
     }
 
-    private com.google.protobuf.SingleFieldBuilder<
-        io.littlehorse.sdk.common.proto.InlineWfSpecId, io.littlehorse.sdk.common.proto.InlineWfSpecId.Builder, io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder> inlineWfSpecIdBuilder_;
     /**
      * <pre>
-     * The immutable inline definition owned by this WfRun.
+     * Must be true when selected. Fetch the inline definition using this WfRun's id.
      * </pre>
      *
-     * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-     * @return Whether the inlineWfSpecId field is set.
+     * <code>bool is_inline = 16;</code>
+     * @return Whether the isInline field is set.
      */
-    @java.lang.Override
-    public boolean hasInlineWfSpecId() {
+    public boolean hasIsInline() {
       return wfSpecSourceCase_ == 16;
     }
     /**
      * <pre>
-     * The immutable inline definition owned by this WfRun.
+     * Must be true when selected. Fetch the inline definition using this WfRun's id.
      * </pre>
      *
-     * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-     * @return The inlineWfSpecId.
+     * <code>bool is_inline = 16;</code>
+     * @return The isInline.
      */
-    @java.lang.Override
-    public io.littlehorse.sdk.common.proto.InlineWfSpecId getInlineWfSpecId() {
-      if (inlineWfSpecIdBuilder_ == null) {
-        if (wfSpecSourceCase_ == 16) {
-          return (io.littlehorse.sdk.common.proto.InlineWfSpecId) wfSpecSource_;
-        }
-        return io.littlehorse.sdk.common.proto.InlineWfSpecId.getDefaultInstance();
-      } else {
-        if (wfSpecSourceCase_ == 16) {
-          return inlineWfSpecIdBuilder_.getMessage();
-        }
-        return io.littlehorse.sdk.common.proto.InlineWfSpecId.getDefaultInstance();
+    public boolean getIsInline() {
+      if (wfSpecSourceCase_ == 16) {
+        return (java.lang.Boolean) wfSpecSource_;
       }
+      return false;
     }
     /**
      * <pre>
-     * The immutable inline definition owned by this WfRun.
+     * Must be true when selected. Fetch the inline definition using this WfRun's id.
      * </pre>
      *
-     * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
+     * <code>bool is_inline = 16;</code>
+     * @param value The isInline to set.
+     * @return This builder for chaining.
      */
-    public Builder setInlineWfSpecId(io.littlehorse.sdk.common.proto.InlineWfSpecId value) {
-      if (inlineWfSpecIdBuilder_ == null) {
-        if (value == null) {
-          throw new NullPointerException();
-        }
-        wfSpecSource_ = value;
-        onChanged();
-      } else {
-        inlineWfSpecIdBuilder_.setMessage(value);
-      }
+    public Builder setIsInline(boolean value) {
+
       wfSpecSourceCase_ = 16;
-      return this;
-    }
-    /**
-     * <pre>
-     * The immutable inline definition owned by this WfRun.
-     * </pre>
-     *
-     * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-     */
-    public Builder setInlineWfSpecId(
-        io.littlehorse.sdk.common.proto.InlineWfSpecId.Builder builderForValue) {
-      if (inlineWfSpecIdBuilder_ == null) {
-        wfSpecSource_ = builderForValue.build();
-        onChanged();
-      } else {
-        inlineWfSpecIdBuilder_.setMessage(builderForValue.build());
-      }
-      wfSpecSourceCase_ = 16;
-      return this;
-    }
-    /**
-     * <pre>
-     * The immutable inline definition owned by this WfRun.
-     * </pre>
-     *
-     * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-     */
-    public Builder mergeInlineWfSpecId(io.littlehorse.sdk.common.proto.InlineWfSpecId value) {
-      if (inlineWfSpecIdBuilder_ == null) {
-        if (wfSpecSourceCase_ == 16 &&
-            wfSpecSource_ != io.littlehorse.sdk.common.proto.InlineWfSpecId.getDefaultInstance()) {
-          wfSpecSource_ = io.littlehorse.sdk.common.proto.InlineWfSpecId.newBuilder((io.littlehorse.sdk.common.proto.InlineWfSpecId) wfSpecSource_)
-              .mergeFrom(value).buildPartial();
-        } else {
-          wfSpecSource_ = value;
-        }
-        onChanged();
-      } else {
-        if (wfSpecSourceCase_ == 16) {
-          inlineWfSpecIdBuilder_.mergeFrom(value);
-        } else {
-          inlineWfSpecIdBuilder_.setMessage(value);
-        }
-      }
-      wfSpecSourceCase_ = 16;
-      return this;
-    }
-    /**
-     * <pre>
-     * The immutable inline definition owned by this WfRun.
-     * </pre>
-     *
-     * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-     */
-    public Builder clearInlineWfSpecId() {
-      if (inlineWfSpecIdBuilder_ == null) {
-        if (wfSpecSourceCase_ == 16) {
-          wfSpecSourceCase_ = 0;
-          wfSpecSource_ = null;
-          onChanged();
-        }
-      } else {
-        if (wfSpecSourceCase_ == 16) {
-          wfSpecSourceCase_ = 0;
-          wfSpecSource_ = null;
-        }
-        inlineWfSpecIdBuilder_.clear();
-      }
-      return this;
-    }
-    /**
-     * <pre>
-     * The immutable inline definition owned by this WfRun.
-     * </pre>
-     *
-     * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-     */
-    public io.littlehorse.sdk.common.proto.InlineWfSpecId.Builder getInlineWfSpecIdBuilder() {
-      return internalGetInlineWfSpecIdFieldBuilder().getBuilder();
-    }
-    /**
-     * <pre>
-     * The immutable inline definition owned by this WfRun.
-     * </pre>
-     *
-     * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-     */
-    @java.lang.Override
-    public io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder getInlineWfSpecIdOrBuilder() {
-      if ((wfSpecSourceCase_ == 16) && (inlineWfSpecIdBuilder_ != null)) {
-        return inlineWfSpecIdBuilder_.getMessageOrBuilder();
-      } else {
-        if (wfSpecSourceCase_ == 16) {
-          return (io.littlehorse.sdk.common.proto.InlineWfSpecId) wfSpecSource_;
-        }
-        return io.littlehorse.sdk.common.proto.InlineWfSpecId.getDefaultInstance();
-      }
-    }
-    /**
-     * <pre>
-     * The immutable inline definition owned by this WfRun.
-     * </pre>
-     *
-     * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-     */
-    private com.google.protobuf.SingleFieldBuilder<
-        io.littlehorse.sdk.common.proto.InlineWfSpecId, io.littlehorse.sdk.common.proto.InlineWfSpecId.Builder, io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder> 
-        internalGetInlineWfSpecIdFieldBuilder() {
-      if (inlineWfSpecIdBuilder_ == null) {
-        if (!(wfSpecSourceCase_ == 16)) {
-          wfSpecSource_ = io.littlehorse.sdk.common.proto.InlineWfSpecId.getDefaultInstance();
-        }
-        inlineWfSpecIdBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-            io.littlehorse.sdk.common.proto.InlineWfSpecId, io.littlehorse.sdk.common.proto.InlineWfSpecId.Builder, io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder>(
-                (io.littlehorse.sdk.common.proto.InlineWfSpecId) wfSpecSource_,
-                getParentForChildren(),
-                isClean());
-        wfSpecSource_ = null;
-      }
-      wfSpecSourceCase_ = 16;
+      wfSpecSource_ = value;
       onChanged();
-      return inlineWfSpecIdBuilder_;
+      return this;
+    }
+    /**
+     * <pre>
+     * Must be true when selected. Fetch the inline definition using this WfRun's id.
+     * </pre>
+     *
+     * <code>bool is_inline = 16;</code>
+     * @return This builder for chaining.
+     */
+    public Builder clearIsInline() {
+      if (wfSpecSourceCase_ == 16) {
+        wfSpecSourceCase_ = 0;
+        wfSpecSource_ = null;
+        onChanged();
+      }
+      return this;
     }
 
     private java.util.List<io.littlehorse.sdk.common.proto.WfSpecId> oldWfSpecVersions_ =

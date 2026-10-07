@@ -11,7 +11,6 @@ import io.littlehorse.common.model.getable.core.variable.VariableValueModel;
 import io.littlehorse.common.model.getable.core.wfrun.InlineWfSpecModel;
 import io.littlehorse.common.model.getable.core.wfrun.WfRunModel;
 import io.littlehorse.common.model.getable.global.wfspec.WfSpecModel;
-import io.littlehorse.common.model.getable.objectId.InlineWfSpecIdModel;
 import io.littlehorse.common.model.getable.objectId.WfRunIdModel;
 import io.littlehorse.common.util.LHUtil;
 import io.littlehorse.sdk.common.proto.RunInlineWfRequest;
@@ -82,11 +81,11 @@ public class RunInlineWfRequestModel extends CoreSubCommand<RunInlineWfRequest> 
         } catch (LHValidationException ex) {
             throw new LHApiException(Status.INVALID_ARGUMENT, ex.getMessage());
         }
-        inline.setId(new InlineWfSpecIdModel(runId));
+        inline.setId(runId);
         inline.setCreatedAt(context.currentCommand().getTime());
         context.getableManager().put(inline);
 
-        WfRunModel run = spec.startNewRun(runId, inline.getId(), variables, context);
+        WfRunModel run = spec.startNewRun(runId, true, variables, context);
         run.advance(context.currentCommand().getTime());
         return run.toProto().build();
     }

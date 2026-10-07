@@ -107,7 +107,7 @@ service LittleHorse {
   rpc RunInlineWf(RunInlineWfRequest) returns (WfRun) {}
 
   // Fetches the run-owned inline definition. Its lifecycle follows the owning WfRun.
-  rpc GetInlineWfSpec(InlineWfSpecId) returns (InlineWfSpec) {}
+  rpc GetInlineWfSpec(WfRunId) returns (InlineWfSpec) {}
 
   // Schedule repeated WfRun based on a cron expression
   rpc ScheduleWf(ScheduleWfRequest) returns (ScheduledWfRun) {}
@@ -698,7 +698,7 @@ message RunInlineWfRequest {
 message RunWfRequest {
   // The name of the WfSpec to run.
   string wf_spec_name = 1;
-  optional InlineSpec = 8;
+  // TODO: Define the inline specification field intended for field number 8.
 
   // Optionally specify the major version of the WfSpec to run. This guarantees that
   // the "signature" of the WfSpec (i.e. the required input variables, and searchable

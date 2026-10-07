@@ -1,6 +1,7 @@
 package io.littlehorse.common.model.wfrun;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import io.littlehorse.TestUtil;
 import io.littlehorse.common.LHConstants;
@@ -17,7 +18,6 @@ import io.littlehorse.common.model.getable.objectId.WfSpecIdModel;
 import io.littlehorse.common.proto.Command;
 import io.littlehorse.common.util.LHUtil;
 import io.littlehorse.sdk.common.proto.InlineWfSpec;
-import io.littlehorse.sdk.common.proto.InlineWfSpecId;
 import io.littlehorse.sdk.common.proto.LHStatus;
 import io.littlehorse.sdk.common.proto.MetricWindowType;
 import io.littlehorse.sdk.common.proto.WfRun;
@@ -64,10 +64,12 @@ public class WfRunModelTest {
 
     @Test
     void resolvesSeparateDefinitionWithoutEmbeddingItInSerializedRun() {
-        WfRunId owner = WfRunId.newBuilder().setId("separate-inline-run").build();
-        InlineWfSpecId specId = InlineWfSpecId.newBuilder().setWfRunId(owner).build();
+        WfRunId owner = WfRunId.newBuilder()
+                .setId("separate-inline-run")
+                .setParentWfRunId(WfRunId.newBuilder().setId("parent-run"))
+                .build();
         InlineWfSpec snapshot = InlineWfSpec.newBuilder()
-                .setId(specId)
+                .setId(owner)
                 .setCreatedAt(LHUtil.fromDate(new Date()))
                 .setEntrypointThreadName("main")
                 .build();
@@ -75,21 +77,34 @@ public class WfRunModelTest {
         testContext.getableManager().put(definition);
         WfRun proto = WfRun.newBuilder()
                 .setId(owner)
-                .setInlineWfSpecId(specId)
+                .setIsInline(true)
                 .setStatus(LHStatus.RUNNING)
                 .build();
         WfRunModel run = WfRunModel.fromProto(proto, WfRunModel.class, testContext);
         assertThat(run.isInline()).isTrue();
         assertThat(run.getWfSpec().getEntrypointThreadName()).isEqualTo("main");
         assertThat(run.toProto().hasInlineWfSpec()).isFalse();
-        assertThat(run.toProto().getInlineWfSpecId()).isEqualTo(specId);
+        assertThat(run.toProto().getWfSpecSourceCase()).isEqualTo(WfRun.WfSpecSourceCase.IS_INLINE);
+        assertThat(run.toProto().getIsInline()).isTrue();
         assertThat(definition.toProto().build()).isEqualTo(snapshot);
         InlineWfSpecIdModel parsedId = new InlineWfSpecIdModel();
         parsedId.initFromString(definition.getId().toString());
-        assertThat(parsedId.toProto().build()).isEqualTo(specId);
+        assertThat(parsedId.toProto().build()).isEqualTo(owner);
         assertThat(parsedId.getPartitionKey()).isEqualTo(run.getId().getPartitionKey());
         assertThat(parsedId.getGroupingWfRunId()).contains(run.getId());
         assertThat(parsedId.getStoreableKey()).isNotEqualTo(run.getId().getStoreableKey());
+    }
+
+    @Test
+    void rejectsFalseInlineSourceFlag() {
+        WfRun proto = WfRun.newBuilder()
+                .setId(WfRunId.newBuilder().setId("invalid-inline-run"))
+                .setIsInline(false)
+                .build();
+
+        assertThatThrownBy(() -> WfRunModel.fromProto(proto, WfRunModel.class, null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Inline workflow source flag must be true");
     }
 
     @Test
@@ -105,6 +120,7 @@ public class WfRunModelTest {
         WfRun serialized = model.toProto().build();
 
         assertThat(model.getInlineWfSpec()).isNull();
+        assertThat(model.isInline()).isFalse();
         assertThat(serialized.getWfSpecSourceCase()).isEqualTo(WfRun.WfSpecSourceCase.WF_SPEC_ID);
         assertThat(serialized.getWfSpecId()).isEqualTo(specId);
     }

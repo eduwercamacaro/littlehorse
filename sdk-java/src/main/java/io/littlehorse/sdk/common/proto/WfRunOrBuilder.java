@@ -97,30 +97,22 @@ public interface WfRunOrBuilder extends
 
   /**
    * <pre>
-   * The immutable inline definition owned by this WfRun.
+   * Must be true when selected. Fetch the inline definition using this WfRun's id.
    * </pre>
    *
-   * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-   * @return Whether the inlineWfSpecId field is set.
+   * <code>bool is_inline = 16;</code>
+   * @return Whether the isInline field is set.
    */
-  boolean hasInlineWfSpecId();
+  boolean hasIsInline();
   /**
    * <pre>
-   * The immutable inline definition owned by this WfRun.
+   * Must be true when selected. Fetch the inline definition using this WfRun's id.
    * </pre>
    *
-   * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-   * @return The inlineWfSpecId.
+   * <code>bool is_inline = 16;</code>
+   * @return The isInline.
    */
-  io.littlehorse.sdk.common.proto.InlineWfSpecId getInlineWfSpecId();
-  /**
-   * <pre>
-   * The immutable inline definition owned by this WfRun.
-   * </pre>
-   *
-   * <code>.littlehorse.InlineWfSpecId inline_wf_spec_id = 16;</code>
-   */
-  io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder getInlineWfSpecIdOrBuilder();
+  boolean getIsInline();
 
   /**
    * <pre>

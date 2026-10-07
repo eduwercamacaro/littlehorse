@@ -25,7 +25,7 @@ message WfRun {
   oneof wf_spec_source {
     WfSpecId wf_spec_id = 2;
 
-    InlineWfSpecId inline_wf_spec_id = 15;
+    bool is_inline = 16;
   }
 
   // Other existing fields are unchanged.
@@ -38,7 +38,7 @@ message WfRun {
 ```protobuf
 message InlineWfSpec {
   // Identity for the one-off workflow
-  InlineWfSpecId id = 1;
+  WfRunId id = 1;
 
   google.protobuf.Timestamp created_at = 2;
 
@@ -53,15 +53,9 @@ The `InlineWfSpec` has a similar structure to a `WfSpec` and uses the same threa
 
 The server validates the thread graph, entrypoint, metadata references, and input variables before accepting the run just like any other `WfSpec`
 
-### `InlineWfSpecId`
+### Identity
 
-Defines both identity and partition key for the inline-spec. The `InlineWfSpec` is co-partitioned with the owning `WfRun` record.
-
-```protobuf
-message InlineWfSpecId {
-  WfRunId wf_run_id = 1;
-}
-```
+The owning `WfRunId` identifies the inline definition and determines its partition. The `InlineWfSpec` is co-partitioned with the owning `WfRun` record.
 
 ### `rpc RunInlineWf`
 
@@ -94,7 +88,7 @@ Clients can retrive the InlineWfSpec for a given WfRun.
 ```protobuf
 service LittleHorse {
   // Existing RPCs omitted.
-  rpc GetInlineWfSpec(InlineWfSpecId) returns (InlineWfSpec) {}
+  rpc GetInlineWfSpec(WfRunId) returns (InlineWfSpec) {}
 }
 ```
 

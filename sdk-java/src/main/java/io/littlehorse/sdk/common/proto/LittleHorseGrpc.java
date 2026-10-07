@@ -570,27 +570,27 @@ public final class LittleHorseGrpc {
     return getRunInlineWfMethod;
   }
 
-  private static volatile io.grpc.MethodDescriptor<io.littlehorse.sdk.common.proto.InlineWfSpecId,
+  private static volatile io.grpc.MethodDescriptor<io.littlehorse.sdk.common.proto.WfRunId,
       io.littlehorse.sdk.common.proto.InlineWfSpec> getGetInlineWfSpecMethod;
 
   @io.grpc.stub.annotations.RpcMethod(
       fullMethodName = SERVICE_NAME + '/' + "GetInlineWfSpec",
-      requestType = io.littlehorse.sdk.common.proto.InlineWfSpecId.class,
+      requestType = io.littlehorse.sdk.common.proto.WfRunId.class,
       responseType = io.littlehorse.sdk.common.proto.InlineWfSpec.class,
       methodType = io.grpc.MethodDescriptor.MethodType.UNARY)
-  public static io.grpc.MethodDescriptor<io.littlehorse.sdk.common.proto.InlineWfSpecId,
+  public static io.grpc.MethodDescriptor<io.littlehorse.sdk.common.proto.WfRunId,
       io.littlehorse.sdk.common.proto.InlineWfSpec> getGetInlineWfSpecMethod() {
-    io.grpc.MethodDescriptor<io.littlehorse.sdk.common.proto.InlineWfSpecId, io.littlehorse.sdk.common.proto.InlineWfSpec> getGetInlineWfSpecMethod;
+    io.grpc.MethodDescriptor<io.littlehorse.sdk.common.proto.WfRunId, io.littlehorse.sdk.common.proto.InlineWfSpec> getGetInlineWfSpecMethod;
     if ((getGetInlineWfSpecMethod = LittleHorseGrpc.getGetInlineWfSpecMethod) == null) {
       synchronized (LittleHorseGrpc.class) {
         if ((getGetInlineWfSpecMethod = LittleHorseGrpc.getGetInlineWfSpecMethod) == null) {
           LittleHorseGrpc.getGetInlineWfSpecMethod = getGetInlineWfSpecMethod =
-              io.grpc.MethodDescriptor.<io.littlehorse.sdk.common.proto.InlineWfSpecId, io.littlehorse.sdk.common.proto.InlineWfSpec>newBuilder()
+              io.grpc.MethodDescriptor.<io.littlehorse.sdk.common.proto.WfRunId, io.littlehorse.sdk.common.proto.InlineWfSpec>newBuilder()
               .setType(io.grpc.MethodDescriptor.MethodType.UNARY)
               .setFullMethodName(generateFullMethodName(SERVICE_NAME, "GetInlineWfSpec"))
               .setSampledToLocalTracing(true)
               .setRequestMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
-                  io.littlehorse.sdk.common.proto.InlineWfSpecId.getDefaultInstance()))
+                  io.littlehorse.sdk.common.proto.WfRunId.getDefaultInstance()))
               .setResponseMarshaller(io.grpc.protobuf.ProtoUtils.marshaller(
                   io.littlehorse.sdk.common.proto.InlineWfSpec.getDefaultInstance()))
               .setSchemaDescriptor(new LittleHorseMethodDescriptorSupplier("GetInlineWfSpec"))
@@ -3684,7 +3684,7 @@ public final class LittleHorseGrpc {
      * Fetches the run-owned inline definition. Its lifecycle follows the owning WfRun.
      * </pre>
      */
-    default void getInlineWfSpec(io.littlehorse.sdk.common.proto.InlineWfSpecId request,
+    default void getInlineWfSpec(io.littlehorse.sdk.common.proto.WfRunId request,
         io.grpc.stub.StreamObserver<io.littlehorse.sdk.common.proto.InlineWfSpec> responseObserver) {
       io.grpc.stub.ServerCalls.asyncUnimplementedUnaryCall(getGetInlineWfSpecMethod(), responseObserver);
     }
@@ -4894,7 +4894,7 @@ public final class LittleHorseGrpc {
      * Fetches the run-owned inline definition. Its lifecycle follows the owning WfRun.
      * </pre>
      */
-    public void getInlineWfSpec(io.littlehorse.sdk.common.proto.InlineWfSpecId request,
+    public void getInlineWfSpec(io.littlehorse.sdk.common.proto.WfRunId request,
         io.grpc.stub.StreamObserver<io.littlehorse.sdk.common.proto.InlineWfSpec> responseObserver) {
       io.grpc.stub.ClientCalls.asyncUnaryCall(
           getChannel().newCall(getGetInlineWfSpecMethod(), getCallOptions()), request, responseObserver);
@@ -6167,7 +6167,7 @@ public final class LittleHorseGrpc {
      * Fetches the run-owned inline definition. Its lifecycle follows the owning WfRun.
      * </pre>
      */
-    public io.littlehorse.sdk.common.proto.InlineWfSpec getInlineWfSpec(io.littlehorse.sdk.common.proto.InlineWfSpecId request) throws io.grpc.StatusException {
+    public io.littlehorse.sdk.common.proto.InlineWfSpec getInlineWfSpec(io.littlehorse.sdk.common.proto.WfRunId request) throws io.grpc.StatusException {
       return io.grpc.stub.ClientCalls.blockingV2UnaryCall(
           getChannel(), getGetInlineWfSpecMethod(), getCallOptions(), request);
     }
@@ -7350,7 +7350,7 @@ public final class LittleHorseGrpc {
      * Fetches the run-owned inline definition. Its lifecycle follows the owning WfRun.
      * </pre>
      */
-    public io.littlehorse.sdk.common.proto.InlineWfSpec getInlineWfSpec(io.littlehorse.sdk.common.proto.InlineWfSpecId request) {
+    public io.littlehorse.sdk.common.proto.InlineWfSpec getInlineWfSpec(io.littlehorse.sdk.common.proto.WfRunId request) {
       return io.grpc.stub.ClientCalls.blockingUnaryCall(
           getChannel(), getGetInlineWfSpecMethod(), getCallOptions(), request);
     }
@@ -8539,7 +8539,7 @@ public final class LittleHorseGrpc {
      * </pre>
      */
     public com.google.common.util.concurrent.ListenableFuture<io.littlehorse.sdk.common.proto.InlineWfSpec> getInlineWfSpec(
-        io.littlehorse.sdk.common.proto.InlineWfSpecId request) {
+        io.littlehorse.sdk.common.proto.WfRunId request) {
       return io.grpc.stub.ClientCalls.futureUnaryCall(
           getChannel().newCall(getGetInlineWfSpecMethod(), getCallOptions()), request);
     }
@@ -9785,7 +9785,7 @@ public final class LittleHorseGrpc {
               (io.grpc.stub.StreamObserver<io.littlehorse.sdk.common.proto.WfRun>) responseObserver);
           break;
         case METHODID_GET_INLINE_WF_SPEC:
-          serviceImpl.getInlineWfSpec((io.littlehorse.sdk.common.proto.InlineWfSpecId) request,
+          serviceImpl.getInlineWfSpec((io.littlehorse.sdk.common.proto.WfRunId) request,
               (io.grpc.stub.StreamObserver<io.littlehorse.sdk.common.proto.InlineWfSpec>) responseObserver);
           break;
         case METHODID_SCHEDULE_WF:
@@ -10299,7 +10299,7 @@ public final class LittleHorseGrpc {
           getGetInlineWfSpecMethod(),
           io.grpc.stub.ServerCalls.asyncUnaryCall(
             new MethodHandlers<
-              io.littlehorse.sdk.common.proto.InlineWfSpecId,
+              io.littlehorse.sdk.common.proto.WfRunId,
               io.littlehorse.sdk.common.proto.InlineWfSpec>(
                 service, METHODID_GET_INLINE_WF_SPEC)))
         .addMethod(

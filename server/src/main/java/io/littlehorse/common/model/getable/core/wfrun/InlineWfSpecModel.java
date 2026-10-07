@@ -8,6 +8,7 @@ import io.littlehorse.common.model.getable.global.wfspec.WfSpecModel;
 import io.littlehorse.common.model.getable.global.wfspec.WorkflowRetentionPolicyModel;
 import io.littlehorse.common.model.getable.global.wfspec.thread.ThreadSpecModel;
 import io.littlehorse.common.model.getable.objectId.InlineWfSpecIdModel;
+import io.littlehorse.common.model.getable.objectId.WfRunIdModel;
 import io.littlehorse.common.proto.TagStorageType;
 import io.littlehorse.common.util.LHUtil;
 import io.littlehorse.sdk.common.proto.InlineWfSpec;
@@ -26,7 +27,7 @@ import lombok.Setter;
 @Setter
 public class InlineWfSpecModel extends CoreGetable<InlineWfSpec> {
 
-    private InlineWfSpecIdModel id;
+    private WfRunIdModel id;
     private Date createdAt;
     private Map<String, ThreadSpecModel> threadSpecs = new HashMap<>();
     private String entrypointThreadName;
@@ -66,7 +67,7 @@ public class InlineWfSpecModel extends CoreGetable<InlineWfSpec> {
     @Override
     public void initFrom(Message proto, ExecutionContext context) {
         InlineWfSpec p = (InlineWfSpec) proto;
-        id = p.hasId() ? LHSerializable.fromProto(p.getId(), InlineWfSpecIdModel.class, context) : null;
+        id = p.hasId() ? LHSerializable.fromProto(p.getId(), WfRunIdModel.class, context) : null;
         createdAt = p.hasCreatedAt() ? LHUtil.fromProtoTs(p.getCreatedAt()) : null;
         entrypointThreadName = p.getEntrypointThreadName();
         threadSpecs.clear();
@@ -82,7 +83,7 @@ public class InlineWfSpecModel extends CoreGetable<InlineWfSpec> {
 
     @Override
     public InlineWfSpecIdModel getObjectId() {
-        return id;
+        return new InlineWfSpecIdModel(id);
     }
 
     @Override

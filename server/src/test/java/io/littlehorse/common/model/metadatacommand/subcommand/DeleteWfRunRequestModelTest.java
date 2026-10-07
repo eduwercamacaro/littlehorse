@@ -40,7 +40,7 @@ public class DeleteWfRunRequestModelTest {
         WfRunIdModel owner = new WfRunIdModel("inline-cleanup");
         InlineWfSpecIdModel definitionId = new InlineWfSpecIdModel(owner);
         WfRunModel run = mock(WfRunModel.class);
-        when(run.getInlineWfSpecId()).thenReturn(definitionId);
+        when(run.isInline()).thenReturn(true);
         when(run.getThreadRunIterator()).thenReturn(mock(ThreadRunIterator.class));
         when(manager.get(owner)).thenReturn(run);
         when(manager.tryToDeleteAllExternalEventsFor(owner, 1)).thenReturn(false, true);

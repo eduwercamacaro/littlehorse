@@ -26,8 +26,8 @@ message WfRun {
     // Legacy embedded format. New runs store a separate, co-partitioned record.
     InlineWfSpec inline_wf_spec = 15 [deprecated = true];
 
-    // The immutable inline definition owned by this WfRun.
-    InlineWfSpecId inline_wf_spec_id = 16;
+    // Must be true when selected. Fetch the inline definition using this WfRun's id.
+    bool is_inline = 16;
   }
 
   // When a WfRun is migrated from an old verison of a WfSpec to a newer one, we add the
@@ -311,7 +311,7 @@ message ThreadHaltReason {
 message InlineWfSpec {
 
   // Output only; must be absent in RunInlineWf requests.
-  InlineWfSpecId id = 1;
+  WfRunId id = 1;
   // Output only; must be absent in RunInlineWf requests.
   google.protobuf.Timestamp created_at = 2;
 

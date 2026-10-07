@@ -17,7 +17,6 @@ import io.littlehorse.common.model.getable.global.structdef.StructDefValidationE
 import io.littlehorse.common.model.getable.global.wfspec.thread.ThreadSpecModel;
 import io.littlehorse.common.model.getable.global.wfspec.thread.ThreadVarDefModel;
 import io.littlehorse.common.model.getable.global.wfspec.variable.VariableDefModel;
-import io.littlehorse.common.model.getable.objectId.InlineWfSpecIdModel;
 import io.littlehorse.common.model.getable.objectId.WfRunIdModel;
 import io.littlehorse.common.model.getable.objectId.WfSpecIdModel;
 import io.littlehorse.common.proto.TagStorageType;
@@ -444,12 +443,12 @@ public class WfSpecModel extends MetadataGetable<WfSpec> {
 
     public WfRunModel startNewRun(RunWfRequestModel evt, CoreProcessorContext processorContext) {
         return startNewRun(
-                new WfRunIdModel(evt.getId(), evt.getParentWfRunId()), null, evt.getVariables(), processorContext);
+                new WfRunIdModel(evt.getId(), evt.getParentWfRunId()), false, evt.getVariables(), processorContext);
     }
 
     public WfRunModel startNewRun(
             WfRunIdModel runId,
-            InlineWfSpecIdModel inlineWfSpecId,
+            boolean inline,
             Map<String, VariableValueModel> variables,
             CoreProcessorContext processorContext) {
         CommandModel currentCommand = processorContext.currentCommand();
@@ -457,8 +456,8 @@ public class WfSpecModel extends MetadataGetable<WfSpec> {
         WfRunModel out = new WfRunModel(processorContext);
         out.setId(runId);
 
-        if (inlineWfSpecId != null) {
-            out.setInlineWfSpecId(inlineWfSpecId);
+        if (inline) {
+            out.setInline(true);
         } else {
             out.setWfSpecId(getObjectId());
         }

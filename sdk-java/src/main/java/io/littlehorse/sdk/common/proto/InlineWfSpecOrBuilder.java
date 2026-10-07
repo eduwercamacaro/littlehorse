@@ -15,7 +15,7 @@ public interface InlineWfSpecOrBuilder extends
    * Output only; must be absent in RunInlineWf requests.
    * </pre>
    *
-   * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+   * <code>.littlehorse.WfRunId id = 1;</code>
    * @return Whether the id field is set.
    */
   boolean hasId();
@@ -24,18 +24,18 @@ public interface InlineWfSpecOrBuilder extends
    * Output only; must be absent in RunInlineWf requests.
    * </pre>
    *
-   * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+   * <code>.littlehorse.WfRunId id = 1;</code>
    * @return The id.
    */
-  io.littlehorse.sdk.common.proto.InlineWfSpecId getId();
+  io.littlehorse.sdk.common.proto.WfRunId getId();
   /**
    * <pre>
    * Output only; must be absent in RunInlineWf requests.
    * </pre>
    *
-   * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+   * <code>.littlehorse.WfRunId id = 1;</code>
    */
-  io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder getIdOrBuilder();
+  io.littlehorse.sdk.common.proto.WfRunIdOrBuilder getIdOrBuilder();
 
   /**
    * <pre>

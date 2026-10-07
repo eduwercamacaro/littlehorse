@@ -19,9 +19,9 @@ must already be registered. The caller needs both workflow `RUN` and
 The server rejects caller-supplied `id` and `created_at`; it generates them after
 validation. There is no checksum or definition-level comparison.
 
-The returned `WfRun` has `inline_wf_spec_id` instead of `wf_spec_id`. The ID contains
-the owning `wf_run_id`, which determines routing and lifecycle. Fetch the snapshot
-with `GetInlineWfSpec(InlineWfSpecId)` (workflow `READ` permission). It contains the
+The returned `WfRun` selects `is_inline = true` instead of `wf_spec_id`.
+Its own `id` identifies the inline definition and determines routing and lifecycle. Fetch the snapshot
+with `GetInlineWfSpec(WfRunId)` (workflow `READ` permission). It contains the
 validated definition, its ID, and creation time.
 There is no independent create/update/delete API for inline definitions.
 Reusing a run ID returns `ALREADY_EXISTS`, matching `RunWf`; it does not compare
@@ -44,7 +44,7 @@ grpcurl -plaintext -import-path schemas/littlehorse -proto service.proto \
   WfRun, staged in the same core transaction when the run is created. A transient
   `WfSpecModel` view lets the existing execution engine use it without inventing
   or registering a WfSpec ID. Subsequent commands resolve it through the stored
-  run's ID reference. WfRun updates no longer serialize the full definition.
+  run's own ID. WfRun updates no longer serialize the full definition.
 - Inline ThreadRuns, NodeRuns, and Variables omit `wf_spec_id`. Consumers must
   resolve their definition through the owning WfRun instead of assuming that
   every run has a registered spec.

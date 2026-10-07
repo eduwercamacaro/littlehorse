@@ -88,7 +88,7 @@ public class WfRunModel extends CoreGetable<WfRun> implements CoreOutputTopicGet
     private WfRunIdModel id;
     private WfSpecIdModel wfSpecId;
     private InlineWfSpecModel inlineWfSpec;
-    private InlineWfSpecIdModel inlineWfSpecId;
+    private boolean inline;
     private List<WfSpecIdModel> oldWfSpecVersions = new ArrayList<>();
 
     // TODO: Iterate over all threadruns, archived included
@@ -127,7 +127,7 @@ public class WfRunModel extends CoreGetable<WfRun> implements CoreOutputTopicGet
         this.wfSpecId = wfSpecId;
         if (wfSpecId != null) {
             this.inlineWfSpec = null;
-            this.inlineWfSpecId = null;
+            this.inline = false;
         }
     }
 
@@ -135,22 +135,22 @@ public class WfRunModel extends CoreGetable<WfRun> implements CoreOutputTopicGet
         this.inlineWfSpec = inlineWfSpec;
         if (inlineWfSpec != null) {
             this.wfSpecId = null;
-            this.inlineWfSpecId = null;
+            this.inline = false;
             this.wfSpec = null;
         }
     }
 
-    public void setInlineWfSpecId(InlineWfSpecIdModel inlineWfSpecId) {
-        this.inlineWfSpecId = inlineWfSpecId;
+    public void setInline(boolean inline) {
+        this.inline = inline;
         this.wfSpec = null;
-        if (inlineWfSpecId != null) {
+        if (inline) {
             this.wfSpecId = null;
             this.inlineWfSpec = null;
         }
     }
 
     public boolean isInline() {
-        return inlineWfSpecId != null || inlineWfSpec != null;
+        return inline || inlineWfSpec != null;
     }
 
     public Date getCreatedAt() {
@@ -246,7 +246,7 @@ public class WfRunModel extends CoreGetable<WfRun> implements CoreOutputTopicGet
 
     public WfSpecModel getWfSpec() {
         if (wfSpec == null) {
-            if (inlineWfSpecId != null) {
+            if (inline) {
                 ReadOnlyGetableManager manager = executionContext.support(CoreProcessorContext.class)
                         ? executionContext
                                 .castOnSupport(CoreProcessorContext.class)
@@ -254,7 +254,7 @@ public class WfRunModel extends CoreGetable<WfRun> implements CoreOutputTopicGet
                         : executionContext
                                 .castOnSupport(RequestExecutionContext.class)
                                 .getableManager();
-                InlineWfSpecModel definition = manager.get(inlineWfSpecId);
+                InlineWfSpecModel definition = manager.get(new InlineWfSpecIdModel(id));
                 if (definition == null) throw new IllegalStateException("Missing inline definition for WfRun " + id);
                 wfSpec = definition.asWfSpecModel();
             } else {
@@ -308,15 +308,18 @@ public class WfRunModel extends CoreGetable<WfRun> implements CoreOutputTopicGet
         wfSpec = null;
         wfSpecId = null;
         inlineWfSpec = null;
-        inlineWfSpecId = null;
+        inline = false;
         id = LHSerializable.fromProto(proto.getId(), WfRunIdModel.class, context);
         switch (proto.getWfSpecSourceCase()) {
             case WF_SPEC_ID -> wfSpecId = LHSerializable.fromProto(proto.getWfSpecId(), WfSpecIdModel.class, context);
             case INLINE_WF_SPEC ->
                 inlineWfSpec = LHSerializable.fromProto(proto.getInlineWfSpec(), InlineWfSpecModel.class, context);
-            case INLINE_WF_SPEC_ID ->
-                inlineWfSpecId =
-                        LHSerializable.fromProto(proto.getInlineWfSpecId(), InlineWfSpecIdModel.class, context);
+            case IS_INLINE -> {
+                if (!proto.getIsInline()) {
+                    throw new IllegalArgumentException("Inline workflow source flag must be true");
+                }
+                inline = true;
+            }
             case WFSPECSOURCE_NOT_SET -> throw new IllegalArgumentException("WfRun has no workflow definition source");
         }
         status = proto.getStatus();
@@ -395,9 +398,9 @@ public class WfRunModel extends CoreGetable<WfRun> implements CoreOutputTopicGet
 
         if (wfSpecId != null && !isInline()) {
             out.setWfSpecId(wfSpecId.toProto());
-        } else if (inlineWfSpecId != null && wfSpecId == null && inlineWfSpec == null) {
-            out.setInlineWfSpecId(inlineWfSpecId.toProto());
-        } else if (inlineWfSpec != null && wfSpecId == null && inlineWfSpecId == null) {
+        } else if (inline && wfSpecId == null && inlineWfSpec == null) {
+            out.setIsInline(true);
+        } else if (inlineWfSpec != null && wfSpecId == null && !inline) {
             out.setInlineWfSpec(inlineWfSpec.toProto());
         } else {
             throw new IllegalStateException("WfRun must have exactly one workflow definition source");

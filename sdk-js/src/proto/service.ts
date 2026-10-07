@@ -37,7 +37,6 @@ import { CompleteUserTaskRunRequest } from "./user_tasks";
 import { Empty } from "./google/protobuf/empty";
 import { AssignUserTaskRunRequest } from "./user_tasks";
 import { ScheduledWfRun } from "./scheduled_wf_run";
-import { InlineWfSpecId } from "./object_id";
 import { WfRun } from "./wf_run";
 import { UserTaskDef } from "./user_tasks";
 import { StructDef } from "./struct_def";
@@ -603,7 +602,7 @@ export interface RunWfRequest {
      *
      * @generated from protobuf field: string wf_spec_name = 1
      */
-    wfSpecName: string;
+    wfSpecName: string; // TODO: Define the inline specification field intended for field number 8.
     /**
      * Optionally specify the major version of the WfSpec to run. This guarantees that
      * the "signature" of the WfSpec (i.e. the required input variables, and searchable
@@ -9921,7 +9920,7 @@ export const LittleHorse = new ServiceType("littlehorse.LittleHorse", [
     { name: "GetLatestUserTaskDef", options: {}, I: GetLatestUserTaskDefRequest, O: UserTaskDef },
     { name: "RunWf", options: {}, I: RunWfRequest, O: WfRun },
     { name: "RunInlineWf", options: {}, I: RunInlineWfRequest, O: WfRun },
-    { name: "GetInlineWfSpec", options: {}, I: InlineWfSpecId, O: InlineWfSpec },
+    { name: "GetInlineWfSpec", options: {}, I: WfRunId, O: InlineWfSpec },
     { name: "ScheduleWf", options: {}, I: ScheduleWfRequest, O: ScheduledWfRun },
     { name: "SearchScheduledWfRun", options: {}, I: SearchScheduledWfRunRequest, O: ScheduledWfRunIdList },
     { name: "GetScheduledWfRun", options: {}, I: ScheduledWfRunId, O: ScheduledWfRun },

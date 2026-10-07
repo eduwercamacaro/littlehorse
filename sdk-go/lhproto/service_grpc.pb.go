@@ -191,7 +191,7 @@ type LittleHorseClient interface {
 	// EXPERIMENTAL: Starts a durable run from an unregistered workflow definition.
 	RunInlineWf(ctx context.Context, in *RunInlineWfRequest, opts ...grpc.CallOption) (*WfRun, error)
 	// Fetches the run-owned inline definition. Its lifecycle follows the owning WfRun.
-	GetInlineWfSpec(ctx context.Context, in *InlineWfSpecId, opts ...grpc.CallOption) (*InlineWfSpec, error)
+	GetInlineWfSpec(ctx context.Context, in *WfRunId, opts ...grpc.CallOption) (*InlineWfSpec, error)
 	// Schedule repeated WfRun based on a cron expression
 	ScheduleWf(ctx context.Context, in *ScheduleWfRequest, opts ...grpc.CallOption) (*ScheduledWfRun, error)
 	// Search for existing schedules
@@ -602,7 +602,7 @@ func (c *littleHorseClient) RunInlineWf(ctx context.Context, in *RunInlineWfRequ
 	return out, nil
 }
 
-func (c *littleHorseClient) GetInlineWfSpec(ctx context.Context, in *InlineWfSpecId, opts ...grpc.CallOption) (*InlineWfSpec, error) {
+func (c *littleHorseClient) GetInlineWfSpec(ctx context.Context, in *WfRunId, opts ...grpc.CallOption) (*InlineWfSpec, error) {
 	out := new(InlineWfSpec)
 	err := c.cc.Invoke(ctx, LittleHorse_GetInlineWfSpec_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -1511,7 +1511,7 @@ type LittleHorseServer interface {
 	// EXPERIMENTAL: Starts a durable run from an unregistered workflow definition.
 	RunInlineWf(context.Context, *RunInlineWfRequest) (*WfRun, error)
 	// Fetches the run-owned inline definition. Its lifecycle follows the owning WfRun.
-	GetInlineWfSpec(context.Context, *InlineWfSpecId) (*InlineWfSpec, error)
+	GetInlineWfSpec(context.Context, *WfRunId) (*InlineWfSpec, error)
 	// Schedule repeated WfRun based on a cron expression
 	ScheduleWf(context.Context, *ScheduleWfRequest) (*ScheduledWfRun, error)
 	// Search for existing schedules
@@ -1811,7 +1811,7 @@ func (UnimplementedLittleHorseServer) RunWf(context.Context, *RunWfRequest) (*Wf
 func (UnimplementedLittleHorseServer) RunInlineWf(context.Context, *RunInlineWfRequest) (*WfRun, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RunInlineWf not implemented")
 }
-func (UnimplementedLittleHorseServer) GetInlineWfSpec(context.Context, *InlineWfSpecId) (*InlineWfSpec, error) {
+func (UnimplementedLittleHorseServer) GetInlineWfSpec(context.Context, *WfRunId) (*InlineWfSpec, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetInlineWfSpec not implemented")
 }
 func (UnimplementedLittleHorseServer) ScheduleWf(context.Context, *ScheduleWfRequest) (*ScheduledWfRun, error) {
@@ -2425,7 +2425,7 @@ func _LittleHorse_RunInlineWf_Handler(srv interface{}, ctx context.Context, dec 
 }
 
 func _LittleHorse_GetInlineWfSpec_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(InlineWfSpecId)
+	in := new(WfRunId)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -2437,7 +2437,7 @@ func _LittleHorse_GetInlineWfSpec_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: LittleHorse_GetInlineWfSpec_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LittleHorseServer).GetInlineWfSpec(ctx, req.(*InlineWfSpecId))
+		return srv.(LittleHorseServer).GetInlineWfSpec(ctx, req.(*WfRunId))
 	}
 	return interceptor(ctx, in, info, handler)
 }

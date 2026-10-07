@@ -6,13 +6,14 @@ import io.littlehorse.common.model.getable.CoreObjectId;
 import io.littlehorse.common.model.getable.core.wfrun.InlineWfSpecModel;
 import io.littlehorse.common.proto.GetableClassEnum;
 import io.littlehorse.sdk.common.proto.InlineWfSpec;
-import io.littlehorse.sdk.common.proto.InlineWfSpecId;
+import io.littlehorse.sdk.common.proto.WfRunId;
 import io.littlehorse.server.streams.topology.core.ExecutionContext;
 import java.util.Optional;
 import lombok.Getter;
 
+/** Internal storage key for an inline definition identified by its owning WfRunId. */
 @Getter
-public class InlineWfSpecIdModel extends CoreObjectId<InlineWfSpecId, InlineWfSpec, InlineWfSpecModel> {
+public class InlineWfSpecIdModel extends CoreObjectId<WfRunId, InlineWfSpec, InlineWfSpecModel> {
     private WfRunIdModel wfRunId;
 
     public InlineWfSpecIdModel() {}
@@ -22,18 +23,18 @@ public class InlineWfSpecIdModel extends CoreObjectId<InlineWfSpecId, InlineWfSp
     }
 
     @Override
-    public InlineWfSpecId.Builder toProto() {
-        return InlineWfSpecId.newBuilder().setWfRunId(wfRunId.toProto());
+    public WfRunId.Builder toProto() {
+        return wfRunId.toProto();
     }
 
     @Override
     public void initFrom(Message proto, ExecutionContext context) {
-        wfRunId = LHSerializable.fromProto(((InlineWfSpecId) proto).getWfRunId(), WfRunIdModel.class, context);
+        wfRunId = LHSerializable.fromProto(proto, WfRunIdModel.class, context);
     }
 
     @Override
-    public Class<InlineWfSpecId> getProtoBaseClass() {
-        return InlineWfSpecId.class;
+    public Class<WfRunId> getProtoBaseClass() {
+        return WfRunId.class;
     }
 
     @Override

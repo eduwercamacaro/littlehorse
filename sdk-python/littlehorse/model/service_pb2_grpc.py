@@ -143,7 +143,7 @@ class LittleHorseStub(object):
                 _registered_method=True)
         self.GetInlineWfSpec = channel.unary_unary(
                 '/littlehorse.LittleHorse/GetInlineWfSpec',
-                request_serializer=object__id__pb2.InlineWfSpecId.SerializeToString,
+                request_serializer=object__id__pb2.WfRunId.SerializeToString,
                 response_deserializer=wf__run__pb2.InlineWfSpec.FromString,
                 _registered_method=True)
         self.ScheduleWf = channel.unary_unary(
@@ -1546,7 +1546,7 @@ def add_LittleHorseServicer_to_server(servicer, server):
             ),
             'GetInlineWfSpec': grpc.unary_unary_rpc_method_handler(
                     servicer.GetInlineWfSpec,
-                    request_deserializer=object__id__pb2.InlineWfSpecId.FromString,
+                    request_deserializer=object__id__pb2.WfRunId.FromString,
                     response_serializer=wf__run__pb2.InlineWfSpec.SerializeToString,
             ),
             'ScheduleWf': grpc.unary_unary_rpc_method_handler(
@@ -2516,7 +2516,7 @@ class LittleHorse(object):
             request,
             target,
             '/littlehorse.LittleHorse/GetInlineWfSpec',
-            object__id__pb2.InlineWfSpecId.SerializeToString,
+            object__id__pb2.WfRunId.SerializeToString,
             wf__run__pb2.InlineWfSpec.FromString,
             options,
             channel_credentials,

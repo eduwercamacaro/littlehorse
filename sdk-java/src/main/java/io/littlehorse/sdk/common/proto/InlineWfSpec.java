@@ -63,13 +63,13 @@ private static final long serialVersionUID = 0L;
 
   private int bitField0_;
   public static final int ID_FIELD_NUMBER = 1;
-  private io.littlehorse.sdk.common.proto.InlineWfSpecId id_;
+  private io.littlehorse.sdk.common.proto.WfRunId id_;
   /**
    * <pre>
    * Output only; must be absent in RunInlineWf requests.
    * </pre>
    *
-   * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+   * <code>.littlehorse.WfRunId id = 1;</code>
    * @return Whether the id field is set.
    */
   @java.lang.Override
@@ -81,23 +81,23 @@ private static final long serialVersionUID = 0L;
    * Output only; must be absent in RunInlineWf requests.
    * </pre>
    *
-   * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+   * <code>.littlehorse.WfRunId id = 1;</code>
    * @return The id.
    */
   @java.lang.Override
-  public io.littlehorse.sdk.common.proto.InlineWfSpecId getId() {
-    return id_ == null ? io.littlehorse.sdk.common.proto.InlineWfSpecId.getDefaultInstance() : id_;
+  public io.littlehorse.sdk.common.proto.WfRunId getId() {
+    return id_ == null ? io.littlehorse.sdk.common.proto.WfRunId.getDefaultInstance() : id_;
   }
   /**
    * <pre>
    * Output only; must be absent in RunInlineWf requests.
    * </pre>
    *
-   * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+   * <code>.littlehorse.WfRunId id = 1;</code>
    */
   @java.lang.Override
-  public io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder getIdOrBuilder() {
-    return id_ == null ? io.littlehorse.sdk.common.proto.InlineWfSpecId.getDefaultInstance() : id_;
+  public io.littlehorse.sdk.common.proto.WfRunIdOrBuilder getIdOrBuilder() {
+    return id_ == null ? io.littlehorse.sdk.common.proto.WfRunId.getDefaultInstance() : id_;
   }
 
   public static final int CREATED_AT_FIELD_NUMBER = 2;
@@ -762,15 +762,15 @@ io.littlehorse.sdk.common.proto.ThreadSpec defaultValue) {
     }
     private int bitField0_;
 
-    private io.littlehorse.sdk.common.proto.InlineWfSpecId id_;
+    private io.littlehorse.sdk.common.proto.WfRunId id_;
     private com.google.protobuf.SingleFieldBuilder<
-        io.littlehorse.sdk.common.proto.InlineWfSpecId, io.littlehorse.sdk.common.proto.InlineWfSpecId.Builder, io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder> idBuilder_;
+        io.littlehorse.sdk.common.proto.WfRunId, io.littlehorse.sdk.common.proto.WfRunId.Builder, io.littlehorse.sdk.common.proto.WfRunIdOrBuilder> idBuilder_;
     /**
      * <pre>
      * Output only; must be absent in RunInlineWf requests.
      * </pre>
      *
-     * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+     * <code>.littlehorse.WfRunId id = 1;</code>
      * @return Whether the id field is set.
      */
     public boolean hasId() {
@@ -781,12 +781,12 @@ io.littlehorse.sdk.common.proto.ThreadSpec defaultValue) {
      * Output only; must be absent in RunInlineWf requests.
      * </pre>
      *
-     * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+     * <code>.littlehorse.WfRunId id = 1;</code>
      * @return The id.
      */
-    public io.littlehorse.sdk.common.proto.InlineWfSpecId getId() {
+    public io.littlehorse.sdk.common.proto.WfRunId getId() {
       if (idBuilder_ == null) {
-        return id_ == null ? io.littlehorse.sdk.common.proto.InlineWfSpecId.getDefaultInstance() : id_;
+        return id_ == null ? io.littlehorse.sdk.common.proto.WfRunId.getDefaultInstance() : id_;
       } else {
         return idBuilder_.getMessage();
       }
@@ -796,9 +796,9 @@ io.littlehorse.sdk.common.proto.ThreadSpec defaultValue) {
      * Output only; must be absent in RunInlineWf requests.
      * </pre>
      *
-     * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+     * <code>.littlehorse.WfRunId id = 1;</code>
      */
-    public Builder setId(io.littlehorse.sdk.common.proto.InlineWfSpecId value) {
+    public Builder setId(io.littlehorse.sdk.common.proto.WfRunId value) {
       if (idBuilder_ == null) {
         if (value == null) {
           throw new NullPointerException();
@@ -816,10 +816,10 @@ io.littlehorse.sdk.common.proto.ThreadSpec defaultValue) {
      * Output only; must be absent in RunInlineWf requests.
      * </pre>
      *
-     * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+     * <code>.littlehorse.WfRunId id = 1;</code>
      */
     public Builder setId(
-        io.littlehorse.sdk.common.proto.InlineWfSpecId.Builder builderForValue) {
+        io.littlehorse.sdk.common.proto.WfRunId.Builder builderForValue) {
       if (idBuilder_ == null) {
         id_ = builderForValue.build();
       } else {
@@ -834,13 +834,13 @@ io.littlehorse.sdk.common.proto.ThreadSpec defaultValue) {
      * Output only; must be absent in RunInlineWf requests.
      * </pre>
      *
-     * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+     * <code>.littlehorse.WfRunId id = 1;</code>
      */
-    public Builder mergeId(io.littlehorse.sdk.common.proto.InlineWfSpecId value) {
+    public Builder mergeId(io.littlehorse.sdk.common.proto.WfRunId value) {
       if (idBuilder_ == null) {
         if (((bitField0_ & 0x00000001) != 0) &&
           id_ != null &&
-          id_ != io.littlehorse.sdk.common.proto.InlineWfSpecId.getDefaultInstance()) {
+          id_ != io.littlehorse.sdk.common.proto.WfRunId.getDefaultInstance()) {
           getIdBuilder().mergeFrom(value);
         } else {
           id_ = value;
@@ -859,7 +859,7 @@ io.littlehorse.sdk.common.proto.ThreadSpec defaultValue) {
      * Output only; must be absent in RunInlineWf requests.
      * </pre>
      *
-     * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+     * <code>.littlehorse.WfRunId id = 1;</code>
      */
     public Builder clearId() {
       bitField0_ = (bitField0_ & ~0x00000001);
@@ -876,9 +876,9 @@ io.littlehorse.sdk.common.proto.ThreadSpec defaultValue) {
      * Output only; must be absent in RunInlineWf requests.
      * </pre>
      *
-     * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+     * <code>.littlehorse.WfRunId id = 1;</code>
      */
-    public io.littlehorse.sdk.common.proto.InlineWfSpecId.Builder getIdBuilder() {
+    public io.littlehorse.sdk.common.proto.WfRunId.Builder getIdBuilder() {
       bitField0_ |= 0x00000001;
       onChanged();
       return internalGetIdFieldBuilder().getBuilder();
@@ -888,14 +888,14 @@ io.littlehorse.sdk.common.proto.ThreadSpec defaultValue) {
      * Output only; must be absent in RunInlineWf requests.
      * </pre>
      *
-     * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+     * <code>.littlehorse.WfRunId id = 1;</code>
      */
-    public io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder getIdOrBuilder() {
+    public io.littlehorse.sdk.common.proto.WfRunIdOrBuilder getIdOrBuilder() {
       if (idBuilder_ != null) {
         return idBuilder_.getMessageOrBuilder();
       } else {
         return id_ == null ?
-            io.littlehorse.sdk.common.proto.InlineWfSpecId.getDefaultInstance() : id_;
+            io.littlehorse.sdk.common.proto.WfRunId.getDefaultInstance() : id_;
       }
     }
     /**
@@ -903,14 +903,14 @@ io.littlehorse.sdk.common.proto.ThreadSpec defaultValue) {
      * Output only; must be absent in RunInlineWf requests.
      * </pre>
      *
-     * <code>.littlehorse.InlineWfSpecId id = 1;</code>
+     * <code>.littlehorse.WfRunId id = 1;</code>
      */
     private com.google.protobuf.SingleFieldBuilder<
-        io.littlehorse.sdk.common.proto.InlineWfSpecId, io.littlehorse.sdk.common.proto.InlineWfSpecId.Builder, io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder> 
+        io.littlehorse.sdk.common.proto.WfRunId, io.littlehorse.sdk.common.proto.WfRunId.Builder, io.littlehorse.sdk.common.proto.WfRunIdOrBuilder> 
         internalGetIdFieldBuilder() {
       if (idBuilder_ == null) {
         idBuilder_ = new com.google.protobuf.SingleFieldBuilder<
-            io.littlehorse.sdk.common.proto.InlineWfSpecId, io.littlehorse.sdk.common.proto.InlineWfSpecId.Builder, io.littlehorse.sdk.common.proto.InlineWfSpecIdOrBuilder>(
+            io.littlehorse.sdk.common.proto.WfRunId, io.littlehorse.sdk.common.proto.WfRunId.Builder, io.littlehorse.sdk.common.proto.WfRunIdOrBuilder>(
                 getId(),
                 getParentForChildren(),
                 isClean());

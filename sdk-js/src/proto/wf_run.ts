@@ -20,7 +20,6 @@ import { MigrationVars } from "./workflow_migration";
 import { WorkflowMigrationPlanId } from "./object_id";
 import { Timestamp } from "./google/protobuf/timestamp";
 import { LHStatus } from "./common_enums";
-import { InlineWfSpecId } from "./object_id";
 import { WfSpecId } from "./object_id";
 import { WfRunId } from "./object_id";
 /**
@@ -56,13 +55,13 @@ export interface WfRun {
          */
         inlineWfSpec: InlineWfSpec;
     } | {
-        oneofKind: "inlineWfSpecId";
+        oneofKind: "isInline";
         /**
-         * The immutable inline definition owned by this WfRun.
+         * Must be true when selected. Fetch the inline definition using this WfRun's id.
          *
-         * @generated from protobuf field: littlehorse.InlineWfSpecId inline_wf_spec_id = 16
+         * @generated from protobuf field: bool is_inline = 16
          */
-        inlineWfSpecId: InlineWfSpecId;
+        isInline: boolean;
     } | {
         oneofKind: undefined;
     };
@@ -595,9 +594,9 @@ export interface InlineWfSpec {
     /**
      * Output only; must be absent in RunInlineWf requests.
      *
-     * @generated from protobuf field: littlehorse.InlineWfSpecId id = 1
+     * @generated from protobuf field: littlehorse.WfRunId id = 1
      */
-    id?: InlineWfSpecId;
+    id?: WfRunId;
     /**
      * Output only; must be absent in RunInlineWf requests.
      *
@@ -658,7 +657,7 @@ class WfRun$Type extends MessageType<WfRun> {
             { no: 1, name: "id", kind: "message", T: () => WfRunId },
             { no: 2, name: "wf_spec_id", kind: "message", oneof: "wfSpecSource", T: () => WfSpecId },
             { no: 15, name: "inline_wf_spec", kind: "message", oneof: "wfSpecSource", T: () => InlineWfSpec },
-            { no: 16, name: "inline_wf_spec_id", kind: "message", oneof: "wfSpecSource", T: () => InlineWfSpecId },
+            { no: 16, name: "is_inline", kind: "scalar", oneof: "wfSpecSource", T: 8 /*ScalarType.BOOL*/ },
             { no: 3, name: "old_wf_spec_versions", kind: "message", repeat: 2 /*RepeatType.UNPACKED*/, T: () => WfSpecId },
             { no: 4, name: "status", kind: "enum", T: () => ["littlehorse.LHStatus", LHStatus] },
             { no: 5, name: "greatest_threadrun_number", kind: "scalar", T: 5 /*ScalarType.INT32*/ },
@@ -708,10 +707,10 @@ class WfRun$Type extends MessageType<WfRun> {
                         inlineWfSpec: InlineWfSpec.internalBinaryRead(reader, reader.uint32(), options, (message.wfSpecSource as any).inlineWfSpec)
                     };
                     break;
-                case /* littlehorse.InlineWfSpecId inline_wf_spec_id */ 16:
+                case /* bool is_inline */ 16:
                     message.wfSpecSource = {
-                        oneofKind: "inlineWfSpecId",
-                        inlineWfSpecId: InlineWfSpecId.internalBinaryRead(reader, reader.uint32(), options, (message.wfSpecSource as any).inlineWfSpecId)
+                        oneofKind: "isInline",
+                        isInline: reader.bool()
                     };
                     break;
                 case /* repeated littlehorse.WfSpecId old_wf_spec_versions */ 3:
@@ -835,9 +834,9 @@ class WfRun$Type extends MessageType<WfRun> {
         /* littlehorse.InlineWfSpec inline_wf_spec = 15 [deprecated = true]; */
         if (message.wfSpecSource.oneofKind === "inlineWfSpec")
             InlineWfSpec.internalBinaryWrite(message.wfSpecSource.inlineWfSpec, writer.tag(15, WireType.LengthDelimited).fork(), options).join();
-        /* littlehorse.InlineWfSpecId inline_wf_spec_id = 16; */
-        if (message.wfSpecSource.oneofKind === "inlineWfSpecId")
-            InlineWfSpecId.internalBinaryWrite(message.wfSpecSource.inlineWfSpecId, writer.tag(16, WireType.LengthDelimited).fork(), options).join();
+        /* bool is_inline = 16; */
+        if (message.wfSpecSource.oneofKind === "isInline")
+            writer.tag(16, WireType.Varint).bool(message.wfSpecSource.isInline);
         let u = options.writeUnknownFields;
         if (u !== false)
             (u == true ? UnknownFieldHandler.onWrite : u)(this.typeName, message, writer);
@@ -1885,7 +1884,7 @@ export const ThreadHaltReason = new ThreadHaltReason$Type();
 class InlineWfSpec$Type extends MessageType<InlineWfSpec> {
     constructor() {
         super("littlehorse.InlineWfSpec", [
-            { no: 1, name: "id", kind: "message", T: () => InlineWfSpecId },
+            { no: 1, name: "id", kind: "message", T: () => WfRunId },
             { no: 2, name: "created_at", kind: "message", T: () => Timestamp },
             { no: 3, name: "thread_specs", kind: "map", K: 9 /*ScalarType.STRING*/, V: { kind: "message", T: () => ThreadSpec } },
             { no: 4, name: "entrypoint_thread_name", kind: "scalar", T: 9 /*ScalarType.STRING*/ },
@@ -1905,8 +1904,8 @@ class InlineWfSpec$Type extends MessageType<InlineWfSpec> {
         while (reader.pos < end) {
             let [fieldNo, wireType] = reader.tag();
             switch (fieldNo) {
-                case /* littlehorse.InlineWfSpecId id */ 1:
-                    message.id = InlineWfSpecId.internalBinaryRead(reader, reader.uint32(), options, message.id);
+                case /* littlehorse.WfRunId id */ 1:
+                    message.id = WfRunId.internalBinaryRead(reader, reader.uint32(), options, message.id);
                     break;
                 case /* google.protobuf.Timestamp created_at */ 2:
                     message.createdAt = Timestamp.internalBinaryRead(reader, reader.uint32(), options, message.createdAt);
@@ -1948,9 +1947,9 @@ class InlineWfSpec$Type extends MessageType<InlineWfSpec> {
         map[key ?? ""] = val ?? ThreadSpec.create();
     }
     internalBinaryWrite(message: InlineWfSpec, writer: IBinaryWriter, options: BinaryWriteOptions): IBinaryWriter {
-        /* littlehorse.InlineWfSpecId id = 1; */
+        /* littlehorse.WfRunId id = 1; */
         if (message.id)
-            InlineWfSpecId.internalBinaryWrite(message.id, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
+            WfRunId.internalBinaryWrite(message.id, writer.tag(1, WireType.LengthDelimited).fork(), options).join();
         /* google.protobuf.Timestamp created_at = 2; */
         if (message.createdAt)
             Timestamp.internalBinaryWrite(message.createdAt, writer.tag(2, WireType.LengthDelimited).fork(), options).join();

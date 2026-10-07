@@ -73,7 +73,7 @@ public abstract class AbstractWorkflowExecutionTest extends AbstractCommandProce
                             .putAllVariables(inputs)
                             .build();
             WfRun run = execute(runId, command -> command.setRunInlineWf(request), WfRun.class);
-            assertThat(run.hasInlineWfSpecId()).isTrue();
+            assertThat(run.getIsInline()).isTrue();
             assertThat(run.hasWfSpecId()).isFalse();
             return run;
         }

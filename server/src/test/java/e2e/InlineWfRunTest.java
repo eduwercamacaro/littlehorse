@@ -34,11 +34,7 @@ public class InlineWfRunTest {
     }
 
     private RunInlineWfRequest request(String id) {
-        return inlineWorkflow()
-                .withWfRunId(id)
-                .compileWorkflow()
-                .toBuilder()
-                .build();
+        return inlineWorkflow().withWfRunId(id).compileWorkflow().toBuilder().build();
     }
 
     @Test
@@ -185,7 +181,9 @@ public class InlineWfRunTest {
                         StatusRuntimeException.class,
                         ex -> assertThat(ex.getStatus().getCode()).isEqualTo(Status.Code.INVALID_ARGUMENT));
         assertThatThrownBy(() -> client.runInlineWf(request(id).toBuilder()
-                        .putVariables("unknown", VariableValue.newBuilder().setStr("hello").build())
+                        .putVariables(
+                                "unknown",
+                                VariableValue.newBuilder().setStr("hello").build())
                         .build()))
                 .isInstanceOfSatisfying(
                         StatusRuntimeException.class,

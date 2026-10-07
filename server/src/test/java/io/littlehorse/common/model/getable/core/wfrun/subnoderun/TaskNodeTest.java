@@ -15,9 +15,10 @@ import io.littlehorse.sdk.wfsdk.WfRunVariable;
 import io.littlehorse.server.AbstractWorkflowExecutionTest;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestTemplate;
 
 class TaskNodeTest extends AbstractWorkflowExecutionTest {
+
     @BeforeEach
     void registerTaskDefinition() {
         TaskDefModel task = TestUtil.taskDef("greet");
@@ -30,7 +31,7 @@ class TaskNodeTest extends AbstractWorkflowExecutionTest {
         seedMetadata(task);
     }
 
-    @Test
+    @TestTemplate
     void resolvesInputsAndCompletesWithTaskOutput() {
         WfRun run = startWorkflow(
                 thread -> {
@@ -66,7 +67,7 @@ class TaskNodeTest extends AbstractWorkflowExecutionTest {
         assertThat(readGetable(task.getId()).getStatus()).isEqualTo(TaskStatus.TASK_SUCCESS);
     }
 
-    @Test
+    @TestTemplate
     void passesOutputToTheNextTask() {
         WfRun run = startWorkflow(
                 thread -> {
@@ -93,7 +94,7 @@ class TaskNodeTest extends AbstractWorkflowExecutionTest {
         assertThat(completed.getThreadRuns(0).getOutput()).isEqualTo(str("Hello Grace"));
     }
 
-    @Test
+    @TestTemplate
     void failsWhenTaskOutputDoesNotMatchDeclaredType() {
         TaskDefModel definition = TestUtil.taskDef("expects-int");
         definition.setReturnType(new ReturnTypeModel(VariableType.INT));
@@ -114,7 +115,7 @@ class TaskNodeTest extends AbstractWorkflowExecutionTest {
         return VariableValue.newBuilder().setStr(value).build();
     }
 
-    @Test
+    @TestTemplate
     void failsWorkflowOnUnhandledTaskError() {
         WfRun run = startWorkflow(thread -> thread.execute("greet", "Ada"), Map.of());
         NodeRunModel node = currentNode(run);
@@ -135,7 +136,7 @@ class TaskNodeTest extends AbstractWorkflowExecutionTest {
                 .isNull();
     }
 
-    @Test
+    @TestTemplate
     void recoversOnRetryWithoutRunningErrorHandler() {
         WfRun run = startWorkflow(
                 thread -> {
@@ -167,7 +168,7 @@ class TaskNodeTest extends AbstractWorkflowExecutionTest {
                 .containsExactly(TaskStatus.TASK_FAILED, TaskStatus.TASK_SUCCESS);
     }
 
-    @Test
+    @TestTemplate
     void runsErrorHandlerOnlyAfterRetriesAreExhausted() {
         WfRun run = startWorkflow(
                 thread -> {
@@ -206,7 +207,7 @@ class TaskNodeTest extends AbstractWorkflowExecutionTest {
                 .isNull();
     }
 
-    @Test
+    @TestTemplate
     void handlesMatchingBusinessExceptionWithoutRetrying() {
         WfRun run = startWorkflow(
                 thread -> {
@@ -235,7 +236,7 @@ class TaskNodeTest extends AbstractWorkflowExecutionTest {
         assertThat(completed.getThreadRuns(1).getStatus()).isEqualTo(LHStatus.COMPLETED);
     }
 
-    @Test
+    @TestTemplate
     void failsWhenNoHandlerMatchesBusinessException() {
         WfRun run = startWorkflow(
                 thread -> {
@@ -272,7 +273,7 @@ class TaskNodeTest extends AbstractWorkflowExecutionTest {
                 .build();
     }
 
-    @Test
+    @TestTemplate
     void waitsForPendingTaskWhenWorkflowIsStopped() {
         WfRun run = startWorkflow(thread -> thread.execute("greet", "Ada"), Map.of());
         processWithoutResponse(

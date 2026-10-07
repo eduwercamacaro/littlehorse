@@ -38,6 +38,44 @@ public class InlineWfRunTest {
     }
 
     @Test
+    void startsInlineRunWithInputsAndPersistsCompletedEntrypoint() {
+        String id = UUID.randomUUID().toString();
+        RunInlineWfRequest request = Workflow.inlineWorkflow(thread -> {
+                    var input = thread.declareStr("input").withDefault("default");
+                    thread.complete(input);
+                })
+                .withWfRunId(id)
+                .compileWorkflow()
+                .toBuilder()
+                .putVariables(
+                        "input", VariableValue.newBuilder().setStr("provided").build())
+                .build();
+
+        WfRun run = client.runInlineWf(request);
+        assertThat(run.getId().getId()).isEqualTo(id);
+        assertThat(run.getStatus()).isEqualTo(LHStatus.COMPLETED);
+        assertThat(run.hasWfSpecId()).isFalse();
+        assertThat(run.hasInlineWfSpecId()).isTrue();
+        assertThat(run.getInlineWfSpecId().getWfRunId()).isEqualTo(run.getId());
+        assertThat(run.getThreadRunsCount()).isEqualTo(1);
+        assertThat(run.getThreadRuns(0).hasWfSpecId()).isFalse();
+        assertThat(run.getThreadRuns(0).getOutput().getStr()).isEqualTo("provided");
+        assertThat(client.getWfRun(run.getId())).isEqualTo(run);
+        assertThat(client.getInlineWfSpec(run.getInlineWfSpecId()).getCreatedAt())
+                .isEqualTo(run.getStartTime());
+        Variable variable = client.getVariable(VariableId.newBuilder()
+                .setWfRunId(run.getId())
+                .setThreadRunNumber(0)
+                .setName("input")
+                .build());
+        assertThat(variable.getValue().getStr()).isEqualTo("provided");
+        assertThat(variable.hasWfSpecId()).isFalse();
+
+        client.deleteWfRun(DeleteWfRunRequest.newBuilder().setId(run.getId()).build());
+        assertDefinitionDeleted(run.getInlineWfSpecId());
+    }
+
+    @Test
     void executesWithoutRegisteredMetadataAcrossEventsAndTaskRetries() {
         WfRun run = client.runInlineWf(request(UUID.randomUUID().toString()));
         assertThat(run.hasInlineWfSpec()).isFalse();

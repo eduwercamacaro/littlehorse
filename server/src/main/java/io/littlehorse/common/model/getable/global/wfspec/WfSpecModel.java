@@ -11,11 +11,13 @@ import io.littlehorse.common.model.corecommand.CommandModel;
 import io.littlehorse.common.model.corecommand.subcommand.RunWfRequestModel;
 import io.littlehorse.common.model.getable.ObjectIdModel;
 import io.littlehorse.common.model.getable.core.noderun.NodeFailureException;
+import io.littlehorse.common.model.getable.core.variable.VariableValueModel;
 import io.littlehorse.common.model.getable.core.wfrun.WfRunModel;
 import io.littlehorse.common.model.getable.global.structdef.StructDefValidationException;
 import io.littlehorse.common.model.getable.global.wfspec.thread.ThreadSpecModel;
 import io.littlehorse.common.model.getable.global.wfspec.thread.ThreadVarDefModel;
 import io.littlehorse.common.model.getable.global.wfspec.variable.VariableDefModel;
+import io.littlehorse.common.model.getable.objectId.InlineWfSpecIdModel;
 import io.littlehorse.common.model.getable.objectId.WfRunIdModel;
 import io.littlehorse.common.model.getable.objectId.WfSpecIdModel;
 import io.littlehorse.common.proto.TagStorageType;
@@ -441,20 +443,31 @@ public class WfSpecModel extends MetadataGetable<WfSpec> {
     }
 
     public WfRunModel startNewRun(RunWfRequestModel evt, CoreProcessorContext processorContext) {
+        return startNewRun(
+                new WfRunIdModel(evt.getId(), evt.getParentWfRunId()), null, evt.getVariables(), processorContext);
+    }
+
+    public WfRunModel startNewRun(
+            WfRunIdModel runId,
+            InlineWfSpecIdModel inlineWfSpecId,
+            Map<String, VariableValueModel> variables,
+            CoreProcessorContext processorContext) {
         CommandModel currentCommand = processorContext.currentCommand();
         GetableManager getableManager = processorContext.getableManager();
         WfRunModel out = new WfRunModel(processorContext);
-        out.setId(new WfRunIdModel(evt.getId()));
-        if (evt.getParentWfRunId() != null) out.getId().setParentWfRunId(evt.getParentWfRunId());
+        out.setId(runId);
 
+        if (inlineWfSpecId != null) {
+            out.setInlineWfSpecId(inlineWfSpecId);
+        } else {
+            out.setWfSpecId(getObjectId());
+        }
         out.setWfSpec(this);
-        out.setWfSpecId(getObjectId());
         out.startTime = currentCommand.getTime();
         out.transitionTo(LHStatus.RUNNING);
 
         try {
-            out.startThread(
-                    entrypointThreadName, currentCommand.getTime(), null, evt.getVariables(), ThreadType.ENTRYPOINT);
+            out.startThread(entrypointThreadName, currentCommand.getTime(), null, variables, ThreadType.ENTRYPOINT);
         } catch (NodeFailureException exn) {
             throw new IllegalStateException("Entrypoint ThreadRun should never exceed the max ThreadRun limit.", exn);
         }

@@ -7,7 +7,6 @@ import io.littlehorse.common.LHServerConfig;
 import io.littlehorse.common.exceptions.LHApiException;
 import io.littlehorse.common.exceptions.LHValidationException;
 import io.littlehorse.common.model.corecommand.CoreSubCommand;
-import io.littlehorse.common.model.getable.core.noderun.NodeFailureException;
 import io.littlehorse.common.model.getable.core.variable.VariableValueModel;
 import io.littlehorse.common.model.getable.core.wfrun.InlineWfSpecModel;
 import io.littlehorse.common.model.getable.core.wfrun.WfRunModel;
@@ -15,10 +14,7 @@ import io.littlehorse.common.model.getable.global.wfspec.WfSpecModel;
 import io.littlehorse.common.model.getable.objectId.InlineWfSpecIdModel;
 import io.littlehorse.common.model.getable.objectId.WfRunIdModel;
 import io.littlehorse.common.util.LHUtil;
-import io.littlehorse.sdk.common.proto.LHStatus;
-import io.littlehorse.sdk.common.proto.Node.NodeCase;
 import io.littlehorse.sdk.common.proto.RunInlineWfRequest;
-import io.littlehorse.sdk.common.proto.ThreadType;
 import io.littlehorse.sdk.common.proto.WfRun;
 import io.littlehorse.server.streams.topology.core.CoreProcessorContext;
 import io.littlehorse.server.streams.topology.core.ExecutionContext;
@@ -27,9 +23,6 @@ import java.util.Map;
 import java.util.Optional;
 
 public class RunInlineWfRequestModel extends CoreSubCommand<RunInlineWfRequest> {
-    // Prototype limits bound validation work and the stored definition size.
-    private static final int MAX_DEFINITION_BYTES = 256 * 1024;
-    private static final int MAX_NODES = 256;
     private String id;
     private InlineWfSpecModel definition;
     private final Map<String, VariableValueModel> variables = new HashMap<>();
@@ -62,9 +55,6 @@ public class RunInlineWfRequestModel extends CoreSubCommand<RunInlineWfRequest> 
         if (!request.hasWfSpec()) {
             throw new LHApiException(Status.INVALID_ARGUMENT, "Missing required argument 'wf_spec'");
         }
-        if (request.getWfSpec().getSerializedSize() > MAX_DEFINITION_BYTES) {
-            throw new LHApiException(Status.INVALID_ARGUMENT, "Inline definition exceeds 256 KiB");
-        }
         if (request.getWfSpec().hasId() || request.getWfSpec().hasCreatedAt()) {
             throw new LHApiException(Status.INVALID_ARGUMENT, "Inline id and created_at are server-managed");
         }
@@ -75,7 +65,6 @@ public class RunInlineWfRequestModel extends CoreSubCommand<RunInlineWfRequest> 
 
     @Override
     public WfRun process(CoreProcessorContext context, LHServerConfig config) {
-        getPartitionKey();
         if (id.isEmpty() || !LHUtil.isValidLHName(id)) {
             throw new LHApiException(Status.INVALID_ARGUMENT, "Optional argument 'id' must be a valid hostname");
         }
@@ -83,22 +72,6 @@ public class RunInlineWfRequestModel extends CoreSubCommand<RunInlineWfRequest> 
         if (context.getableManager().get(runId) != null) {
             throw new LHApiException(Status.ALREADY_EXISTS, "WfRun with id " + id + " already exists!");
         }
-        long nodeCount = definition.getThreadSpecs().values().stream()
-                .mapToLong(thread -> thread.getNodes().size())
-                .sum();
-        if (nodeCount > MAX_NODES || definition.getThreadSpecs().size() > MAX_NODES) {
-            throw new LHApiException(Status.INVALID_ARGUMENT, "Inline definition exceeds 256 nodes or threads");
-        }
-        // Parent-spec identity and migration are intentionally outside the prototype.
-        definition.getThreadSpecs().values().forEach(thread -> thread.getNodes()
-                .values()
-                .forEach(node -> {
-                    if (node.getType() == NodeCase.RUN_CHILD_WF || node.getType() == NodeCase.WAIT_FOR_CHILD_WF) {
-                        throw new LHApiException(
-                                Status.INVALID_ARGUMENT, "Inline child workflows are not supported yet");
-                    }
-                }));
-
         // Keep server-generated metadata out of the submitted command payload.
         InlineWfSpecModel inline =
                 LHSerializable.fromProto(definition.toProto().build(), InlineWfSpecModel.class, context);
@@ -109,28 +82,12 @@ public class RunInlineWfRequestModel extends CoreSubCommand<RunInlineWfRequest> 
         } catch (LHValidationException ex) {
             throw new LHApiException(Status.INVALID_ARGUMENT, ex.getMessage());
         }
-        // Validation may pin metadata references; bound the normalized definition too.
-        if (inline.toProto().build().getSerializedSize() > MAX_DEFINITION_BYTES) {
-            throw new LHApiException(Status.INVALID_ARGUMENT, "Normalized inline definition exceeds 256 KiB");
-        }
         inline.setId(new InlineWfSpecIdModel(runId));
         inline.setCreatedAt(context.currentCommand().getTime());
-        // Both records are staged in the same core transaction and partition.
         context.getableManager().put(inline);
 
-        WfRunModel run = new WfRunModel(context);
-        run.setId(runId);
-        run.setInlineWfSpecId(inline.getId());
-        run.setWfSpec(spec);
-        run.setStartTime(context.currentCommand().getTime());
-        run.transitionTo(LHStatus.RUNNING);
-        context.getableManager().put(run);
-        try {
-            run.startThread(spec.getEntrypointThreadName(), run.getStartTime(), null, variables, ThreadType.ENTRYPOINT);
-        } catch (NodeFailureException ex) {
-            throw new IllegalStateException("Could not start inline entrypoint", ex);
-        }
-        run.advance(run.getStartTime());
+        WfRunModel run = spec.startNewRun(runId, inline.getId(), variables, context);
+        run.advance(context.currentCommand().getTime());
         return run.toProto().build();
     }
 }

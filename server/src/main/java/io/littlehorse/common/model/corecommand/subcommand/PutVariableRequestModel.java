@@ -11,6 +11,7 @@ import io.littlehorse.common.model.getable.core.variable.VariableModel;
 import io.littlehorse.common.model.getable.core.variable.VariableValueModel;
 import io.littlehorse.common.model.getable.core.wfrun.WfRunModel;
 import io.littlehorse.common.model.getable.objectId.VariableIdModel;
+import io.littlehorse.sdk.common.proto.LHStatus;
 import io.littlehorse.sdk.common.proto.PutVariableRequest;
 import io.littlehorse.sdk.common.proto.VariableValue;
 import io.littlehorse.server.streams.topology.core.CoreProcessorContext;
@@ -56,12 +57,15 @@ public class PutVariableRequestModel extends CoreSubCommand<PutVariableRequest> 
         if (variable == null) {
             throw new LHApiException(Status.NOT_FOUND, "Couldn't find provided Variable");
         }
+        WfRunModel wfRun = context.getableManager().get(id.getWfRunId());
+        if (wfRun.getStatus() == LHStatus.COMPLETED) {
+            throw new LHApiException(Status.FAILED_PRECONDITION, "Cannot update variables on a completed WfRun");
+        }
         VariableValue previousValue = variable.isMasked()
                 ? VariableValue.newBuilder().setStr(LHConstants.STRING_MASK).build()
                 : variable.getValue().toProto().build();
         variable.setValue(value);
         context.getableManager().put(variable);
-        WfRunModel wfRun = context.getableManager().get(id.getWfRunId());
         wfRun.advance(context.currentCommand().getTime());
         return previousValue;
     }

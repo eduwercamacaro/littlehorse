@@ -160,4 +160,31 @@ public class PutVariableTest {
                 .waitForStatus(LHStatus.COMPLETED)
                 .start();
     }
+
+    @Test
+    void shouldRejectUpdateAfterWorkflowCompletes() {
+        verifier.prepareRun(workflow)
+                .waitForNodeRunStatus(0, 1, LHStatus.RUNNING)
+                .thenSendExternalEventWithContent("put-variable-continue", "continue")
+                .waitForStatus(LHStatus.COMPLETED)
+                .thenVerifyWfRun(wfRun -> {
+                    VariableId id = VariableId.newBuilder()
+                            .setWfRunId(wfRun.getId())
+                            .setThreadRunNumber(0)
+                            .setName("value")
+                            .build();
+                    Variable before = client.getVariable(id);
+                    StatusRuntimeException error = assertThrows(
+                            StatusRuntimeException.class,
+                            () -> client.putVariable(PutVariableRequest.newBuilder()
+                                    .setId(id)
+                                    .setValue(VariableValue.newBuilder().setStr("updated"))
+                                    .build()));
+                    assertThat(error.getStatus().getCode()).isEqualTo(Status.Code.FAILED_PRECONDITION);
+                    assertThat(error.getStatus().getDescription())
+                            .isEqualTo("Cannot update variables on a completed WfRun");
+                    assertThat(client.getVariable(id)).isEqualTo(before);
+                })
+                .start();
+    }
 }

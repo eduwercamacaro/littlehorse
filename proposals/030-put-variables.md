@@ -51,6 +51,8 @@ The response is a snapshot of the previous value captured before replacement and
 
 After replacing the value, the server attempts to advance the owning `WfRun`. Active nodes may reevaluate conditions or variable-dependent behavior, including a pending sleep. Advancement does not clear halt reasons, rescue a failed thread, reopen completed nodes, or change inputs already stored in a `TaskRun`. A successful response confirms the replacement, but does not guarantee that the workflow progresses or completes; later workflow execution may also overwrite the value.
 
+`PutVariable` does not notify or advance child `WfRun`s that inherit the updated variable. A child sleep keeps its stored deadline after a parent update. It can reevaluate that deadline if another command advances the child before its timer fires; otherwise, the existing timer remains in effect.
+
 ### lhctl
 
 Add `lhctl put variable` using the existing CLI value-parsing conventions:
